@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>몽골 리테일 체인 점포 현황</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif; background: #f0f2f5; color: #1a1a2e; height: 100vh; display: flex; flex-direction: column; }
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, #C4180A 0%, #8B0000 100%);
+  color: white; padding: 14px 20px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.25); flex-shrink: 0;
+}
+.flag { font-size: 28px; }
+.header-text h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+.header-text p { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+.header-stats { margin-left: auto; display: flex; gap: 16px; text-align: center; }
+.stat-item { background: rgba(255,255,255,0.15); border-radius: 8px; padding: 6px 14px; }
+.stat-num { font-size: 20px; font-weight: 900; }
+.stat-label { font-size: 10px; opacity: 0.8; }
+
+/* ── Layout ── */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 340px; flex-shrink: 0;
+  background: white; display: flex; flex-direction: column;
+  border-right: 1px solid #e0e0e0; overflow: hidden;
+}
+.sidebar-top { padding: 12px; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+.search-box {
+  width: 100%; padding: 8px 12px; border: 1.5px solid #ddd;
+  border-radius: 8px; font-size: 13px; outline: none;
+  transition: border-color 0.2s;
+}
+.search-box:focus { border-color: #C4180A; }
+
+.filter-section { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; flex-shrink: 0; }
+.filter-title { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip {
+  padding: 4px 10px; border: 1.5px solid #ddd; border-radius: 20px;
+  font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.18s;
+  background: white; color: #555; white-space: nowrap;
+}
+.chip:hover { border-color: #C4180A; color: #C4180A; }
+.chip.active { background: #C4180A; border-color: #C4180A; color: white; }
+
+.store-count { padding: 8px 12px; font-size: 12px; color: #888; flex-shrink: 0; }
+.store-count strong { color: #C4180A; }
+
+.store-list { overflow-y: auto; flex: 1; }
+.store-card {
+  padding: 12px 14px; border-bottom: 1px solid #f5f5f5;
+  cursor: pointer; transition: background 0.15s; display: flex; gap: 10px; align-items: flex-start;
+}
+.store-card:hover { background: #fef5f5; }
+.store-card.selected { background: #fff0f0; border-left: 3px solid #C4180A; }
+
+.store-icon {
+  width: 38px; height: 38px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 900; color: white;
+}
+.store-info { flex: 1; min-width: 0; }
+.store-name { font-size: 13px; font-weight: 700; color: #1a1a2e; }
+.store-chain { font-size: 11px; font-weight: 600; margin-top: 1px; }
+.store-meta { font-size: 11px; color: #888; margin-top: 3px; display: flex; gap: 8px; flex-wrap: wrap; }
+.store-meta span { display: flex; align-items: center; gap: 2px; }
+.open-badge { font-size: 10px; padding: 1px 6px; border-radius: 8px; font-weight: 700; flex-shrink: 0; align-self: flex-start; margin-top: 3px; }
+.open { background: #e8f8ef; color: #1a7a3f; }
+.closed { background: #fee; color: #c00; }
+
+/* ── Map ── */
+#map { width: 100%; height: 100%; min-height: 400px; }
+
+/* ── Detail Panel ── */
+.detail-panel {
+  position: absolute; bottom: 20px; right: 20px; z-index: 1000;
+  background: white; border-radius: 14px; padding: 18px 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18); width: 300px;
+  display: none; border-top: 4px solid #C4180A;
+}
+.detail-panel.visible { display: block; }
+.detail-close { position: absolute; top: 10px; right: 12px; cursor: pointer; font-size: 18px; color: #aaa; line-height: 1; }
+.detail-close:hover { color: #333; }
+.detail-chain { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+.detail-name { font-size: 18px; font-weight: 800; color: #1a1a2e; }
+.detail-rows { margin-top: 12px; display: flex; flex-direction: column; gap: 7px; }
+.detail-row { display: flex; gap: 8px; font-size: 12px; }
+.detail-row .icon { width: 18px; text-align: center; flex-shrink: 0; }
+.detail-row .val { color: #444; }
+.detail-row .val strong { color: #1a1a2e; }
+.detail-tags { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px; }
+.tag { font-size: 10px; padding: 2px 8px; border-radius: 12px; background: #f0f0f0; color: #555; font-weight: 600; }
+
+/* ── Custom Markers ── */
+.custom-marker {
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; border: 2.5px solid white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  font-weight: 900; color: white; cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.custom-marker.selected {
+  box-shadow: 0 0 0 3px white, 0 0 0 6px currentColor, 0 4px 12px rgba(0,0,0,0.4);
+}
+.map-wrapper { position: relative; flex: 1; display: flex; flex-direction: column; }
+
+/* 매출 범례 */
+.sales-legend {
+  position: absolute; bottom: 30px; left: 12px; z-index: 1000;
+  background: white; border-radius: 10px; padding: 10px 14px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15); font-size: 11px;
+}
+.legend-title { font-weight: 700; color: #555; margin-bottom: 8px; }
+.legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.legend-circle {
+  border-radius: 50%; background: #999; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;
+}
+.legend-label { color: #666; }
+
+/* 매출 바 (카드) */
+.sales-bar-wrap { margin-top: 4px; }
+.sales-bar-bg { height: 4px; background: #f0f0f0; border-radius: 2px; }
+.sales-bar-fill { height: 4px; border-radius: 2px; transition: width 0.3s; }
+.sales-text { font-size: 10px; color: #aaa; margin-top: 1px; }
+
+/* Scrollbar styling */
+.store-list::-webkit-scrollbar { width: 4px; }
+.store-list::-webkit-scrollbar-track { background: #f9f9f9; }
+.store-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+
+/* ── 사이드바 핸들 (모바일 전용) ── */
+.sidebar-handle {
+  display: none;
+  justify-content: center; align-items: center;
+  padding: 10px 0 4px; cursor: pointer; flex-shrink: 0;
+}
+.handle-bar { width: 40px; height: 4px; background: #ddd; border-radius: 2px; }
+
+/* ── 모바일 토글 버튼 ── */
+.map-toggle-btn {
+  display: none;
+  position: absolute; bottom: 100px; right: 14px; z-index: 1001;
+  background: white; border: none; border-radius: 50%;
+  width: 48px; height: 48px; box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+  font-size: 20px; cursor: pointer; align-items: center; justify-content: center;
+}
+
+/* ── 모바일 반응형 ── */
+@media (max-width: 768px) {
+  .header { padding: 10px 14px; gap: 8px; }
+  .flag { font-size: 22px; }
+  .header-text h1 { font-size: 14px; }
+  .header-text p { display: none; }
+  .header-stats { gap: 8px; }
+  .stat-item { padding: 4px 8px; }
+  .stat-num { font-size: 15px; }
+  .stat-label { font-size: 9px; }
+
+  .main { position: relative; }
+
+  /* 사이드바 → 하단 시트 */
+  .sidebar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    width: 100%; height: auto; max-height: 72vh;
+    border-right: none;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
+    z-index: 1500;
+    transform: translateY(calc(100% - 52px));
+    transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+  }
+  .sidebar.sheet-open { transform: translateY(0); }
+
+  .sidebar-handle { display: flex; }
+
+  /* 검색창이 핸들 탭 역할도 함 */
+  .sidebar-top { padding: 8px 12px 10px; cursor: pointer; }
+
+  /* 필터/리스트는 접힌 상태에서 숨김 */
+  .filter-section, .store-count, .store-list { transition: opacity 0.2s; }
+  .sidebar:not(.sheet-open) .filter-section,
+  .sidebar:not(.sheet-open) .store-count,
+  .sidebar:not(.sheet-open) .store-list { opacity: 0; pointer-events: none; }
+
+  /* 상세 패널 모바일 */
+  .detail-panel {
+    bottom: 60px; left: 12px; right: 12px; width: auto;
+    max-height: 60vh; overflow-y: auto;
+  }
+
+  /* 범례 모바일 */
+  .sales-legend { bottom: 60px; left: 8px; padding: 7px 10px; font-size: 10px; }
+  .legend-circle { transform: scale(0.85); }
+
+  .map-toggle-btn { display: flex; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="../" style="display:inline-flex;align-items:center;gap:5px;color:rgba(255,255,255,0.75);text-decoration:none;font-size:12px;padding:5px 11px;border:1px solid rgba(255,255,255,0.3);border-radius:7px;margin-right:8px;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">&#8592; 허브</a>
+  <span class="flag">🇲🇳</span>
+  <div class="header-text">
+    <h1>몽골 리테일 체인 점포 현황</h1>
+    <p>Монгол улсын жижиглэн худалдааны сүлжээ</p>
+  </div>
+  <div class="header-stats">
+    <div class="stat-item">
+      <div class="stat-num" id="totalStores">0</div>
+      <div class="stat-label">전체 점포</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="totalChains">0</div>
+      <div class="stat-label">체인 수</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" id="openNow">0</div>
+      <div class="stat-label">현재 영업</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-handle" id="sidebarHandle" onclick="toggleSheet()">
+      <div class="handle-bar"></div>
+    </div>
+    <div class="sidebar-top" onclick="if(window.innerWidth<=768) toggleSheet()">
+      <input class="search-box" type="text" id="searchInput" placeholder="🔍  점포명·주소·구역 검색...">
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-title">체인 브랜드</div>
+      <div class="chip-row" id="chainFilters"></div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-title">구역 (Дүүрэг)</div>
+      <div class="chip-row" id="districtFilters"></div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-title">업태</div>
+      <div class="chip-row" id="typeFilters"></div>
+    </div>
+
+    <div class="store-count" id="storeCount"></div>
+    <div class="store-list" id="storeList"></div>
+  </div>
+
+  <div class="map-wrapper">
+    <div id="map"></div>
+    <button class="map-toggle-btn" onclick="toggleSheet()" title="점포 목록">☰</button>
+    <div class="sales-legend">
+      <div class="legend-title">원 크기 = 연간 매출</div>
+      <div class="legend-row"><div class="legend-circle" style="width:14px;height:14px;font-size:7px;background:#999"></div><span class="legend-label">~30억₮</span></div>
+      <div class="legend-row"><div class="legend-circle" style="width:24px;height:24px;font-size:9px;background:#999"></div><span class="legend-label">~150억₮</span></div>
+      <div class="legend-row"><div class="legend-circle" style="width:36px;height:36px;font-size:12px;background:#999"></div><span class="legend-label">~500억₮</span></div>
+      <div class="legend-row"><div class="legend-circle" style="width:50px;height:50px;font-size:14px;background:#999"></div><span class="legend-label">~2,000억₮</span></div>
+      <div class="legend-row"><div class="legend-circle" style="width:60px;height:60px;font-size:15px;background:#999"></div><span class="legend-label">3,200억₮+</span></div>
+    </div>
+    <div class="detail-panel" id="detailPanel">
+      <span class="detail-close" onclick="closeDetail()">✕</span>
+      <div class="detail-chain" id="dChain"></div>
+      <div class="detail-name" id="dName"></div>
+      <div class="detail-rows" id="dRows"></div>
+      <div class="detail-tags" id="dTags"></div>
+      <a id="dWebBtn" href="#" target="_blank" rel="noopener" style="display:none;margin-top:12px;width:100%;padding:8px;background:#f5f5f5;border:1.5px solid #e0e0e0;border-radius:8px;text-align:center;font-size:12px;font-weight:700;color:#333;text-decoration:none;box-sizing:border-box;">🌐 웹사이트 방문</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── 데이터 ────────────────────────────────────────────────────────────────
+const CHAINS = {
+  "노민":     { color: "#0055A5", emoji: "N", label: "Nomin",        url: "https://nomin.mn" },
+  "이마트":   { color: "#003087", emoji: "E", label: "Emart",        url: "https://emartmall.mn" },
+  "스카이":   { color: "#00A86B", emoji: "S", label: "Sky",          url: "https://skyshop.mn" },
+  "이흐 델구르": { color: "#8B4513", emoji: "Д", label: "Их Дэлгүүр", url: "https://ikhdelguur.mn" },
+  "머큐리":   { color: "#7B2FBE", emoji: "M", label: "Mercury",      url: "https://mercury.mn" },
+  "굿프라이스": { color: "#E67E00", emoji: "G", label: "Good Price",  url: "https://goodprice.mn" },
+  "유니버설": { color: "#1A7A3F", emoji: "U", label: "Universal",    url: "https://universal.mn" },
+  "자야":     { color: "#C4180A", emoji: "Z", label: "Zaya",         url: "https://zaya.mn" },
+  "까르푸":   { color: "#004A97", emoji: "C", label: "Carrefour",    url: "https://carrefour.mn" },
+  "산사르":   { color: "#D4A017", emoji: "Ш", label: "Сансар",       url: "https://sansarmall.mn" },
+  "오르길":   { color: "#E83E8C", emoji: "О", label: "Оргил",        url: "https://orgil.mn" },
+  "유니텔":   { color: "#00B4D8", emoji: "U", label: "Unitel",       url: "https://unitel.mn" },
+  "모비콤":   { color: "#FF6B35", emoji: "M", label: "MobiCom",      url: "https://mobicom.mn" },
+  "지모바일":        { color: "#1DB954", emoji: "G",  label: "G-Mobile",         url: "https://gmobile.mn" },
+  "피씨몰":          { color: "#2D6A4F", emoji: "P",  label: "PC Mall",           url: "https://pcmall.mn" },
+  "사인일렉":        { color: "#E9A020", emoji: "S",  label: "Sain Electronics",  url: "https://sain.mn" },
+  "넥스트일렉":      { color: "#264653", emoji: "Nx", label: "Next Electronics",  url: "https://next.mn" },
+  "노민일렉":        { color: "#023E8A", emoji: "Ne", label: "Nomin Electronics", url: "https://nomin.mn/electronics" },
+  "테크노존":        { color: "#9B2226", emoji: "T",  label: "Techno Zone",       url: "https://technozone.mn" },
+};
+
+const STORES = [
+  // ── 노민 (20개) ──────────────────────────────────────────────────────────
+  { id:1,  chain:"노민", name:"노민 센트럴",          district:"수흐바타르",    address:"Peace Ave 15, 1-r khoroo",           lat:47.9078, lng:106.9184, type:"하이퍼마켓", floors:4, hours:"08:00-22:00", phone:"+976 7777-0001", tags:["전자제품","의류","식품","가전"] },
+  { id:2,  chain:"노민", name:"노민 바얀주르흐 3호",  district:"바얀주르흐",    address:"Bayanzurkh Duureg, 3-r khoroo",      lat:47.9246, lng:106.9527, type:"하이퍼마켓", floors:3, hours:"09:00-21:00", phone:"+976 7777-0002", tags:["전자제품","가전","의류"] },
+  { id:3,  chain:"노민", name:"노민 바얀골",          district:"바얀골",        address:"Bayangol Duureg, 20-r khoroo",       lat:47.8996, lng:106.8592, type:"하이퍼마켓", floors:3, hours:"09:00-21:00", phone:"+976 7777-0003", tags:["가전","의류","식품"] },
+  { id:4,  chain:"노민", name:"노민 송기노 5호",      district:"송기노하이르항", address:"Songinokhairkhan, 5-r khoroo",      lat:47.9142, lng:106.8165, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7777-0004", tags:["의류","가전"] },
+  { id:5,  chain:"노민", name:"노민 항올",            district:"항올",          address:"Khan-Uul Duureg, 11-r khoroo",       lat:47.8742, lng:106.9051, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7777-0005", tags:["의류","식품"] },
+  { id:6,  chain:"노민", name:"노민 칭겔테이",        district:"칭겔테이",      address:"Chingeltei Duureg, 1-r khoroo",      lat:47.9310, lng:106.9020, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7777-0006", tags:["전자제품","가전"] },
+  { id:7,  chain:"노민", name:"노민 바얀주르흐 13호", district:"바얀주르흐",    address:"Bayanzurkh Duureg, 13-r khoroo",     lat:47.9312, lng:106.9680, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7777-0007", tags:["가전","의류"] },
+  { id:8,  chain:"노민", name:"노민 송기노 18호",     district:"송기노하이르항", address:"Songinokhairkhan, 18-r khoroo",     lat:47.9000, lng:106.7820, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7777-0008", tags:["식품","가전"] },
+  { id:9,  chain:"노민", name:"노민 수흐바타르 2호",  district:"수흐바타르",    address:"Sukhbaatar Duureg, 2-r khoroo",      lat:47.9105, lng:106.9050, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7777-0009", tags:["전자제품","가전"] },
+  { id:10, chain:"노민", name:"노민 바얀골 11호",     district:"바얀골",        address:"Bayangol Duureg, 11-r khoroo",       lat:47.9040, lng:106.8710, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7777-0010", tags:["가전","식품"] },
+  { id:11, chain:"노민", name:"노민 항올 자이산",     district:"항올",          address:"Khan-Uul Duureg, 3-r khoroo (Zaisan)", lat:47.8651, lng:106.9150, type:"슈퍼마켓", floors:2, hours:"10:00-21:00", phone:"+976 7777-0011", tags:["전자제품","가전","의류"] },
+  { id:12, chain:"노민", name:"노민 칭겔테이 5호",    district:"칭겔테이",      address:"Chingeltei Duureg, 5-r khoroo",      lat:47.9390, lng:106.9120, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7777-0012", tags:["가전","의류"] },
+  { id:13, chain:"노민", name:"노민 날라이흐",        district:"날라이흐",      address:"Nalaikh Duureg, 2-r khoroo",         lat:47.7530, lng:107.3010, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7777-0013", tags:["가전","식품"] },
+  { id:14, chain:"노민", name:"노민 바간누르",        district:"바간누르",      address:"Baganuur Duureg, 1-r khoroo",        lat:47.7105, lng:108.2810, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7777-0014", tags:["가전","의류","식품"] },
+  { id:15, chain:"노민", name:"노민 바얀주르흐 21호", district:"바얀주르흐",    address:"Bayanzurkh Duureg, 21-r khoroo",     lat:47.9180, lng:106.9780, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7777-0015", tags:["가전","의류"] },
+  { id:16, chain:"노민", name:"노민 송기노 25호",     district:"송기노하이르항", address:"Songinokhairkhan, 25-r khoroo",     lat:47.9210, lng:106.8020, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7777-0016", tags:["식품","가전"] },
+  { id:17, chain:"노민", name:"노민 항올 16호",       district:"항올",          address:"Khan-Uul Duureg, 16-r khoroo",       lat:47.8830, lng:106.9280, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7777-0017", tags:["가전","의류"] },
+  { id:18, chain:"노민", name:"노민 수흐바타르 7호",  district:"수흐바타르",    address:"Sukhbaatar Duureg, 7-r khoroo",      lat:47.9220, lng:106.9330, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7777-0018", tags:["전자제품","가전"] },
+  { id:19, chain:"노민", name:"노민 바얀골 17호",     district:"바얀골",        address:"Bayangol Duureg, 17-r khoroo",       lat:47.8920, lng:106.8780, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7777-0019", tags:["가전","식품"] },
+  { id:20, chain:"노민", name:"노민 칭겔테이 8호",    district:"칭겔테이",      address:"Chingeltei Duureg, 8-r khoroo",      lat:47.9260, lng:106.8960, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7777-0020", tags:["가전","의류"] },
+
+  // ── 이마트 (8개) ─────────────────────────────────────────────────────────
+  { id:21, chain:"이마트", name:"이마트몰 바얀골",      district:"바얀골",        address:"Bayangol Duureg, 15-r khoroo",       lat:47.8954, lng:106.8703, type:"하이퍼마켓", floors:5, hours:"08:00-23:00", phone:"+976 7788-0001", tags:["식품","가전","의류","전자제품"] },
+  { id:22, chain:"이마트", name:"이마트몰 수흐바타르",  district:"수흐바타르",    address:"Sukhbaatar Duureg, 8-r khoroo",      lat:47.9120, lng:106.9290, type:"하이퍼마켓", floors:4, hours:"08:00-22:00", phone:"+976 7788-0002", tags:["식품","가전","의류"] },
+  { id:23, chain:"이마트", name:"이마트 항올",          district:"항올",          address:"Khan-Uul Duureg, 3-r khoroo",        lat:47.8651, lng:106.9201, type:"슈퍼마켓",   floors:3, hours:"09:00-21:00", phone:"+976 7788-0003", tags:["식품","생필품"] },
+  { id:24, chain:"이마트", name:"이마트 바얀주르흐",    district:"바얀주르흐",    address:"Bayanzurkh Duureg, 9-r khoroo",      lat:47.9265, lng:106.9550, type:"슈퍼마켓",   floors:3, hours:"09:00-22:00", phone:"+976 7788-0004", tags:["식품","가전","생필품"] },
+  { id:25, chain:"이마트", name:"이마트 송기노",        district:"송기노하이르항", address:"Songinokhairkhan, 3-r khoroo",      lat:47.9125, lng:106.8250, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7788-0005", tags:["식품","생필품"] },
+  { id:26, chain:"이마트", name:"이마트 칭겔테이",      district:"칭겔테이",      address:"Chingeltei Duureg, 3-r khoroo",      lat:47.9345, lng:106.9060, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7788-0006", tags:["식품","생필품","가전"] },
+  { id:27, chain:"이마트", name:"이마트 날라이흐",      district:"날라이흐",      address:"Nalaikh Duureg, 1-r khoroo",         lat:47.7524, lng:107.2970, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7788-0007", tags:["식품","생필품"] },
+  { id:28, chain:"이마트", name:"이마트 바얀골 2호",    district:"바얀골",        address:"Bayangol Duureg, 4-r khoroo",        lat:47.9052, lng:106.8620, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7788-0008", tags:["식품","생필품","가전"] },
+
+  // ── 스카이 (12개) ────────────────────────────────────────────────────────
+  { id:29, chain:"스카이", name:"스카이 쇼핑센터",      district:"수흐바타르",    address:"Seoul St 8, Суухбаатар",             lat:47.9065, lng:106.9139, type:"쇼핑센터",   floors:6, hours:"10:00-22:00", phone:"+976 7766-0001", tags:["패션","식당","뷰티","명품"] },
+  { id:30, chain:"스카이", name:"스카이 바얀주르흐",    district:"바얀주르흐",    address:"Bayanzurkh, 7-r khoroo",             lat:47.9287, lng:106.9612, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7766-0002", tags:["식품","생필품"] },
+  { id:31, chain:"스카이", name:"스카이 날라이흐",      district:"날라이흐",      address:"Nalaikh Duureg, 1-r khoroo",         lat:47.7516, lng:107.2988, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7766-0003", tags:["식품","생필품"] },
+  { id:32, chain:"스카이", name:"스카이 바얀골",        district:"바얀골",        address:"Bayangol Duureg, 8-r khoroo",        lat:47.9015, lng:106.8660, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7766-0004", tags:["식품","생필품"] },
+  { id:33, chain:"스카이", name:"스카이 항올",          district:"항올",          address:"Khan-Uul Duureg, 7-r khoroo",        lat:47.8768, lng:106.9030, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7766-0005", tags:["식품","생필품"] },
+  { id:34, chain:"스카이", name:"스카이 칭겔테이",      district:"칭겔테이",      address:"Chingeltei Duureg, 2-r khoroo",      lat:47.9330, lng:106.9100, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7766-0006", tags:["식품","생필품"] },
+  { id:35, chain:"스카이", name:"스카이 송기노 1호",    district:"송기노하이르항", address:"Songinokhairkhan, 1-r khoroo",      lat:47.9175, lng:106.8300, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7766-0007", tags:["식품","생필품"] },
+  { id:36, chain:"스카이", name:"스카이 수흐바타르",    district:"수흐바타르",    address:"Sukhbaatar Duureg, 4-r khoroo",      lat:47.9145, lng:106.9200, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7766-0008", tags:["식품","생필품"] },
+  { id:37, chain:"스카이", name:"스카이 바얀주르흐 2호", district:"바얀주르흐",   address:"Bayanzurkh Duureg, 16-r khoroo",     lat:47.9380, lng:106.9700, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7766-0009", tags:["식품","생필품"] },
+  { id:38, chain:"스카이", name:"스카이 바간누르",      district:"바간누르",      address:"Baganuur Duureg",                    lat:47.7098, lng:108.2750, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7766-0010", tags:["식품","생필품"] },
+  { id:39, chain:"스카이", name:"스카이 항올 2호",      district:"항올",          address:"Khan-Uul Duureg, 14-r khoroo",       lat:47.8608, lng:106.9320, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7766-0011", tags:["식품","생필품"] },
+  { id:40, chain:"스카이", name:"스카이 송기노 15호",   district:"송기노하이르항", address:"Songinokhairkhan, 15-r khoroo",     lat:47.9062, lng:106.7900, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7766-0012", tags:["식품","생필품"] },
+
+  // ── 이흐 델구르 (6개) ────────────────────────────────────────────────────
+  { id:41, chain:"이흐 델구르", name:"국영백화점 본점",     district:"수흐바타르", address:"Sukhbaatar Square 44",               lat:47.9079, lng:106.9058, type:"백화점",    floors:7, hours:"10:00-21:00", phone:"+976 7700-0001", tags:["패션","식품","가전","명품","의류"] },
+  { id:42, chain:"이흐 델구르", name:"이흐 델구르 항올",    district:"항올",       address:"Khan-Uul Duureg, 8-r khoroo",        lat:47.8820, lng:106.8951, type:"백화점",    floors:4, hours:"10:00-21:00", phone:"+976 7700-0002", tags:["패션","의류","가전"] },
+  { id:43, chain:"이흐 델구르", name:"이흐 델구르 바얀골",  district:"바얀골",     address:"Bayangol Duureg, 12-r khoroo",       lat:47.8980, lng:106.8560, type:"백화점",    floors:4, hours:"10:00-21:00", phone:"+976 7700-0003", tags:["패션","의류","명품"] },
+  { id:44, chain:"이흐 델구르", name:"이흐 델구르 바얀주르흐", district:"바얀주르흐", address:"Bayanzurkh Duureg, 5-r khoroo",   lat:47.9225, lng:106.9480, type:"백화점",    floors:3, hours:"10:00-21:00", phone:"+976 7700-0004", tags:["패션","의류","가전"] },
+  { id:45, chain:"이흐 델구르", name:"이흐 델구르 칭겔테이", district:"칭겔테이",  address:"Chingeltei Duureg, 6-r khoroo",      lat:47.9360, lng:106.9080, type:"백화점",    floors:3, hours:"10:00-21:00", phone:"+976 7700-0005", tags:["패션","의류"] },
+  { id:46, chain:"이흐 델구르", name:"이흐 델구르 송기노",  district:"송기노하이르항", address:"Songinokhairkhan, 10-r khoroo",  lat:47.9095, lng:106.8050, type:"백화점",    floors:3, hours:"10:00-21:00", phone:"+976 7700-0006", tags:["패션","의류","가전"] },
+
+  // ── 머큐리 (10개) ────────────────────────────────────────────────────────
+  { id:47, chain:"머큐리", name:"머큐리 몰 본점",       district:"수흐바타르",    address:"Olympic St 1, Суухбаатар",           lat:47.9044, lng:106.9223, type:"쇼핑몰",    floors:5, hours:"10:00-22:00", phone:"+976 7755-0001", tags:["명품","패션","식당","영화관"] },
+  { id:48, chain:"머큐리", name:"머큐리 바얀골",        district:"바얀골",        address:"Bayangol, 18-r khoroo",              lat:47.9003, lng:106.8791, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7755-0002", tags:["식품","생필품"] },
+  { id:49, chain:"머큐리", name:"머큐리 바얀주르흐",    district:"바얀주르흐",    address:"Bayanzurkh, 8-r khoroo",             lat:47.9298, lng:106.9630, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7755-0003", tags:["식품","생필품"] },
+  { id:50, chain:"머큐리", name:"머큐리 항올",          district:"항올",          address:"Khan-Uul Duureg, 5-r khoroo",        lat:47.8800, lng:106.9200, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7755-0004", tags:["식품","생필품"] },
+  { id:51, chain:"머큐리", name:"머큐리 칭겔테이",      district:"칭겔테이",      address:"Chingeltei, 3-r khoroo",             lat:47.9320, lng:106.9040, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7755-0005", tags:["식품","생필품"] },
+  { id:52, chain:"머큐리", name:"머큐리 송기노",        district:"송기노하이르항", address:"Songinokhairkhan, 6-r khoroo",      lat:47.9130, lng:106.8180, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7755-0006", tags:["식품","생필품"] },
+  { id:53, chain:"머큐리", name:"머큐리 수흐바타르",    district:"수흐바타르",    address:"Sukhbaatar Duureg, 5-r khoroo",      lat:47.9158, lng:106.9260, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7755-0007", tags:["식품","생필품"] },
+  { id:54, chain:"머큐리", name:"머큐리 바얀골 2호",    district:"바얀골",        address:"Bayangol, 21-r khoroo",              lat:47.8960, lng:106.8530, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7755-0008", tags:["식품","생필품"] },
+  { id:55, chain:"머큐리", name:"머큐리 바얀주르흐 2호", district:"바얀주르흐",   address:"Bayanzurkh, 19-r khoroo",            lat:47.9400, lng:106.9820, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7755-0009", tags:["식품","생필품"] },
+  { id:56, chain:"머큐리", name:"머큐리 항올 2호",      district:"항올",          address:"Khan-Uul Duureg, 13-r khoroo",       lat:47.8640, lng:106.9110, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7755-0010", tags:["식품","생필품"] },
+
+  // ── 굿프라이스 (18개) ────────────────────────────────────────────────────
+  { id:57, chain:"굿프라이스", name:"굿프라이스 수흐바타르",    district:"수흐바타르",    address:"Peace Ave 38",                   lat:47.9137, lng:106.9104, type:"할인점", floors:2, hours:"08:00-22:00", phone:"+976 7744-0001", tags:["식품","생필품","가전"] },
+  { id:58, chain:"굿프라이스", name:"굿프라이스 송기노 12호",  district:"송기노하이르항", address:"Songinokhairkhan, 12-r khoroo",  lat:47.9080, lng:106.7943, type:"할인점", floors:1, hours:"08:00-21:00", phone:"+976 7744-0002", tags:["식품","생필품"] },
+  { id:59, chain:"굿프라이스", name:"굿프라이스 칭겔테이",     district:"칭겔테이",      address:"Chingeltei, 4-r khoroo",          lat:47.9391, lng:106.9180, type:"할인점", floors:1, hours:"09:00-21:00", phone:"+976 7744-0003", tags:["식품","생필품"] },
+  { id:60, chain:"굿프라이스", name:"굿프라이스 바간누르",     district:"바간누르",      address:"Baganuur Duureg",                 lat:47.7092, lng:108.2782, type:"할인점", floors:1, hours:"09:00-20:00", phone:"+976 7744-0004", tags:["식품","생필품"] },
+  { id:61, chain:"굿프라이스", name:"굿프라이스 바얀골",       district:"바얀골",        address:"Bayangol, 3-r khoroo",            lat:47.9068, lng:106.8650, type:"할인점", floors:1, hours:"08:00-21:00", phone:"+976 7744-0005", tags:["식품","생필품"] },
+  { id:62, chain:"굿프라이스", name:"굿프라이스 바얀주르흐",   district:"바얀주르흐",    address:"Bayanzurkh, 2-r khoroo",          lat:47.9200, lng:106.9460, type:"할인점", floors:1, hours:"08:00-21:00", phone:"+976 7744-0006", tags:["식품","생필품"] },
+  { id:63, chain:"굿프라이스", name:"굿프라이스 항올",         district:"항올",          address:"Khan-Uul, 2-r khoroo",            lat:47.8860, lng:106.9140, type:"할인점", floors:1, hours:"08:00-21:00", phone:"+976 7744-0007", tags:["식품","생필품"] },
+  { id:64, chain:"굿프라이스", name:"굿프라이스 날라이흐",     district:"날라이흐",      address:"Nalaikh Duureg",                  lat:47.7545, lng:107.3020, type:"할인점", floors:1, hours:"09:00-20:00", phone:"+976 7744-0008", tags:["식품","생필품"] },
+  { id:65, chain:"굿프라이스", name:"굿프라이스 송기노 20호",  district:"송기노하이르항", address:"Songinokhairkhan, 20-r khoroo",  lat:47.9230, lng:106.8100, type:"할인점", floors:1, hours:"08:00-21:00", phone:"+976 7744-0009", tags:["식품","생필품"] },
+  { id:66, chain:"굿프라이스", name:"굿프라이스 바얀골 2호",   district:"바얀골",        address:"Bayangol, 16-r khoroo",           lat:47.8930, lng:106.8500, type:"할인점", floors:1, hours:"08:00-21:00", phone:"+976 7744-0010", tags:["식품","생필품"] },
+  { id:67, chain:"굿프라이스", name:"굿프라이스 칭겔테이 2호", district:"칭겔테이",      address:"Chingeltei, 7-r khoroo",          lat:47.9270, lng:106.8990, type:"할인점", floors:1, hours:"09:00-21:00", phone:"+976 7744-0011", tags:["식품","생필품"] },
+  { id:68, chain:"굿프라이스", name:"굿프라이스 수흐바타르 2호", district:"수흐바타르",  address:"Sukhbaatar, 6-r khoroo",          lat:47.9175, lng:106.9330, type:"할인점", floors:1, hours:"08:00-22:00", phone:"+976 7744-0012", tags:["식품","생필품"] },
+  { id:69, chain:"굿프라이스", name:"굿프라이스 항올 2호",     district:"항올",          address:"Khan-Uul, 10-r khoroo",           lat:47.8720, lng:106.9060, type:"할인점", floors:1, hours:"08:00-21:00", phone:"+976 7744-0013", tags:["식품","생필품"] },
+  { id:70, chain:"굿프라이스", name:"굿프라이스 바얀주르흐 2호", district:"바얀주르흐",  address:"Bayanzurkh, 17-r khoroo",         lat:47.9340, lng:106.9760, type:"할인점", floors:1, hours:"08:00-21:00", phone:"+976 7744-0014", tags:["식품","생필품"] },
+  { id:71, chain:"굿프라이스", name:"굿프라이스 송기노 29호",  district:"송기노하이르항", address:"Songinokhairkhan, 29-r khoroo",  lat:47.8980, lng:106.7780, type:"할인점", floors:1, hours:"08:00-21:00", phone:"+976 7744-0015", tags:["식품","생필품"] },
+  { id:72, chain:"굿프라이스", name:"굿프라이스 바얀골 3호",   district:"바얀골",        address:"Bayangol, 22-r khoroo",           lat:47.8890, lng:106.8680, type:"할인점", floors:1, hours:"08:00-21:00", phone:"+976 7744-0016", tags:["식품","생필품"] },
+  { id:73, chain:"굿프라이스", name:"굿프라이스 항올 자이산",  district:"항올",          address:"Khan-Uul, 4-r khoroo (Zaisan)",   lat:47.8672, lng:106.9220, type:"할인점", floors:1, hours:"09:00-21:00", phone:"+976 7744-0017", tags:["식품","생필품"] },
+  { id:74, chain:"굿프라이스", name:"굿프라이스 수흐바타르 3호", district:"수흐바타르",  address:"Sukhbaatar, 8-r khoroo",          lat:47.9108, lng:106.9160, type:"할인점", floors:1, hours:"08:00-22:00", phone:"+976 7744-0018", tags:["식품","생필품"] },
+
+  // ── 유니버설 (15개) ──────────────────────────────────────────────────────
+  { id:75, chain:"유니버설", name:"유니버설 본점",          district:"바얀골",        address:"Bayangol, 5-r khoroo",               lat:47.9018, lng:106.8481, type:"슈퍼마켓", floors:2, hours:"09:00-21:00", phone:"+976 7733-0001", tags:["식품","유기농","수입식품"] },
+  { id:76, chain:"유니버설", name:"유니버설 항올",          district:"항올",          address:"Khan-Uul, 14-r khoroo",              lat:47.8593, lng:106.9342, type:"슈퍼마켓", floors:2, hours:"09:00-21:00", phone:"+976 7733-0002", tags:["식품","수입식품"] },
+  { id:77, chain:"유니버설", name:"유니버설 수흐바타르",    district:"수흐바타르",    address:"Sukhbaatar, 3-r khoroo",             lat:47.9090, lng:106.9170, type:"슈퍼마켓", floors:2, hours:"09:00-21:00", phone:"+976 7733-0003", tags:["식품","유기농"] },
+  { id:78, chain:"유니버설", name:"유니버설 바얀주르흐",    district:"바얀주르흐",    address:"Bayanzurkh, 11-r khoroo",            lat:47.9302, lng:106.9660, type:"슈퍼마켓", floors:2, hours:"09:00-21:00", phone:"+976 7733-0004", tags:["식품","수입식품"] },
+  { id:79, chain:"유니버설", name:"유니버설 칭겔테이",      district:"칭겔테이",      address:"Chingeltei, 2-r khoroo",             lat:47.9355, lng:106.9050, type:"슈퍼마켓", floors:2, hours:"09:00-21:00", phone:"+976 7733-0005", tags:["식품","유기농"] },
+  { id:80, chain:"유니버설", name:"유니버설 송기노",        district:"송기노하이르항", address:"Songinokhairkhan, 9-r khoroo",      lat:47.9108, lng:106.8120, type:"슈퍼마켓", floors:2, hours:"09:00-20:00", phone:"+976 7733-0006", tags:["식품","생필품"] },
+  { id:81, chain:"유니버설", name:"유니버설 바얀골 2호",    district:"바얀골",        address:"Bayangol, 13-r khoroo",              lat:47.8965, lng:106.8740, type:"슈퍼마켓", floors:2, hours:"09:00-21:00", phone:"+976 7733-0007", tags:["식품","수입식품"] },
+  { id:82, chain:"유니버설", name:"유니버설 항올 2호",      district:"항올",          address:"Khan-Uul, 6-r khoroo",               lat:47.8750, lng:106.9100, type:"슈퍼마켓", floors:2, hours:"09:00-21:00", phone:"+976 7733-0008", tags:["식품","유기농"] },
+  { id:83, chain:"유니버설", name:"유니버설 바얀주르흐 2호", district:"바얀주르흐",   address:"Bayanzurkh, 22-r khoroo",            lat:47.9420, lng:106.9850, type:"슈퍼마켓", floors:2, hours:"09:00-21:00", phone:"+976 7733-0009", tags:["식품","수입식품"] },
+  { id:84, chain:"유니버설", name:"유니버설 수흐바타르 2호", district:"수흐바타르",   address:"Sukhbaatar, 7-r khoroo",             lat:47.9202, lng:106.9310, type:"슈퍼마켓", floors:2, hours:"09:00-21:00", phone:"+976 7733-0010", tags:["식품","유기농"] },
+  { id:85, chain:"유니버설", name:"유니버설 칭겔테이 2호",  district:"칭겔테이",      address:"Chingeltei, 6-r khoroo",             lat:47.9280, lng:106.8970, type:"슈퍼마켓", floors:2, hours:"09:00-21:00", phone:"+976 7733-0011", tags:["식품","수입식품"] },
+  { id:86, chain:"유니버설", name:"유니버설 송기노 2호",    district:"송기노하이르항", address:"Songinokhairkhan, 22-r khoroo",     lat:47.9035, lng:106.7860, type:"슈퍼마켓", floors:2, hours:"09:00-20:00", phone:"+976 7733-0012", tags:["식품","생필품"] },
+  { id:87, chain:"유니버설", name:"유니버설 바얀골 3호",    district:"바얀골",        address:"Bayangol, 19-r khoroo",              lat:47.8888, lng:106.8600, type:"슈퍼마켓", floors:2, hours:"09:00-21:00", phone:"+976 7733-0013", tags:["식품","유기농"] },
+  { id:88, chain:"유니버설", name:"유니버설 날라이흐",      district:"날라이흐",      address:"Nalaikh Duureg, 2-r khoroo",         lat:47.7508, lng:107.2950, type:"슈퍼마켓", floors:1, hours:"09:00-20:00", phone:"+976 7733-0014", tags:["식품","생필품"] },
+  { id:89, chain:"유니버설", name:"유니버설 바간누르",      district:"바간누르",      address:"Baganuur Duureg",                    lat:47.7080, lng:108.2820, type:"슈퍼마켓", floors:1, hours:"09:00-20:00", phone:"+976 7733-0015", tags:["식품","생필품"] },
+
+  // ── 자야 (20개) ──────────────────────────────────────────────────────────
+  { id:90,  chain:"자야", name:"자야 수흐바타르",        district:"수흐바타르",    address:"Sukhbaatar, 6-r khoroo",             lat:47.9165, lng:106.9355, type:"슈퍼마켓", floors:2, hours:"08:00-22:00", phone:"+976 7722-0001", tags:["식품","생필품"] },
+  { id:91,  chain:"자야", name:"자야 바얀주르흐 10호",   district:"바얀주르흐",    address:"Bayanzurkh, 10-r khoroo",            lat:47.9354, lng:106.9779, type:"슈퍼마켓", floors:2, hours:"08:00-22:00", phone:"+976 7722-0002", tags:["식품","생필품"] },
+  { id:92,  chain:"자야", name:"자야 항올",              district:"항올",          address:"Khan-Uul, 6-r khoroo",               lat:47.8709, lng:106.9128, type:"슈퍼마켓", floors:1, hours:"09:00-21:00", phone:"+976 7722-0003", tags:["식품","생필품"] },
+  { id:93,  chain:"자야", name:"자야 바얀골",            district:"바얀골",        address:"Bayangol, 9-r khoroo",               lat:47.9022, lng:106.8560, type:"슈퍼마켓", floors:1, hours:"08:00-21:00", phone:"+976 7722-0004", tags:["식품","생필품"] },
+  { id:94,  chain:"자야", name:"자야 칭겔테이",          district:"칭겔테이",      address:"Chingeltei, 5-r khoroo",             lat:47.9375, lng:106.9130, type:"슈퍼마켓", floors:1, hours:"08:00-21:00", phone:"+976 7722-0005", tags:["식품","생필품"] },
+  { id:95,  chain:"자야", name:"자야 송기노 7호",        district:"송기노하이르항", address:"Songinokhairkhan, 7-r khoroo",      lat:47.9160, lng:106.8220, type:"슈퍼마켓", floors:1, hours:"08:00-21:00", phone:"+976 7722-0006", tags:["식품","생필품"] },
+  { id:96,  chain:"자야", name:"자야 바얀주르흐 4호",    district:"바얀주르흐",    address:"Bayanzurkh, 4-r khoroo",             lat:47.9218, lng:106.9500, type:"슈퍼마켓", floors:1, hours:"08:00-21:00", phone:"+976 7722-0007", tags:["식품","생필품"] },
+  { id:97,  chain:"자야", name:"자야 수흐바타르 2호",    district:"수흐바타르",    address:"Sukhbaatar, 1-r khoroo",             lat:47.9092, lng:106.9080, type:"슈퍼마켓", floors:1, hours:"08:00-22:00", phone:"+976 7722-0008", tags:["식품","생필품"] },
+  { id:98,  chain:"자야", name:"자야 바얀골 2호",        district:"바얀골",        address:"Bayangol, 14-r khoroo",              lat:47.8978, lng:106.8820, type:"슈퍼마켓", floors:1, hours:"08:00-21:00", phone:"+976 7722-0009", tags:["식품","생필품"] },
+  { id:99,  chain:"자야", name:"자야 항올 2호",          district:"항올",          address:"Khan-Uul, 15-r khoroo",              lat:47.8620, lng:106.9390, type:"슈퍼마켓", floors:1, hours:"09:00-21:00", phone:"+976 7722-0010", tags:["식품","생필품"] },
+  { id:100, chain:"자야", name:"자야 송기노 14호",       district:"송기노하이르항", address:"Songinokhairkhan, 14-r khoroo",     lat:47.9068, lng:106.7980, type:"슈퍼마켓", floors:1, hours:"08:00-21:00", phone:"+976 7722-0011", tags:["식품","생필품"] },
+  { id:101, chain:"자야", name:"자야 바얀주르흐 18호",   district:"바얀주르흐",    address:"Bayanzurkh, 18-r khoroo",            lat:47.9370, lng:106.9830, type:"슈퍼마켓", floors:1, hours:"08:00-21:00", phone:"+976 7722-0012", tags:["식품","생필품"] },
+  { id:102, chain:"자야", name:"자야 칭겔테이 2호",      district:"칭겔테이",      address:"Chingeltei, 8-r khoroo",             lat:47.9255, lng:106.8950, type:"슈퍼마켓", floors:1, hours:"08:00-21:00", phone:"+976 7722-0013", tags:["식품","생필품"] },
+  { id:103, chain:"자야", name:"자야 바얀골 3호",        district:"바얀골",        address:"Bayangol, 1-r khoroo",               lat:47.9055, lng:106.8420, type:"슈퍼마켓", floors:1, hours:"08:00-21:00", phone:"+976 7722-0014", tags:["식품","생필품"] },
+  { id:104, chain:"자야", name:"자야 수흐바타르 3호",    district:"수흐바타르",    address:"Sukhbaatar, 4-r khoroo",             lat:47.9130, lng:106.9230, type:"슈퍼마켓", floors:1, hours:"08:00-22:00", phone:"+976 7722-0015", tags:["식품","생필품"] },
+  { id:105, chain:"자야", name:"자야 날라이흐",          district:"날라이흐",      address:"Nalaikh Duureg, 3-r khoroo",         lat:47.7498, lng:107.2930, type:"슈퍼마켓", floors:1, hours:"09:00-20:00", phone:"+976 7722-0016", tags:["식품","생필품"] },
+  { id:106, chain:"자야", name:"자야 바간누르",          district:"바간누르",      address:"Baganuur Duureg",                    lat:47.7115, lng:108.2850, type:"슈퍼마켓", floors:1, hours:"09:00-20:00", phone:"+976 7722-0017", tags:["식품","생필품"] },
+  { id:107, chain:"자야", name:"자야 송기노 26호",       district:"송기노하이르항", address:"Songinokhairkhan, 26-r khoroo",     lat:47.8995, lng:106.7850, type:"슈퍼마켓", floors:1, hours:"08:00-21:00", phone:"+976 7722-0018", tags:["식품","생필품"] },
+  { id:108, chain:"자야", name:"자야 항올 3호",          district:"항올",          address:"Khan-Uul, 9-r khoroo",               lat:47.8810, lng:106.9250, type:"슈퍼마켓", floors:1, hours:"09:00-21:00", phone:"+976 7722-0019", tags:["식품","생필품"] },
+  { id:109, chain:"자야", name:"자야 바얀주르흐 23호",   district:"바얀주르흐",    address:"Bayanzurkh, 23-r khoroo",            lat:47.9160, lng:106.9750, type:"슈퍼마켓", floors:1, hours:"08:00-21:00", phone:"+976 7722-0020", tags:["식품","생필품"] },
+
+  // ── 까르푸 (8개) ─────────────────────────────────────────────────────────
+  { id:110, chain:"까르푸", name:"까르푸 바얀골",          district:"바얀골",        address:"Bayangol, 11-r khoroo",              lat:47.8974, lng:106.8644, type:"하이퍼마켓", floors:4, hours:"09:00-22:00", phone:"+976 7711-0001", tags:["식품","가전","의류","생필품"] },
+  { id:111, chain:"까르푸", name:"까르푸 수흐바타르",      district:"수흐바타르",    address:"Sukhbaatar, 3-r khoroo",             lat:47.9098, lng:106.9248, type:"하이퍼마켓", floors:3, hours:"09:00-22:00", phone:"+976 7711-0002", tags:["식품","생필품","가전"] },
+  { id:112, chain:"까르푸", name:"까르푸 항올",            district:"항올",          address:"Khan-Uul, 9-r khoroo",               lat:47.8780, lng:106.9173, type:"슈퍼마켓",   floors:2, hours:"10:00-21:00", phone:"+976 7711-0003", tags:["식품","생필품"] },
+  { id:113, chain:"까르푸", name:"까르푸 바얀주르흐",      district:"바얀주르흐",    address:"Bayanzurkh, 12-r khoroo",            lat:47.9280, lng:106.9590, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7711-0004", tags:["식품","생필품","가전"] },
+  { id:114, chain:"까르푸", name:"까르푸 칭겔테이",        district:"칭겔테이",      address:"Chingeltei, 7-r khoroo",             lat:47.9410, lng:106.9160, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7711-0005", tags:["식품","생필품"] },
+  { id:115, chain:"까르푸", name:"까르푸 송기노",          district:"송기노하이르항", address:"Songinokhairkhan, 4-r khoroo",      lat:47.9155, lng:106.8290, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7711-0006", tags:["식품","생필품"] },
+  { id:116, chain:"까르푸", name:"까르푸 바얀골 2호",      district:"바얀골",        address:"Bayangol, 23-r khoroo",              lat:47.8912, lng:106.8610, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7711-0007", tags:["식품","생필품"] },
+  { id:117, chain:"까르푸", name:"까르푸 날라이흐",        district:"날라이흐",      address:"Nalaikh Duureg",                     lat:47.7538, lng:107.3040, type:"슈퍼마켓",   floors:1, hours:"09:00-20:00", phone:"+976 7711-0008", tags:["식품","생필품"] },
+
+  // ── 산사르 (12개) ────────────────────────────────────────────────────────
+  { id:118, chain:"산사르", name:"산사르 본점",            district:"수흐바타르",    address:"Sansariin Gudamj 5",                 lat:47.9193, lng:106.9401, type:"쇼핑센터",   floors:5, hours:"10:00-21:00", phone:"+976 7799-0001", tags:["패션","전자제품","식당","뷰티"] },
+  { id:119, chain:"산사르", name:"산사르 바얀주르흐",      district:"바얀주르흐",    address:"Bayanzurkh, 6-r khoroo",             lat:47.9268, lng:106.9614, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7799-0002", tags:["식품","생필품"] },
+  { id:120, chain:"산사르", name:"산사르 송기노",          district:"송기노하이르항", address:"Songinokhairkhan, 8-r khoroo",      lat:47.9055, lng:106.8056, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7799-0003", tags:["식품","생필품"] },
+  { id:121, chain:"산사르", name:"산사르 바얀골",          district:"바얀골",        address:"Bayangol, 6-r khoroo",               lat:47.9038, lng:106.8570, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7799-0004", tags:["식품","생필품"] },
+  { id:122, chain:"산사르", name:"산사르 항올",            district:"항올",          address:"Khan-Uul, 4-r khoroo",               lat:47.8795, lng:106.9090, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7799-0005", tags:["식품","생필품"] },
+  { id:123, chain:"산사르", name:"산사르 칭겔테이",        district:"칭겔테이",      address:"Chingeltei, 4-r khoroo",             lat:47.9350, lng:106.9070, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7799-0006", tags:["식품","생필품"] },
+  { id:124, chain:"산사르", name:"산사르 바얀주르흐 2호",  district:"바얀주르흐",    address:"Bayanzurkh, 15-r khoroo",            lat:47.9370, lng:106.9720, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7799-0007", tags:["식품","생필품"] },
+  { id:125, chain:"산사르", name:"산사르 수흐바타르",      district:"수흐바타르",    address:"Sukhbaatar, 5-r khoroo",             lat:47.9115, lng:106.9270, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7799-0008", tags:["식품","생필품"] },
+  { id:126, chain:"산사르", name:"산사르 바얀골 2호",      district:"바얀골",        address:"Bayangol, 10-r khoroo",              lat:47.9002, lng:106.8730, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7799-0009", tags:["식품","생필품"] },
+  { id:127, chain:"산사르", name:"산사르 송기노 2호",      district:"송기노하이르항", address:"Songinokhairkhan, 24-r khoroo",     lat:47.9020, lng:106.7920, type:"슈퍼마켓",   floors:2, hours:"09:00-20:00", phone:"+976 7799-0010", tags:["식품","생필품"] },
+  { id:128, chain:"산사르", name:"산사르 날라이흐",        district:"날라이흐",      address:"Nalaikh Duureg",                     lat:47.7528, lng:107.2960, type:"슈퍼마켓",   floors:1, hours:"09:00-20:00", phone:"+976 7799-0011", tags:["식품","생필품"] },
+  { id:129, chain:"산사르", name:"산사르 항올 2호",        district:"항올",          address:"Khan-Uul, 12-r khoroo",              lat:47.8668, lng:106.9300, type:"슈퍼마켓",   floors:2, hours:"09:00-21:00", phone:"+976 7799-0012", tags:["식품","생필품"] },
+
+  // ── 오르길 (20개) ────────────────────────────────────────────────────────
+  { id:130, chain:"오르길", name:"오르길 센트럴",          district:"수흐바타르",    address:"Peace Ave 19",                       lat:47.9061, lng:106.9112, type:"전자전문점", floors:3, hours:"10:00-21:00", phone:"+976 7780-0001", tags:["전자제품","휴대폰","노트북","가전"] },
+  { id:131, chain:"오르길", name:"오르길 바얀골",          district:"바얀골",        address:"Bayangol, 7-r khoroo",               lat:47.9031, lng:106.8720, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0002", tags:["전자제품","휴대폰","가전"] },
+  { id:132, chain:"오르길", name:"오르길 바얀주르흐",      district:"바얀주르흐",    address:"Bayanzurkh, 4-r khoroo",             lat:47.9201, lng:106.9443, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0003", tags:["전자제품","휴대폰","가전"] },
+  { id:133, chain:"오르길", name:"오르길 항올",            district:"항올",          address:"Khan-Uul, 12-r khoroo",              lat:47.8697, lng:106.9080, type:"전자전문점", floors:2, hours:"10:00-20:00", phone:"+976 7780-0004", tags:["전자제품","가전"] },
+  { id:134, chain:"오르길", name:"오르길 칭겔테이",        district:"칭겔테이",      address:"Chingeltei, 1-r khoroo",             lat:47.9315, lng:106.9030, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0005", tags:["전자제품","휴대폰"] },
+  { id:135, chain:"오르길", name:"오르길 송기노",          district:"송기노하이르항", address:"Songinokhairkhan, 11-r khoroo",     lat:47.9098, lng:106.8130, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0006", tags:["전자제품","가전"] },
+  { id:136, chain:"오르길", name:"오르길 수흐바타르 2호",  district:"수흐바타르",    address:"Sukhbaatar, 2-r khoroo",             lat:47.9125, lng:106.9190, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0007", tags:["전자제품","휴대폰","노트북"] },
+  { id:137, chain:"오르길", name:"오르길 바얀골 2호",      district:"바얀골",        address:"Bayangol, 16-r khoroo",              lat:47.8950, lng:106.8770, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0008", tags:["전자제품","가전"] },
+  { id:138, chain:"오르길", name:"오르길 바얀주르흐 2호",  district:"바얀주르흐",    address:"Bayanzurkh, 14-r khoroo",            lat:47.9338, lng:106.9710, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0009", tags:["전자제품","휴대폰"] },
+  { id:139, chain:"오르길", name:"오르길 항올 2호",        district:"항올",          address:"Khan-Uul, 5-r khoroo",               lat:47.8830, lng:106.9170, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0010", tags:["전자제품","가전"] },
+  { id:140, chain:"오르길", name:"오르길 칭겔테이 2호",    district:"칭겔테이",      address:"Chingeltei, 7-r khoroo",             lat:47.9290, lng:106.8980, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0011", tags:["전자제품","휴대폰"] },
+  { id:141, chain:"오르길", name:"오르길 송기노 2호",      district:"송기노하이르항", address:"Songinokhairkhan, 23-r khoroo",     lat:47.9025, lng:106.8000, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0012", tags:["전자제품","가전"] },
+  { id:142, chain:"오르길", name:"오르길 바얀골 3호",      district:"바얀골",        address:"Bayangol, 2-r khoroo",               lat:47.9072, lng:106.8490, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0013", tags:["전자제품","노트북"] },
+  { id:143, chain:"오르길", name:"오르길 수흐바타르 3호",  district:"수흐바타르",    address:"Sukhbaatar, 8-r khoroo",             lat:47.9140, lng:106.9320, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0014", tags:["전자제품","휴대폰","노트북"] },
+  { id:144, chain:"오르길", name:"오르길 바얀주르흐 3호",  district:"바얀주르흐",    address:"Bayanzurkh, 20-r khoroo",            lat:47.9395, lng:106.9850, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0015", tags:["전자제품","가전"] },
+  { id:145, chain:"오르길", name:"오르길 항올 자이산",     district:"항올",          address:"Khan-Uul, 1-r khoroo (Zaisan)",      lat:47.8658, lng:106.9045, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0016", tags:["전자제품","휴대폰"] },
+  { id:146, chain:"오르길", name:"오르길 바얀골 4호",      district:"바얀골",        address:"Bayangol, 20-r khoroo",              lat:47.8980, lng:106.8550, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0017", tags:["전자제품","가전"] },
+  { id:147, chain:"오르길", name:"오르길 날라이흐",        district:"날라이흐",      address:"Nalaikh Duureg",                     lat:47.7521, lng:107.3000, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7780-0018", tags:["전자제품","휴대폰"] },
+  { id:148, chain:"오르길", name:"오르길 바간누르",        district:"바간누르",      address:"Baganuur Duureg",                    lat:47.7088, lng:108.2760, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7780-0019", tags:["전자제품","가전"] },
+  { id:149, chain:"오르길", name:"오르길 송기노 30호",     district:"송기노하이르항", address:"Songinokhairkhan, 30-r khoroo",     lat:47.8960, lng:106.7820, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7780-0020", tags:["전자제품","휴대폰","가전"] },
+
+  // ── 유니텔 (20개) ────────────────────────────────────────────────────────
+  { id:150, chain:"유니텔", name:"유니텔 센트럴",          district:"수흐바타르",    address:"Sukhbaatar, 1-r khoroo",             lat:47.9092, lng:106.9148, type:"전자전문점", floors:2, hours:"09:00-21:00", phone:"+976 7760-0001", tags:["휴대폰","유심","가전","인터넷"] },
+  { id:151, chain:"유니텔", name:"유니텔 바얀골 1호",      district:"바얀골",        address:"Bayangol, 1-r khoroo",               lat:47.9088, lng:106.8628, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0002", tags:["휴대폰","유심","인터넷"] },
+  { id:152, chain:"유니텔", name:"유니텔 바얀주르흐 1호",  district:"바얀주르흐",    address:"Bayanzurkh, 1-r khoroo",             lat:47.9175, lng:106.9425, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0003", tags:["휴대폰","유심","인터넷"] },
+  { id:153, chain:"유니텔", name:"유니텔 항올 1호",        district:"항올",          address:"Khan-Uul, 1-r khoroo",               lat:47.8888, lng:106.9155, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0004", tags:["휴대폰","유심"] },
+  { id:154, chain:"유니텔", name:"유니텔 칭겔테이 1호",    district:"칭겔테이",      address:"Chingeltei, 1-r khoroo",             lat:47.9318, lng:106.9028, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0005", tags:["휴대폰","유심","인터넷"] },
+  { id:155, chain:"유니텔", name:"유니텔 송기노 1호",      district:"송기노하이르항", address:"Songinokhairkhan, 1-r khoroo",      lat:47.9178, lng:106.8308, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7760-0006", tags:["휴대폰","유심"] },
+  { id:156, chain:"유니텔", name:"유니텔 바얀골 5호",      district:"바얀골",        address:"Bayangol, 5-r khoroo",               lat:47.9022, lng:106.8498, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0007", tags:["휴대폰","유심","가전"] },
+  { id:157, chain:"유니텔", name:"유니텔 바얀주르흐 9호",  district:"바얀주르흐",    address:"Bayanzurkh, 9-r khoroo",             lat:47.9265, lng:106.9558, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0008", tags:["휴대폰","유심"] },
+  { id:158, chain:"유니텔", name:"유니텔 항올 5호",        district:"항올",          address:"Khan-Uul, 5-r khoroo",               lat:47.8802, lng:106.9200, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0009", tags:["휴대폰","유심"] },
+  { id:159, chain:"유니텔", name:"유니텔 수흐바타르 4호",  district:"수흐바타르",    address:"Sukhbaatar, 4-r khoroo",             lat:47.9128, lng:106.9218, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0010", tags:["휴대폰","유심","인터넷"] },
+  { id:160, chain:"유니텔", name:"유니텔 송기노 10호",     district:"송기노하이르항", address:"Songinokhairkhan, 10-r khoroo",     lat:47.9095, lng:106.8052, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7760-0011", tags:["휴대폰","유심"] },
+  { id:161, chain:"유니텔", name:"유니텔 칭겔테이 4호",    district:"칭겔테이",      address:"Chingeltei, 4-r khoroo",             lat:47.9388, lng:106.9175, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0012", tags:["휴대폰","유심"] },
+  { id:162, chain:"유니텔", name:"유니텔 바얀골 15호",     district:"바얀골",        address:"Bayangol, 15-r khoroo",              lat:47.8955, lng:106.8708, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0013", tags:["휴대폰","유심","가전"] },
+  { id:163, chain:"유니텔", name:"유니텔 바얀주르흐 16호", district:"바얀주르흐",    address:"Bayanzurkh, 16-r khoroo",            lat:47.9378, lng:106.9725, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0014", tags:["휴대폰","유심"] },
+  { id:164, chain:"유니텔", name:"유니텔 항올 11호",       district:"항올",          address:"Khan-Uul, 11-r khoroo",              lat:47.8745, lng:106.9055, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0015", tags:["휴대폰","유심"] },
+  { id:165, chain:"유니텔", name:"유니텔 송기노 20호",     district:"송기노하이르항", address:"Songinokhairkhan, 20-r khoroo",     lat:47.9232, lng:106.8108, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7760-0016", tags:["휴대폰","유심"] },
+  { id:166, chain:"유니텔", name:"유니텔 날라이흐",        district:"날라이흐",      address:"Nalaikh Duureg",                     lat:47.7532, lng:107.2995, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7760-0017", tags:["휴대폰","유심"] },
+  { id:167, chain:"유니텔", name:"유니텔 바간누르",        district:"바간누르",      address:"Baganuur Duureg",                    lat:47.7100, lng:108.2795, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7760-0018", tags:["휴대폰","유심"] },
+  { id:168, chain:"유니텔", name:"유니텔 바얀골 20호",     district:"바얀골",        address:"Bayangol, 20-r khoroo",              lat:47.9000, lng:106.8595, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0019", tags:["휴대폰","유심","인터넷"] },
+  { id:169, chain:"유니텔", name:"유니텔 수흐바타르 8호",  district:"수흐바타르",    address:"Sukhbaatar, 8-r khoroo",             lat:47.9108, lng:106.9162, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7760-0020", tags:["휴대폰","유심","가전"] },
+
+  // ── 모비콤 (20개) ────────────────────────────────────────────────────────
+  { id:170, chain:"모비콤", name:"모비콤 센트럴",          district:"수흐바타르",    address:"Peace Ave 7, Суухбаатар",            lat:47.9082, lng:106.9175, type:"전자전문점", floors:2, hours:"09:00-21:00", phone:"+976 7750-0001", tags:["휴대폰","유심","가전","인터넷"] },
+  { id:171, chain:"모비콤", name:"모비콤 바얀골 2호",      district:"바얀골",        address:"Bayangol, 2-r khoroo",               lat:47.9075, lng:106.8682, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0002", tags:["휴대폰","유심"] },
+  { id:172, chain:"모비콤", name:"모비콤 바얀주르흐 2호",  district:"바얀주르흐",    address:"Bayanzurkh, 2-r khoroo",             lat:47.9188, lng:106.9452, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0003", tags:["휴대폰","유심","인터넷"] },
+  { id:173, chain:"모비콤", name:"모비콤 항올 2호",        district:"항올",          address:"Khan-Uul, 2-r khoroo",               lat:47.8868, lng:106.9142, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0004", tags:["휴대폰","유심"] },
+  { id:174, chain:"모비콤", name:"모비콤 칭겔테이 2호",    district:"칭겔테이",      address:"Chingeltei, 2-r khoroo",             lat:47.9328, lng:106.9058, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0005", tags:["휴대폰","유심","인터넷"] },
+  { id:175, chain:"모비콤", name:"모비콤 송기노 2호",      district:"송기노하이르항", address:"Songinokhairkhan, 2-r khoroo",      lat:47.9162, lng:106.8275, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7750-0006", tags:["휴대폰","유심"] },
+  { id:176, chain:"모비콤", name:"모비콤 바얀골 8호",      district:"바얀골",        address:"Bayangol, 8-r khoroo",               lat:47.9045, lng:106.8558, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0007", tags:["휴대폰","유심","가전"] },
+  { id:177, chain:"모비콤", name:"모비콤 바얀주르흐 11호", district:"바얀주르흐",    address:"Bayanzurkh, 11-r khoroo",            lat:47.9305, lng:106.9665, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0008", tags:["휴대폰","유심"] },
+  { id:178, chain:"모비콤", name:"모비콤 항올 8호",        district:"항올",          address:"Khan-Uul, 8-r khoroo",               lat:47.8825, lng:106.8958, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0009", tags:["휴대폰","유심"] },
+  { id:179, chain:"모비콤", name:"모비콤 수흐바타르 3호",  district:"수흐바타르",    address:"Sukhbaatar, 3-r khoroo",             lat:47.9100, lng:106.9175, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0010", tags:["휴대폰","유심","인터넷"] },
+  { id:180, chain:"모비콤", name:"모비콤 송기노 11호",     district:"송기노하이르항", address:"Songinokhairkhan, 11-r khoroo",     lat:47.9100, lng:106.8132, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7750-0011", tags:["휴대폰","유심"] },
+  { id:181, chain:"모비콤", name:"모비콤 칭겔테이 5호",    district:"칭겔테이",      address:"Chingeltei, 5-r khoroo",             lat:47.9362, lng:106.9125, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0012", tags:["휴대폰","유심"] },
+  { id:182, chain:"모비콤", name:"모비콤 바얀골 18호",     district:"바얀골",        address:"Bayangol, 18-r khoroo",              lat:47.9005, lng:106.8795, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0013", tags:["휴대폰","유심","가전"] },
+  { id:183, chain:"모비콤", name:"모비콤 바얀주르흐 20호", district:"바얀주르흐",    address:"Bayanzurkh, 20-r khoroo",            lat:47.9398, lng:106.9858, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0014", tags:["휴대폰","유심"] },
+  { id:184, chain:"모비콤", name:"모비콤 항올 14호",       district:"항올",          address:"Khan-Uul, 14-r khoroo",              lat:47.8598, lng:106.9348, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0015", tags:["휴대폰","유심"] },
+  { id:185, chain:"모비콤", name:"모비콤 송기노 25호",     district:"송기노하이르항", address:"Songinokhairkhan, 25-r khoroo",     lat:47.9215, lng:106.8025, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7750-0016", tags:["휴대폰","유심"] },
+  { id:186, chain:"모비콤", name:"모비콤 날라이흐",        district:"날라이흐",      address:"Nalaikh Duureg",                     lat:47.7519, lng:107.2978, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7750-0017", tags:["휴대폰","유심"] },
+  { id:187, chain:"모비콤", name:"모비콤 바간누르",        district:"바간누르",      address:"Baganuur Duureg",                    lat:47.7095, lng:108.2772, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7750-0018", tags:["휴대폰","유심"] },
+  { id:188, chain:"모비콤", name:"모비콤 바얀골 22호",     district:"바얀골",        address:"Bayangol, 22-r khoroo",              lat:47.8895, lng:106.8685, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0019", tags:["휴대폰","유심","인터넷"] },
+  { id:189, chain:"모비콤", name:"모비콤 수흐바타르 6호",  district:"수흐바타르",    address:"Sukhbaatar, 6-r khoroo",             lat:47.9158, lng:106.9345, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7750-0020", tags:["휴대폰","유심","가전"] },
+
+  // ── 지모바일 (18개) ──────────────────────────────────────────────────────
+  { id:190, chain:"지모바일", name:"지모바일 센트럴",       district:"수흐바타르",    address:"Peace Ave 11, Суухбаатар",           lat:47.9070, lng:106.9158, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7740-0001", tags:["삼성","LG","휴대폰","노트북","가전"] },
+  { id:191, chain:"지모바일", name:"지모바일 바얀골",       district:"바얀골",        address:"Bayangol, 9-r khoroo",               lat:47.9025, lng:106.8562, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7740-0002", tags:["삼성","LG","휴대폰","가전"] },
+  { id:192, chain:"지모바일", name:"지모바일 바얀주르흐",   district:"바얀주르흐",    address:"Bayanzurkh, 5-r khoroo",             lat:47.9228, lng:106.9512, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7740-0003", tags:["삼성","LG","휴대폰","노트북"] },
+  { id:193, chain:"지모바일", name:"지모바일 항올",         district:"항올",          address:"Khan-Uul, 7-r khoroo",               lat:47.8770, lng:106.9035, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7740-0004", tags:["삼성","LG","가전"] },
+  { id:194, chain:"지모바일", name:"지모바일 칭겔테이",     district:"칭겔테이",      address:"Chingeltei, 3-r khoroo",             lat:47.9342, lng:106.9092, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7740-0005", tags:["삼성","LG","휴대폰"] },
+  { id:195, chain:"지모바일", name:"지모바일 송기노",       district:"송기노하이르항", address:"Songinokhairkhan, 6-r khoroo",      lat:47.9132, lng:106.8182, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7740-0006", tags:["삼성","LG","휴대폰"] },
+  { id:196, chain:"지모바일", name:"지모바일 수흐바타르 2호", district:"수흐바타르",  address:"Sukhbaatar, 2-r khoroo",             lat:47.9098, lng:106.9052, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7740-0007", tags:["삼성","LG","노트북","가전"] },
+  { id:197, chain:"지모바일", name:"지모바일 바얀골 2호",   district:"바얀골",        address:"Bayangol, 14-r khoroo",              lat:47.8978, lng:106.8825, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7740-0008", tags:["삼성","LG","가전"] },
+  { id:198, chain:"지모바일", name:"지모바일 바얀주르흐 2호", district:"바얀주르흐",  address:"Bayanzurkh, 14-r khoroo",            lat:47.9340, lng:106.9715, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7740-0009", tags:["삼성","LG","휴대폰"] },
+  { id:199, chain:"지모바일", name:"지모바일 항올 2호",     district:"항올",          address:"Khan-Uul, 13-r khoroo",              lat:47.8642, lng:106.9115, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7740-0010", tags:["삼성","가전"] },
+  { id:200, chain:"지모바일", name:"지모바일 칭겔테이 2호", district:"칭겔테이",      address:"Chingeltei, 7-r khoroo",             lat:47.9292, lng:106.8982, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7740-0011", tags:["삼성","LG","휴대폰"] },
+  { id:201, chain:"지모바일", name:"지모바일 송기노 2호",   district:"송기노하이르항", address:"Songinokhairkhan, 16-r khoroo",     lat:47.9215, lng:106.8312, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7740-0012", tags:["삼성","LG","가전"] },
+  { id:202, chain:"지모바일", name:"지모바일 바얀골 3호",   district:"바얀골",        address:"Bayangol, 21-r khoroo",              lat:47.8962, lng:106.8538, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7740-0013", tags:["삼성","노트북","가전"] },
+  { id:203, chain:"지모바일", name:"지모바일 날라이흐",     district:"날라이흐",      address:"Nalaikh Duureg",                     lat:47.7525, lng:107.3008, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7740-0014", tags:["삼성","LG","휴대폰"] },
+  { id:204, chain:"지모바일", name:"지모바일 바간누르",     district:"바간누르",      address:"Baganuur Duureg",                    lat:47.7082, lng:108.2768, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7740-0015", tags:["삼성","가전"] },
+  { id:205, chain:"지모바일", name:"지모바일 바얀주르흐 3호", district:"바얀주르흐",  address:"Bayanzurkh, 22-r khoroo",            lat:47.9422, lng:106.9862, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7740-0016", tags:["삼성","LG","휴대폰"] },
+  { id:206, chain:"지모바일", name:"지모바일 수흐바타르 3호", district:"수흐바타르",  address:"Sukhbaatar, 7-r khoroo",             lat:47.9205, lng:106.9318, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7740-0017", tags:["삼성","LG","노트북","가전"] },
+  { id:207, chain:"지모바일", name:"지모바일 항올 자이산",  district:"항올",          address:"Khan-Uul, 1-r khoroo (Zaisan)",      lat:47.8662, lng:106.9052, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7740-0018", tags:["삼성","LG","가전","노트북"] },
+
+  // ── 피씨몰 (15개) ────────────────────────────────────────────────────────
+  { id:208, chain:"피씨몰", name:"피씨몰 센트럴",         district:"수흐바타르",    address:"Sukhbaatar, 1-r khoroo",             lat:47.9086, lng:106.9132, type:"전자전문점", floors:3, hours:"10:00-21:00", phone:"+976 7730-0001", tags:["PC","노트북","부품","주변기기"] },
+  { id:209, chain:"피씨몰", name:"피씨몰 바얀골",         district:"바얀골",        address:"Bayangol, 6-r khoroo",               lat:47.9038, lng:106.8575, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7730-0002", tags:["PC","노트북","부품"] },
+  { id:210, chain:"피씨몰", name:"피씨몰 바얀주르흐",     district:"바얀주르흐",    address:"Bayanzurkh, 8-r khoroo",             lat:47.9295, lng:106.9638, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7730-0003", tags:["PC","노트북","주변기기"] },
+  { id:211, chain:"피씨몰", name:"피씨몰 항올",           district:"항올",          address:"Khan-Uul, 4-r khoroo",               lat:47.8792, lng:106.9095, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7730-0004", tags:["PC","노트북","부품"] },
+  { id:212, chain:"피씨몰", name:"피씨몰 칭겔테이",       district:"칭겔테이",      address:"Chingeltei, 3-r khoroo",             lat:47.9345, lng:106.9065, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7730-0005", tags:["PC","노트북","주변기기"] },
+  { id:213, chain:"피씨몰", name:"피씨몰 송기노",         district:"송기노하이르항", address:"Songinokhairkhan, 7-r khoroo",      lat:47.9158, lng:106.8225, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7730-0006", tags:["PC","노트북"] },
+  { id:214, chain:"피씨몰", name:"피씨몰 수흐바타르 2호", district:"수흐바타르",    address:"Sukhbaatar, 5-r khoroo",             lat:47.9118, lng:106.9268, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7730-0007", tags:["PC","노트북","부품","주변기기"] },
+  { id:215, chain:"피씨몰", name:"피씨몰 바얀골 2호",     district:"바얀골",        address:"Bayangol, 16-r khoroo",              lat:47.8952, lng:106.8772, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7730-0008", tags:["PC","노트북","부품"] },
+  { id:216, chain:"피씨몰", name:"피씨몰 바얀주르흐 2호", district:"바얀주르흐",    address:"Bayanzurkh, 17-r khoroo",            lat:47.9345, lng:106.9765, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7730-0009", tags:["PC","노트북"] },
+  { id:217, chain:"피씨몰", name:"피씨몰 항올 2호",       district:"항올",          address:"Khan-Uul, 12-r khoroo",              lat:47.8700, lng:106.9085, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7730-0010", tags:["PC","노트북","부품"] },
+  { id:218, chain:"피씨몰", name:"피씨몰 송기노 2호",     district:"송기노하이르항", address:"Songinokhairkhan, 22-r khoroo",     lat:47.9038, lng:106.7998, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7730-0011", tags:["PC","노트북"] },
+  { id:219, chain:"피씨몰", name:"피씨몰 바얀골 3호",     district:"바얀골",        address:"Bayangol, 3-r khoroo",               lat:47.9068, lng:106.8715, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7730-0012", tags:["PC","부품","주변기기"] },
+  { id:220, chain:"피씨몰", name:"피씨몰 칭겔테이 2호",   district:"칭겔테이",      address:"Chingeltei, 8-r khoroo",             lat:47.9258, lng:106.8955, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7730-0013", tags:["PC","노트북"] },
+  { id:221, chain:"피씨몰", name:"피씨몰 날라이흐",       district:"날라이흐",      address:"Nalaikh Duureg",                     lat:47.7528, lng:107.3018, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7730-0014", tags:["PC","노트북"] },
+  { id:222, chain:"피씨몰", name:"피씨몰 바간누르",       district:"바간누르",      address:"Baganuur Duureg",                    lat:47.7085, lng:108.2792, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7730-0015", tags:["PC","노트북"] },
+
+  // ── 사인일렉 (15개) ──────────────────────────────────────────────────────
+  { id:223, chain:"사인일렉", name:"사인일렉 센트럴",      district:"수흐바타르",    address:"Seoul St 3, Суухбаатар",             lat:47.9058, lng:106.9145, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7720-0001", tags:["삼성","애플","가전","휴대폰"] },
+  { id:224, chain:"사인일렉", name:"사인일렉 바얀골",      district:"바얀골",        address:"Bayangol, 10-r khoroo",              lat:47.9005, lng:106.8735, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7720-0002", tags:["삼성","가전","휴대폰"] },
+  { id:225, chain:"사인일렉", name:"사인일렉 바얀주르흐",  district:"바얀주르흐",    address:"Bayanzurkh, 6-r khoroo",             lat:47.9242, lng:106.9540, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7720-0003", tags:["삼성","애플","휴대폰"] },
+  { id:226, chain:"사인일렉", name:"사인일렉 항올",        district:"항올",          address:"Khan-Uul, 6-r khoroo",               lat:47.8712, lng:106.9132, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7720-0004", tags:["삼성","가전"] },
+  { id:227, chain:"사인일렉", name:"사인일렉 칭겔테이",    district:"칭겔테이",      address:"Chingeltei, 2-r khoroo",             lat:47.9328, lng:106.9055, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7720-0005", tags:["삼성","애플","휴대폰"] },
+  { id:228, chain:"사인일렉", name:"사인일렉 송기노",      district:"송기노하이르항", address:"Songinokhairkhan, 9-r khoroo",      lat:47.9112, lng:106.8122, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7720-0006", tags:["삼성","가전"] },
+  { id:229, chain:"사인일렉", name:"사인일렉 수흐바타르 2호", district:"수흐바타르", address:"Sukhbaatar, 7-r khoroo",             lat:47.9198, lng:106.9308, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7720-0007", tags:["삼성","애플","가전","휴대폰"] },
+  { id:230, chain:"사인일렉", name:"사인일렉 바얀골 2호",  district:"바얀골",        address:"Bayangol, 19-r khoroo",              lat:47.8890, lng:106.8605, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7720-0008", tags:["삼성","가전"] },
+  { id:231, chain:"사인일렉", name:"사인일렉 바얀주르흐 2호", district:"바얀주르흐", address:"Bayanzurkh, 15-r khoroo",            lat:47.9372, lng:106.9722, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7720-0009", tags:["삼성","휴대폰"] },
+  { id:232, chain:"사인일렉", name:"사인일렉 항올 2호",    district:"항올",          address:"Khan-Uul, 15-r khoroo",              lat:47.8612, lng:106.9312, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7720-0010", tags:["삼성","가전"] },
+  { id:233, chain:"사인일렉", name:"사인일렉 칭겔테이 2호", district:"칭겔테이",     address:"Chingeltei, 6-r khoroo",             lat:47.9278, lng:106.8975, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7720-0011", tags:["삼성","휴대폰"] },
+  { id:234, chain:"사인일렉", name:"사인일렉 송기노 2호",  district:"송기노하이르항", address:"Songinokhairkhan, 24-r khoroo",     lat:47.9022, lng:106.7925, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7720-0012", tags:["삼성","가전"] },
+  { id:235, chain:"사인일렉", name:"사인일렉 날라이흐",    district:"날라이흐",      address:"Nalaikh Duureg",                     lat:47.7522, lng:107.2968, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7720-0013", tags:["삼성","가전"] },
+  { id:236, chain:"사인일렉", name:"사인일렉 바간누르",    district:"바간누르",      address:"Baganuur Duureg",                    lat:47.7078, lng:108.2768, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7720-0014", tags:["삼성","가전"] },
+  { id:237, chain:"사인일렉", name:"사인일렉 바얀골 3호",  district:"바얀골",        address:"Bayangol, 4-r khoroo",               lat:47.9058, lng:106.8622, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7720-0015", tags:["삼성","애플","휴대폰","가전"] },
+
+  // ── 넥스트일렉 (15개) ────────────────────────────────────────────────────
+  { id:238, chain:"넥스트일렉", name:"넥스트 센트럴",      district:"수흐바타르",    address:"Peace Ave 22",                       lat:47.9075, lng:106.9200, type:"전자전문점", floors:3, hours:"10:00-21:00", phone:"+976 7710-0001", tags:["가전","TV","냉장고","세탁기"] },
+  { id:239, chain:"넥스트일렉", name:"넥스트 바얀골",      district:"바얀골",        address:"Bayangol, 13-r khoroo",              lat:47.8968, lng:106.8742, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7710-0002", tags:["가전","TV","냉장고"] },
+  { id:240, chain:"넥스트일렉", name:"넥스트 바얀주르흐",  district:"바얀주르흐",    address:"Bayanzurkh, 12-r khoroo",            lat:47.9282, lng:106.9595, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7710-0003", tags:["가전","TV","세탁기"] },
+  { id:241, chain:"넥스트일렉", name:"넥스트 항올",        district:"항올",          address:"Khan-Uul, 9-r khoroo",               lat:47.8782, lng:106.9178, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7710-0004", tags:["가전","TV","냉장고"] },
+  { id:242, chain:"넥스트일렉", name:"넥스트 칭겔테이",    district:"칭겔테이",      address:"Chingeltei, 5-r khoroo",             lat:47.9362, lng:106.9128, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7710-0005", tags:["가전","TV","세탁기"] },
+  { id:243, chain:"넥스트일렉", name:"넥스트 송기노",      district:"송기노하이르항", address:"Songinokhairkhan, 13-r khoroo",     lat:47.9075, lng:106.7968, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7710-0006", tags:["가전","TV"] },
+  { id:244, chain:"넥스트일렉", name:"넥스트 수흐바타르 2호", district:"수흐바타르", address:"Sukhbaatar, 6-r khoroo",             lat:47.9162, lng:106.9352, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7710-0007", tags:["가전","TV","냉장고","세탁기"] },
+  { id:245, chain:"넥스트일렉", name:"넥스트 바얀골 2호",  district:"바얀골",        address:"Bayangol, 22-r khoroo",              lat:47.8898, lng:106.8678, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7710-0008", tags:["가전","TV"] },
+  { id:246, chain:"넥스트일렉", name:"넥스트 바얀주르흐 2호", district:"바얀주르흐", address:"Bayanzurkh, 19-r khoroo",            lat:47.9402, lng:106.9828, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7710-0009", tags:["가전","TV","냉장고"] },
+  { id:247, chain:"넥스트일렉", name:"넥스트 항올 2호",    district:"항올",          address:"Khan-Uul, 16-r khoroo",              lat:47.8835, lng:106.9285, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7710-0010", tags:["가전","TV"] },
+  { id:248, chain:"넥스트일렉", name:"넥스트 칭겔테이 2호", district:"칭겔테이",     address:"Chingeltei, 8-r khoroo",             lat:47.9252, lng:106.8962, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7710-0011", tags:["가전","TV","세탁기"] },
+  { id:249, chain:"넥스트일렉", name:"넥스트 송기노 2호",  district:"송기노하이르항", address:"Songinokhairkhan, 28-r khoroo",     lat:47.8972, lng:106.7798, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7710-0012", tags:["가전","TV"] },
+  { id:250, chain:"넥스트일렉", name:"넥스트 바얀골 3호",  district:"바얀골",        address:"Bayangol, 7-r khoroo",               lat:47.9032, lng:106.8725, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7710-0013", tags:["가전","TV","냉장고"] },
+  { id:251, chain:"넥스트일렉", name:"넥스트 날라이흐",    district:"날라이흐",      address:"Nalaikh Duureg",                     lat:47.7518, lng:107.2982, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7710-0014", tags:["가전","TV"] },
+  { id:252, chain:"넥스트일렉", name:"넥스트 바간누르",    district:"바간누르",      address:"Baganuur Duureg",                    lat:47.7075, lng:108.2758, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7710-0015", tags:["가전","TV","냉장고"] },
+
+  // ── 노민일렉 (15개) ──────────────────────────────────────────────────────
+  { id:253, chain:"노민일렉", name:"노민일렉 센트럴",      district:"수흐바타르",    address:"Peace Ave 13 (Nomin Bldg)",          lat:47.9080, lng:106.9192, type:"전자전문점", floors:3, hours:"09:00-21:00", phone:"+976 7777-1001", tags:["삼성","LG","가전","휴대폰","노트북"] },
+  { id:254, chain:"노민일렉", name:"노민일렉 바얀주르흐",  district:"바얀주르흐",    address:"Bayanzurkh, 3-r khoroo",             lat:47.9248, lng:106.9532, type:"전자전문점", floors:2, hours:"09:00-21:00", phone:"+976 7777-1002", tags:["삼성","LG","가전","노트북"] },
+  { id:255, chain:"노민일렉", name:"노민일렉 바얀골",      district:"바얀골",        address:"Bayangol, 20-r khoroo",              lat:47.8998, lng:106.8598, type:"전자전문점", floors:2, hours:"09:00-21:00", phone:"+976 7777-1003", tags:["삼성","LG","가전"] },
+  { id:256, chain:"노민일렉", name:"노민일렉 항올",        district:"항올",          address:"Khan-Uul, 11-r khoroo",              lat:47.8745, lng:106.9058, type:"전자전문점", floors:2, hours:"09:00-20:00", phone:"+976 7777-1004", tags:["삼성","LG","가전"] },
+  { id:257, chain:"노민일렉", name:"노민일렉 칭겔테이",    district:"칭겔테이",      address:"Chingeltei, 1-r khoroo",             lat:47.9312, lng:106.9022, type:"전자전문점", floors:2, hours:"09:00-21:00", phone:"+976 7777-1005", tags:["삼성","LG","휴대폰","노트북"] },
+  { id:258, chain:"노민일렉", name:"노민일렉 송기노",      district:"송기노하이르항", address:"Songinokhairkhan, 5-r khoroo",      lat:47.9145, lng:106.8168, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7777-1006", tags:["삼성","가전"] },
+  { id:259, chain:"노민일렉", name:"노민일렉 수흐바타르 2호", district:"수흐바타르", address:"Sukhbaatar, 2-r khoroo",             lat:47.9108, lng:106.9052, type:"전자전문점", floors:2, hours:"09:00-21:00", phone:"+976 7777-1007", tags:["삼성","LG","가전","휴대폰"] },
+  { id:260, chain:"노민일렉", name:"노민일렉 바얀골 2호",  district:"바얀골",        address:"Bayangol, 11-r khoroo",              lat:47.9042, lng:106.8715, type:"전자전문점", floors:2, hours:"09:00-21:00", phone:"+976 7777-1008", tags:["삼성","LG","가전"] },
+  { id:261, chain:"노민일렉", name:"노민일렉 바얀주르흐 2호", district:"바얀주르흐", address:"Bayanzurkh, 21-r khoroo",            lat:47.9182, lng:106.9785, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7777-1009", tags:["삼성","LG","노트북"] },
+  { id:262, chain:"노민일렉", name:"노민일렉 항올 자이산",  district:"항올",          address:"Khan-Uul, 3-r khoroo (Zaisan)",      lat:47.8655, lng:106.9155, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7777-1010", tags:["삼성","LG","가전","노트북"] },
+  { id:263, chain:"노민일렉", name:"노민일렉 송기노 2호",  district:"송기노하이르항", address:"Songinokhairkhan, 18-r khoroo",     lat:47.9005, lng:106.7825, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7777-1011", tags:["삼성","가전"] },
+  { id:264, chain:"노민일렉", name:"노민일렉 칭겔테이 2호", district:"칭겔테이",     address:"Chingeltei, 5-r khoroo",             lat:47.9392, lng:106.9122, type:"전자전문점", floors:1, hours:"09:00-21:00", phone:"+976 7777-1012", tags:["삼성","LG","휴대폰"] },
+  { id:265, chain:"노민일렉", name:"노민일렉 날라이흐",    district:"날라이흐",      address:"Nalaikh Duureg",                     lat:47.7535, lng:107.3012, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7777-1013", tags:["삼성","가전"] },
+  { id:266, chain:"노민일렉", name:"노민일렉 바간누르",    district:"바간누르",      address:"Baganuur Duureg",                    lat:47.7108, lng:108.2815, type:"전자전문점", floors:1, hours:"09:00-20:00", phone:"+976 7777-1014", tags:["삼성","LG","가전"] },
+  { id:267, chain:"노민일렉", name:"노민일렉 바얀골 3호",  district:"바얀골",        address:"Bayangol, 17-r khoroo",              lat:47.8922, lng:106.8782, type:"전자전문점", floors:2, hours:"09:00-21:00", phone:"+976 7777-1015", tags:["삼성","LG","가전","노트북"] },
+
+  // ── 테크노존 (15개) ──────────────────────────────────────────────────────
+  { id:268, chain:"테크노존", name:"테크노존 센트럴",      district:"수흐바타르",    address:"Sukhbaatar, 4-r khoroo",             lat:47.9115, lng:106.9210, type:"전자전문점", floors:3, hours:"10:00-21:00", phone:"+976 7700-1001", tags:["드론","스마트홈","게임기","VR"] },
+  { id:269, chain:"테크노존", name:"테크노존 바얀골",      district:"바얀골",        address:"Bayangol, 8-r khoroo",               lat:47.9048, lng:106.8562, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7700-1002", tags:["드론","게임기","스마트홈"] },
+  { id:270, chain:"테크노존", name:"테크노존 바얀주르흐",  district:"바얀주르흐",    address:"Bayanzurkh, 10-r khoroo",            lat:47.9252, lng:106.9528, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7700-1003", tags:["드론","VR","게임기"] },
+  { id:271, chain:"테크노존", name:"테크노존 항올",        district:"항올",          address:"Khan-Uul, 5-r khoroo",               lat:47.8778, lng:106.9048, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7700-1004", tags:["드론","게임기","스마트홈"] },
+  { id:272, chain:"테크노존", name:"테크노존 칭겔테이",    district:"칭겔테이",      address:"Chingeltei, 4-r khoroo",             lat:47.9395, lng:106.9185, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7700-1005", tags:["드론","VR","게임기"] },
+  { id:273, chain:"테크노존", name:"테크노존 송기노",      district:"송기노하이르항", address:"Songinokhairkhan, 8-r khoroo",      lat:47.9058, lng:106.8058, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7700-1006", tags:["드론","게임기"] },
+  { id:274, chain:"테크노존", name:"테크노존 수흐바타르 2호", district:"수흐바타르", address:"Sukhbaatar, 8-r khoroo",             lat:47.9112, lng:106.9165, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7700-1007", tags:["드론","스마트홈","VR","게임기"] },
+  { id:275, chain:"테크노존", name:"테크노존 바얀골 2호",  district:"바얀골",        address:"Bayangol, 15-r khoroo",              lat:47.8958, lng:106.8708, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7700-1008", tags:["드론","게임기"] },
+  { id:276, chain:"테크노존", name:"테크노존 바얀주르흐 2호", district:"바얀주르흐", address:"Bayanzurkh, 16-r khoroo",            lat:47.9382, lng:106.9728, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7700-1009", tags:["드론","VR","게임기"] },
+  { id:277, chain:"테크노존", name:"테크노존 항올 2호",    district:"항올",          address:"Khan-Uul, 13-r khoroo",              lat:47.8638, lng:106.9118, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7700-1010", tags:["드론","게임기"] },
+  { id:278, chain:"테크노존", name:"테크노존 칭겔테이 2호", district:"칭겔테이",     address:"Chingeltei, 7-r khoroo",             lat:47.9288, lng:106.8985, type:"전자전문점", floors:1, hours:"10:00-21:00", phone:"+976 7700-1011", tags:["드론","스마트홈","게임기"] },
+  { id:279, chain:"테크노존", name:"테크노존 송기노 2호",  district:"송기노하이르항", address:"Songinokhairkhan, 20-r khoroo",     lat:47.9235, lng:106.8105, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7700-1012", tags:["드론","게임기"] },
+  { id:280, chain:"테크노존", name:"테크노존 바얀골 3호",  district:"바얀골",        address:"Bayangol, 4-r khoroo",               lat:47.9038, lng:106.8748, type:"전자전문점", floors:2, hours:"10:00-21:00", phone:"+976 7700-1013", tags:["드론","VR","스마트홈"] },
+  { id:281, chain:"테크노존", name:"테크노존 날라이흐",    district:"날라이흐",      address:"Nalaikh Duureg",                     lat:47.7512, lng:107.2972, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7700-1014", tags:["드론","게임기"] },
+  { id:282, chain:"테크노존", name:"테크노존 바간누르",    district:"바간누르",      address:"Baganuur Duureg",                    lat:47.7072, lng:108.2748, type:"전자전문점", floors:1, hours:"10:00-20:00", phone:"+976 7700-1015", tags:["드론","게임기","스마트홈"] },
+];
+
+// ─── 매출 데이터 (단위: 억₮/연) ───────────────────────────────────────────
+const SALES = {
+  // 노민
+  1:1850,2:920,3:880,4:180,5:160,6:145,7:130,8:115,
+  9:190,10:155,11:210,12:120,13:95,14:88,15:110,16:108,17:125,18:172,19:138,20:118,
+  // 이마트
+  21:2200,22:1980,23:720,24:680,25:310,26:285,27:180,28:290,
+  // 스카이
+  29:2100,30:175,31:90,32:165,33:145,34:135,35:148,36:195,37:122,38:85,39:112,40:105,
+  // 이흐 델구르
+  41:3200,42:980,43:870,44:620,45:540,46:380,
+  // 머큐리
+  47:1950,48:170,49:155,50:140,51:128,52:118,53:182,54:148,55:108,56:115,
+  // 굿프라이스
+  57:98,58:45,59:38,60:32,61:52,62:48,63:41,64:28,65:42,66:38,67:35,68:62,69:37,70:44,71:31,72:34,73:55,74:58,
+  // 유니버설
+  75:220,76:148,77:195,78:162,79:138,80:118,81:155,82:132,83:125,84:178,85:122,86:108,87:142,88:75,89:68,
+  // 자야
+  90:195,91:175,92:88,93:92,94:82,95:78,96:95,97:105,98:85,99:72,100:68,101:65,102:70,103:80,
+  104:112,105:55,106:48,107:62,108:75,109:88,
+  // 까르푸
+  110:1650,111:1420,112:385,113:350,114:320,115:295,116:278,117:145,
+  // 산사르
+  118:1780,119:185,120:148,121:168,122:155,123:142,124:128,125:198,126:158,127:132,128:88,129:145,
+  // 오르길
+  130:850,131:320,132:285,133:198,134:175,135:165,136:388,137:295,138:268,139:182,
+  140:158,141:148,142:238,143:412,144:252,145:225,146:212,147:95,148:88,149:142,
+  // 유니텔
+  150:620,151:88,152:95,153:72,154:82,155:65,156:90,157:85,158:70,159:105,
+  160:68,161:78,162:92,163:80,164:75,165:62,166:48,167:44,168:88,169:98,
+  // 모비콤
+  170:580,171:82,172:88,173:68,174:78,175:60,176:85,177:80,178:65,179:100,
+  180:64,181:74,182:87,183:76,184:70,185:58,186:45,187:42,188:84,189:92,
+  // 지모바일
+  190:480,191:195,192:178,193:145,194:132,195:118,196:225,197:168,198:155,199:108,
+  200:122,201:102,202:178,203:72,204:68,205:115,206:210,207:188,
+  // 피씨몰
+  208:420,209:168,210:155,211:138,212:128,213:95,214:195,215:148,216:132,217:112,
+  218:88,219:158,220:105,221:65,222:62,
+  // 사인일렉
+  223:385,224:158,225:145,226:128,227:118,228:88,229:178,230:142,231:115,232:105,
+  233:98,234:82,235:58,236:55,237:165,
+  // 넥스트일렉
+  238:520,239:198,240:182,241:162,242:148,243:108,244:225,245:175,246:138,247:125,
+  248:112,249:92,250:188,251:72,252:68,
+  // 노민일렉
+  253:680,254:285,255:262,256:198,257:215,258:128,259:312,260:248,261:172,262:225,
+  263:118,264:145,265:88,266:82,267:258,
+  // 테크노존
+  268:380,269:148,270:138,271:122,272:115,273:82,274:172,275:135,276:112,277:98,
+  278:92,279:78,280:142,281:55,282:52,
+};
+const SALES_MIN = 28, SALES_MAX = 3200;
+
+function salesSize(id) {
+  const s = SALES[id] || 100;
+  const t = (Math.log(s) - Math.log(SALES_MIN)) / (Math.log(SALES_MAX) - Math.log(SALES_MIN));
+  return Math.round(14 + t * 46); // 14px ~ 60px
+}
+
+function salesPct(id) {
+  const s = SALES[id] || 100;
+  return Math.round((Math.log(s) - Math.log(SALES_MIN)) / (Math.log(SALES_MAX) - Math.log(SALES_MIN)) * 100);
+}
+
+// ─── 상태 ──────────────────────────────────────────────────────────────────
+let filterChain = "전체", filterDistrict = "전체", filterType = "전체";
+let selectedId = null;
+let markers = {};
+
+// ─── 영업 여부 계산 ────────────────────────────────────────────────────────
+function isOpen(hours) {
+  const now = new Date();
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const [open, close] = hours.split("-").map(t => {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+  });
+  return cur >= open && cur < close;
+}
+
+// ─── 필터링 ────────────────────────────────────────────────────────────────
+function getFiltered() {
+  const q = document.getElementById("searchInput").value.trim().toLowerCase();
+  return STORES.filter(s => {
+    if (filterChain !== "전체" && s.chain !== filterChain) return false;
+    if (filterDistrict !== "전체" && s.district !== filterDistrict) return false;
+    if (filterType !== "전체" && s.type !== filterType) return false;
+    if (q && !s.name.toLowerCase().includes(q) && !s.address.toLowerCase().includes(q) && !s.district.includes(q)) return false;
+    return true;
+  });
+}
+
+// ─── 지도 초기화 ──────────────────────────────────────────────────────────
+const map = L.map("map", { zoomControl: false }).setView([47.9077, 106.9184], 12);
+L.control.zoom({ position: "topright" }).addTo(map);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap contributors",
+  maxZoom: 19
+}).addTo(map);
+
+function makeMarkerIcon(chain, size, selected = false, id = null) {
+  const c = CHAINS[chain];
+  const sel = selected ? `box-shadow:0 0 0 3px white,0 0 0 6px ${c.color},0 4px 14px rgba(0,0,0,0.4);` : '';
+  return L.divIcon({
+    html: `<div class="custom-marker" style="width:${size}px;height:${size}px;background:${c.color};font-size:${Math.max(9,Math.round(size*0.36))}px;${sel}">${size >= 22 ? c.emoji : ''}</div>`,
+    className: "", iconSize: [size, size], iconAnchor: [size/2, size/2]
+  });
+}
+
+function addMarkers() {
+  Object.values(markers).forEach(m => map.removeLayer(m));
+  markers = {};
+  getFiltered().forEach(s => {
+    const sz = salesSize(s.id);
+    const m = L.marker([s.lat, s.lng], { icon: makeMarkerIcon(s.chain, sz, s.id === selectedId, s.id) }).addTo(map);
+    m.on("click", () => {
+      const url = CHAINS[s.chain]?.url;
+      if (url) window.open(url, '_blank', 'noopener');
+      selectStore(s.id);
+    });
+    markers[s.id] = m;
+  });
+}
+
+// ─── 점포 선택 ────────────────────────────────────────────────────────────
+function selectStore(id) {
+  selectedId = id;
+  const s = STORES.find(x => x.id === id);
+  if (!s) return;
+
+  // 리스트 하이라이트
+  document.querySelectorAll(".store-card").forEach(el => el.classList.remove("selected"));
+  const card = document.querySelector(`.store-card[data-id="${id}"]`);
+  if (card) { card.classList.add("selected"); card.scrollIntoView({ block: "nearest" }); }
+
+  // 지도 이동
+  map.setView([s.lat, s.lng], 15, { animate: true });
+
+  // 선택 마커 하이라이트 (크기는 매출 기준 유지)
+  Object.entries(markers).forEach(([mid, mk]) => {
+    const st = STORES.find(x => x.id == mid);
+    mk.setIcon(makeMarkerIcon(st.chain, salesSize(st.id), mid == id, st.id));
+  });
+
+  // 상세 패널
+  const c = CHAINS[s.chain];
+  document.getElementById("dChain").textContent = `${c.label} · ${s.chain}`;
+  document.getElementById("dChain").style.color = c.color;
+  document.getElementById("dName").textContent = s.name;
+  const sv = SALES[s.id] || 0;
+  const sp = salesPct(s.id);
+  document.getElementById("dRows").innerHTML = `
+    <div class="detail-row"><span class="icon">📍</span><span class="val">${s.address}</span></div>
+    <div class="detail-row"><span class="icon">🏘️</span><span class="val">${s.district}구</span></div>
+    <div class="detail-row"><span class="icon">🏬</span><span class="val">${s.type} · 지상 ${s.floors}층</span></div>
+    <div class="detail-row"><span class="icon">💰</span><span class="val">
+      <strong style="color:#C4180A">${sv.toLocaleString()}억₮</strong><span style="font-size:10px;color:#aaa;margin-left:4px">/연</span>
+      <div class="sales-bar-bg" style="margin-top:4px"><div class="sales-bar-fill" style="width:${sp}%;background:${CHAINS[s.chain].color}"></div></div>
+    </span></div>
+    <div class="detail-row"><span class="icon">🕐</span><span class="val">
+      <strong>${s.hours}</strong>
+      <span class="open-badge ${isOpen(s.hours) ? 'open' : 'closed'}">${isOpen(s.hours) ? '영업 중' : '영업 종료'}</span>
+    </span></div>
+    <div class="detail-row"><span class="icon">📞</span><span class="val">${s.phone}</span></div>
+  `;
+  document.getElementById("dTags").innerHTML = s.tags.map(t => `<span class="tag">${t}</span>`).join("");
+  const btn = document.getElementById("dWebBtn");
+  const url = c.url;
+  if (url) { btn.href = url; btn.style.display = "block"; btn.style.borderColor = c.color; btn.style.color = c.color; }
+  else { btn.style.display = "none"; }
+  document.getElementById("detailPanel").classList.add("visible");
+}
+
+function closeDetail() {
+  selectedId = null;
+  document.getElementById("detailPanel").classList.remove("visible");
+  document.querySelectorAll(".store-card").forEach(el => el.classList.remove("selected"));
+  Object.entries(markers).forEach(([mid, mk]) => {
+    const st = STORES.find(x => x.id == mid);
+    mk.setIcon(makeMarkerIcon(st.chain, salesSize(st.id), false, st.id));
+  });
+}
+
+// ─── 리스트 렌더 ──────────────────────────────────────────────────────────
+function renderList() {
+  const filtered = getFiltered();
+  const list = document.getElementById("storeList");
+  document.getElementById("storeCount").innerHTML =
+    `<strong>${filtered.length}</strong>개 점포 표시 중 (전체 ${STORES.length}개)`;
+
+  list.innerHTML = filtered.map(s => {
+    const c = CHAINS[s.chain];
+    const open = isOpen(s.hours);
+    return `
+      <div class="store-card" data-id="${s.id}" onclick="selectStore(${s.id})">
+        <div class="store-icon" style="background:${c.color}">${c.emoji}</div>
+        <div class="store-info">
+          <div class="store-name">${s.name}</div>
+          <div class="store-chain" style="color:${c.color}">${s.chain} · ${s.type}</div>
+          <div class="store-meta">
+            <span>🏘️ ${s.district}</span>
+            <span>🏬 ${s.floors}층</span>
+            <span>🕐 ${s.hours}</span>
+          </div>
+          <div class="sales-bar-wrap">
+            <div class="sales-bar-bg"><div class="sales-bar-fill" style="width:${salesPct(s.id)}%;background:${c.color}"></div></div>
+            <div class="sales-text">💰 ${(SALES[s.id]||0).toLocaleString()}억₮/연</div>
+          </div>
+        </div>
+        <span class="open-badge ${open ? 'open' : 'closed'}">${open ? '영업중' : '종료'}</span>
+      </div>`;
+  }).join("");
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:#aaa;font-size:13px;">검색 결과가 없습니다</div>`;
+  }
+  addMarkers();
+}
+
+// ─── 필터 UI 렌더 ─────────────────────────────────────────────────────────
+function renderFilters() {
+  const chains = ["전체", ...Object.keys(CHAINS)];
+  const districts = ["전체", ...new Set(STORES.map(s => s.district))];
+  const types = ["전체", ...new Set(STORES.map(s => s.type))];
+
+  function makeChips(items, current, setter, containerId) {
+    const c = document.getElementById(containerId);
+    c.innerHTML = items.map(v => `
+      <div class="chip ${v === current ? 'active' : ''}" onclick="(${setter.toString()})('${v}')">${v}</div>
+    `).join("");
+  }
+
+  makeChips(chains, filterChain, v => { filterChain = v; refresh(); }, "chainFilters");
+  makeChips(districts, filterDistrict, v => { filterDistrict = v; refresh(); }, "districtFilters");
+  makeChips(types, filterType, v => { filterType = v; refresh(); }, "typeFilters");
+}
+
+function refresh() {
+  renderFilters();
+  renderList();
+  updateHeaderStats();
+}
+
+// ─── 헤더 통계 ────────────────────────────────────────────────────────────
+function updateHeaderStats() {
+  const f = getFiltered();
+  document.getElementById("totalStores").textContent = f.length;
+  document.getElementById("totalChains").textContent = new Set(f.map(s => s.chain)).size;
+  document.getElementById("openNow").textContent = f.filter(s => isOpen(s.hours)).length;
+}
+
+// ─── 모바일 시트 토글 ─────────────────────────────────────────────────────
+function toggleSheet() {
+  if (window.innerWidth > 768) return;
+  const sb = document.getElementById("sidebar");
+  sb.classList.toggle("sheet-open");
+  // 검색창 클릭 시 열릴 때 포커스 이동 방지
+  if (!sb.classList.contains("sheet-open")) document.activeElement?.blur();
+}
+// 지도 클릭 시 시트 닫기
+map.on("click", () => {
+  if (window.innerWidth <= 768)
+    document.getElementById("sidebar").classList.remove("sheet-open");
+});
+
+// ─── 검색 ─────────────────────────────────────────────────────────────────
+document.getElementById("searchInput").addEventListener("input", () => refresh());
+// 검색창 직접 입력 시 시트 열기 (모바일)
+document.getElementById("searchInput").addEventListener("focus", () => {
+  if (window.innerWidth <= 768)
+    document.getElementById("sidebar").classList.add("sheet-open");
+});
+
+// ─── 초기화 ───────────────────────────────────────────────────────────────
+refresh();
+</script>
+</body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teo Hub</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #ffffff;
+  --sidebar-bg: #f7f7f5;
+  --border: rgba(0,0,0,0.08);
+  --text: rgba(0,0,0,0.87);
+  --text-secondary: rgba(0,0,0,0.45);
+  --text-tertiary: rgba(0,0,0,0.28);
+  --hover-bg: rgba(0,0,0,0.04);
+  --active-bg: rgba(0,0,0,0.06);
+  --accent: #2563eb;
+}
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  height: 100%;
+}
+
+/* ── Sidebar ── */
+.sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 2px; }
+
+.sidebar-header {
+  padding: 16px 14px 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar-logo {
+  width: 26px; height: 26px;
+  background: #4f87ff;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 900; color: white;
+  flex-shrink: 0;
+}
+.sidebar-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+
+.sidebar-section {
+  padding: 20px 8px 4px;
+}
+.sidebar-section-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  padding: 0 8px 6px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 14px;
+  transition: background 0.12s;
+  line-height: 1.4;
+}
+.nav-item:hover {
+  background: var(--hover-bg);
+}
+.nav-item.active {
+  background: var(--active-bg);
+  color: var(--text);
+}
+.nav-icon {
+  font-size: 15px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+.nav-label { flex: 1; }
+.nav-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* ── Main ── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.page {
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 80px 64px 120px;
+}
+
+/* Page header */
+.page-icon { font-size: 52px; margin-bottom: 16px; display: block; }
+.page-title {
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.8px;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.page-desc {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 40px;
+  max-width: 560px;
+}
+.page-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+
+/* Section block */
+.block-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}
+
+/* Service cards — Notion-style rows */
+.service-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 48px;
+}
+.service-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text);
+  border: 1px solid transparent;
+  transition: background 0.12s, border-color 0.12s;
+}
+.service-row:hover {
+  background: var(--hover-bg);
+  border-color: var(--border);
+}
+.row-arrow {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+.service-row-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.service-row-body { flex: 1; min-width: 0; }
+.service-row-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.service-row-url {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+}
+.service-row-tags {
+  display: flex; gap: 5px; flex-shrink: 0; margin-left: auto;
+}
+.stag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+.stag-blue   { background: #eff6ff;  color: #2563eb;  border-color: #bfdbfe; }
+.stag-green  { background: #f0fdf4;  color: #16a34a;  border-color: #bbf7d0; }
+.stag-yellow { background: #fffbeb;  color: #d97706;  border-color: #fde68a; }
+.stag-red    { background: #fff1f2;  color: #e11d48;  border-color: #fecdd3; }
+.stag-purple { background: #faf5ff;  color: #7c3aed;  border-color: #ddd6fe; }
+
+/* Icon color variants */
+.ic-blue   { background: #eff6ff; }
+.ic-green  { background: #f0fdf4; }
+.ic-red    { background: #fff1f2; }
+
+/* Info block */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 48px;
+}
+.info-cell {
+  background: #fafafa;
+  padding: 16px 20px;
+}
+.info-cell-label { font-size: 11px; color: var(--text-tertiary); margin-bottom: 4px; }
+.info-cell-value { font-size: 20px; font-weight: 700; color: var(--text); }
+
+/* Mobile */
+@media (max-width: 800px) {
+  .sidebar { display: none; }
+  .page { padding: 40px 24px 80px; }
+  .page-title { font-size: 28px; }
+  .service-row-tags { display: none; }
+  .info-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">T</div>
+    <span class="sidebar-title">Teo Hub</span>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">수입 분석</div>
+    <a class="nav-item" href="https://samsung-mn.netlify.app" target="_blank">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">삼성 수입 대시보드</span>
+    </a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">리테일</div>
+    <a class="nav-item" href="https://emart-mn.netlify.app" target="_blank">
+      <span class="nav-icon">🛒</span>
+      <span class="nav-label">이마트몰 특가 카탈로그</span>
+    </a>
+    <a class="nav-item" href="https://retail-mn.netlify.app" target="_blank">
+      <span class="nav-icon">🗺️</span>
+      <span class="nav-label">리테일 점포 현황</span>
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    🇲🇳 Mongolia · 2025
+  </div>
+</nav>
+
+<!-- ── Main ── -->
+<main class="main">
+  <div class="page">
+
+    <span class="page-icon">🇲🇳</span>
+    <h1 class="page-title">Teo Hub</h1>
+    <p class="page-desc">몽골 시장 데이터를 한 곳에서 — 수입 통계, 리테일 점포 현황, 가전제품 가격 분석을 대시보드로 제공합니다.</p>
+
+    <div class="info-grid">
+      <div class="info-cell">
+        <div class="info-cell-label">대시보드</div>
+        <div class="info-cell-value">3개</div>
+      </div>
+      <div class="info-cell">
+        <div class="info-cell-label">지역</div>
+        <div class="info-cell-value">Mongolia</div>
+      </div>
+      <div class="info-cell">
+        <div class="info-cell-label">데이터 기준</div>
+        <div class="info-cell-value">2025</div>
+      </div>
+    </div>
+
+    <hr class="page-divider">
+
+    <div class="block-label">수입 분석</div>
+    <div class="service-list">
+      <a class="service-row" href="https://samsung-mn.netlify.app" target="_blank">
+        <div class="service-row-icon ic-blue">📊</div>
+        <div class="service-row-body">
+          <div class="service-row-title">삼성전자 몽골 수입 대시보드</div>
+          <div class="service-row-url">samsung-mn.netlify.app</div>
+        </div>
+        <div class="service-row-tags">
+          <span class="stag stag-blue">수입 통계</span>
+          <span class="stag stag-green">차트</span>
+          <span class="stag stag-yellow">가격 분석</span>
+        </div>
+        <span class="row-arrow">↗</span>
+      </a>
+    </div>
+
+    <div class="block-label">리테일</div>
+    <div class="service-list">
+      <a class="service-row" href="https://emart-mn.netlify.app" target="_blank">
+        <div class="service-row-icon ic-green">🛒</div>
+        <div class="service-row-body">
+          <div class="service-row-title">이마트몰 몽골 삼성 특가 카탈로그</div>
+          <div class="service-row-url">emart-mn.netlify.app</div>
+        </div>
+        <div class="service-row-tags">
+          <span class="stag stag-blue">가전제품</span>
+          <span class="stag stag-yellow">특가</span>
+          <span class="stag stag-purple">₮ · ₩</span>
+        </div>
+        <span class="row-arrow">↗</span>
+      </a>
+      <a class="service-row" href="https://retail-mn.netlify.app" target="_blank">
+        <div class="service-row-icon ic-red">🗺️</div>
+        <div class="service-row-body">
+          <div class="service-row-title">몽골 리테일 체인 점포 현황</div>
+          <div class="service-row-url">retail-mn.netlify.app</div>
+        </div>
+        <div class="service-row-tags">
+          <span class="stag stag-red">점포 지도</span>
+          <span class="stag stag-green">리테일</span>
+        </div>
+        <span class="row-arrow">↗</span>
+      </a>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>

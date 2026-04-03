@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>삼성전자 몽골 수입 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e0e0e0; }
+
+  .header {
+    background: linear-gradient(135deg, #1a1f35 0%, #0d1526 100%);
+    padding: 24px 32px;
+    border-bottom: 1px solid #1e3a5f;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .header-logo {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, #1428A0 0%, #0056d6 100%);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 900; color: white;
+  }
+  .header-text h1 { font-size: 22px; font-weight: 700; color: #fff; }
+  .header-text p { font-size: 13px; color: #7a9cbf; margin-top: 3px; }
+
+  /* Loading overlay */
+  #loading {
+    position: fixed; inset: 0; background: #0f1117;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 999; gap: 16px;
+  }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 4px solid #1e2d40;
+    border-top-color: #1428A0;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading p { color: #7a9cbf; font-size: 14px; }
+
+  .filters {
+    background: #141824;
+    padding: 12px 32px;
+    border-bottom: 1px solid #1e2d40;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .filter-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-group label { font-size: 11px; color: #7a9cbf; text-transform: uppercase; letter-spacing: 0.5px; }
+  .filter-group select {
+    background: #1e2d40; border: 1px solid #2a3f58; color: #e0e0e0;
+    padding: 8px 12px; border-radius: 7px; font-size: 13px; cursor: pointer;
+    min-width: 160px;
+  }
+  .filter-group select:focus { outline: none; border-color: #1428A0; }
+  .reset-btn {
+    background: #1428A0; color: white; border: none;
+    padding: 9px 20px; border-radius: 7px; font-size: 13px;
+    cursor: pointer; transition: background 0.2s; font-weight: 600;
+  }
+  .reset-btn:hover { background: #0d1e80; }
+
+  .main { padding: 24px 32px; }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px; margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: #141824;
+    border: 1px solid #1e2d40;
+    border-radius: 12px; padding: 20px 20px 18px;
+    position: relative; overflow: hidden;
+  }
+  .kpi-card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%;
+  }
+  .kpi-card.blue::before  { background: #1428A0; }
+  .kpi-card.green::before { background: #10b981; }
+  .kpi-card.red::before   { background: #ef4444; }
+  .kpi-card.yellow::before{ background: #f59e0b; }
+  .kpi-card.purple::before{ background: #8b5cf6; }
+  .kpi-card.cyan::before  { background: #06b6d4; }
+  .kpi-icon  { font-size: 22px; margin-bottom: 8px; }
+  .kpi-label { font-size: 11px; color: #7a9cbf; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .kpi-value { font-size: 26px; font-weight: 700; color: #fff; line-height: 1; }
+  .kpi-sub   { font-size: 11px; color: #4a6580; margin-top: 5px; }
+
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-bottom: 24px;
+  }
+  .chart-card {
+    background: #141824;
+    border: 1px solid #1e2d40;
+    border-radius: 12px; padding: 20px;
+  }
+  .chart-title { font-size: 14px; font-weight: 600; color: #c0d0e0; margin-bottom: 16px; }
+  .chart-wrap  { position: relative; height: 270px; }
+
+  .table-card {
+    background: #141824;
+    border: 1px solid #1e2d40;
+    border-radius: 12px; padding: 20px;
+    margin-bottom: 24px;
+  }
+  .table-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;
+  }
+  .table-count { font-size: 12px; color: #4a6580; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    background: #0f1117; color: #7a9cbf;
+    padding: 10px 12px; text-align: left;
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid #1e2d40;
+  }
+  tbody tr { border-bottom: 1px solid #1a2435; transition: background 0.1s; }
+  tbody tr:hover { background: #1e2d40; }
+  tbody td { padding: 10px 12px; color: #c0d0e0; }
+  .badge {
+    display: inline-block;
+    padding: 3px 9px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-blue  { background: #1428A018; color: #5a9fdd; border: 1px solid #1428A035; }
+  .badge-green { background: #10b98118; color: #10b981; border: 1px solid #10b98135; }
+  .table-scroll { max-height: 440px; overflow-y: auto; }
+  .table-scroll::-webkit-scrollbar { width: 6px; }
+  .table-scroll::-webkit-scrollbar-track { background: #0f1117; }
+  .table-scroll::-webkit-scrollbar-thumb { background: #2a3f58; border-radius: 3px; }
+
+  .pagination {
+    display: flex; gap: 6px; align-items: center;
+    margin-top: 14px; justify-content: center; flex-wrap: wrap;
+  }
+  .page-btn {
+    background: #1e2d40; border: 1px solid #2a3f58; color: #c0d0e0;
+    padding: 5px 11px; border-radius: 6px; cursor: pointer; font-size: 12px;
+    transition: all 0.15s;
+  }
+  .page-btn:hover   { background: #2a3f58; }
+  .page-btn.active  { background: #1428A0; border-color: #1428A0; color: white; }
+  .page-btn:disabled{ opacity: 0.4; cursor: not-allowed; }
+  .page-info { font-size: 11px; color: #4a6580; margin-left: 8px; }
+
+  @media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 900px) {
+    .charts-grid { grid-template-columns: 1fr; }
+    .kpi-grid    { grid-template-columns: repeat(2, 1fr); }
+    .main        { padding: 16px; }
+    .filters     { padding: 12px 16px; }
+    .col-exporter { display: none; }
+  }
+  .col-name     { max-width: 110px; width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .col-exporter { max-width: 110px; width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p>데이터 로딩 중...</p>
+</div>
+
+<div class="header">
+  <a href="../" style="display:flex;align-items:center;gap:6px;color:#7a9cbf;text-decoration:none;font-size:12px;margin-right:12px;padding:6px 12px;border:1px solid #2a3f58;border-radius:7px;transition:all 0.15s;" onmouseover="this.style.background='#1e2d40'" onmouseout="this.style.background='transparent'">&#8592; 허브</a>
+  <div class="header-logo">S</div>
+  <div class="header-text">
+    <h1>삼성전자 몽골 수입 대시보드</h1>
+    <p>Samsung Electronics Mongolia Import Analysis &middot; 2025</p>
+  </div>
+</div>
+
+<div class="filters">
+  <div class="filter-row">
+    <div class="filter-group">
+      <label>카테고리</label>
+      <select id="f-category" onchange="applyFilters()"><option value="">전체</option></select>
+    </div>
+    <div class="filter-group">
+      <label>월</label>
+      <select id="f-month" onchange="applyFilters()"><option value="">전체</option></select>
+    </div>
+    <button class="reset-btn" onclick="resetFilters()">&#8634; 초기화</button>
+  </div>
+  <div class="filter-row">
+    <div class="filter-group">
+      <label>수입회사 (Importer)</label>
+      <select id="f-importer" onchange="applyFilters()"><option value="">전체</option></select>
+    </div>
+    <div class="filter-group">
+      <label>수출국가 (Export Country)</label>
+      <select id="f-country" onchange="applyFilters()"><option value="">전체</option></select>
+    </div>
+    <div class="filter-group">
+      <label>수출회사 (Exporter)</label>
+      <select id="f-exporter" onchange="applyFilters()"><option value="">전체</option></select>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="kpi-grid">
+    <div class="kpi-card blue">
+      <div class="kpi-icon">📦</div>
+      <div class="kpi-label">전체 물량</div>
+      <div class="kpi-value" id="kpi-units">-</div>
+      <div class="kpi-sub">총 수입 수량 (units)</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-icon">💵</div>
+      <div class="kpi-label">평균 단가</div>
+      <div class="kpi-value" id="kpi-avg">-</div>
+      <div class="kpi-sub">Average Unit Price (USD)</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-icon">🔽</div>
+      <div class="kpi-label">최저가</div>
+      <div class="kpi-value" id="kpi-min">-</div>
+      <div class="kpi-sub">Minimum Price (USD)</div>
+    </div>
+    <div class="kpi-card yellow">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-label">중간값</div>
+      <div class="kpi-value" id="kpi-median">-</div>
+      <div class="kpi-sub">Median Price (USD)</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-icon">🔼</div>
+      <div class="kpi-label">최고가</div>
+      <div class="kpi-value" id="kpi-max">-</div>
+      <div class="kpi-sub">Maximum Price (USD)</div>
+    </div>
+    <div class="kpi-card cyan">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">총 매출</div>
+      <div class="kpi-value" id="kpi-revenue">-</div>
+      <div class="kpi-sub">Total Revenue (USD)</div>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">🌍 수출국가별 물량</div>
+      <div class="chart-wrap"><canvas id="chart-country"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📱 카테고리별 물량</div>
+      <div class="chart-wrap"><canvas id="chart-category"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">🏢 수입회사별 총 거래금액 (USD)</div>
+      <div class="chart-wrap"><canvas id="chart-importer"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">📅 월별 수입 물량 추이</div>
+      <div class="chart-wrap"><canvas id="chart-monthly"></canvas></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <div class="chart-title" style="margin:0">📋 거래 상세 내역</div>
+      <div class="table-count" id="tbl-count"></div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-name">수입회사</th>
+            <th>년-월</th>
+            <th>카테고리</th>
+            <th>수출국가</th>
+            <th class="col-exporter">수출회사</th>
+            <th style="text-align:right">물량</th>
+            <th style="text-align:right">단가 (USD)</th>
+            <th style="text-align:right">총액 (USD)</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<script>
+let RAW = [];
+let filtered = [];
+let currentPage = 1;
+const PAGE_SIZE = 50;
+let charts = {};
+
+const COLORS = ['#1428A0','#10b981','#f59e0b','#ef4444','#8b5cf6',
+                '#06b6d4','#ec4899','#84cc16','#f97316','#14b8a6','#6366f1','#e11d48'];
+
+function fmt(n, decimals) {
+  decimals = decimals === undefined ? 0 : decimals;
+  if (n === null || n === undefined || isNaN(n)) return '-';
+  return n.toLocaleString('en-US', {minimumFractionDigits: decimals, maximumFractionDigits: decimals});
+}
+
+function median(arr) {
+  if (!arr.length) return 0;
+  const sorted = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+function populateSelects() {
+  const fields = [
+    { id: 'f-importer', key: 'importer' },
+    { id: 'f-country',  key: 'export_country' },
+    { id: 'f-exporter', key: 'exporter' },
+    { id: 'f-category', key: 'category' },
+    { id: 'f-month',    key: 'month' },
+  ];
+  fields.forEach(({ id, key }) => {
+    const sel = document.getElementById(id);
+    const vals = [...new Set(RAW.map(d => d[key]).filter(Boolean))].sort((a, b) =>
+      typeof a === 'number' ? a - b : String(a).localeCompare(String(b))
+    );
+    vals.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = key === 'month' ? v + '월' : v;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+function applyFilters() {
+  const importer = document.getElementById('f-importer').value;
+  const country  = document.getElementById('f-country').value;
+  const exporter = document.getElementById('f-exporter').value;
+  const category = document.getElementById('f-category').value;
+  const month    = document.getElementById('f-month').value;
+
+  filtered = RAW.filter(d =>
+    (!importer || d.importer === importer) &&
+    (!country  || d.export_country === country) &&
+    (!exporter || d.exporter === exporter) &&
+    (!category || d.category === category) &&
+    (!month    || String(d.month) === String(month))
+  );
+
+  currentPage = 1;
+  updateKPIs();
+  updateCharts();
+  updateTable();
+}
+
+function resetFilters() {
+  ['f-importer','f-country','f-exporter','f-category','f-month']
+    .forEach(id => { document.getElementById(id).value = ''; });
+  applyFilters();
+}
+
+function updateKPIs() {
+  const units  = filtered.reduce((s, d) => s + (d.unit || 0), 0);
+  const prices = filtered.map(d => d.unit_price).filter(p => p > 0);
+  const avg    = prices.length ? prices.reduce((a, b) => a + b, 0) / prices.length : 0;
+  const mn     = prices.length ? Math.min(...prices) : 0;
+  const mx     = prices.length ? Math.max(...prices) : 0;
+  const med     = median(prices);
+  const revenue = filtered.reduce((s, d) => s + (d.total_amount || 0), 0);
+
+  document.getElementById('kpi-units').textContent   = fmt(units);
+  document.getElementById('kpi-avg').textContent     = '$' + fmt(avg, 2);
+  document.getElementById('kpi-min').textContent     = '$' + fmt(mn, 2);
+  document.getElementById('kpi-median').textContent  = '$' + fmt(med, 2);
+  document.getElementById('kpi-max').textContent     = '$' + fmt(mx, 2);
+  document.getElementById('kpi-revenue').textContent = '$' + fmt(revenue, 0);
+}
+
+function makeChart(id, type, labels, data, opts) {
+  opts = opts || {};
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id).getContext('2d');
+  const lineExtra = type === 'line' ? {
+    borderColor: '#1428A0',
+    backgroundColor: 'rgba(20,40,160,0.12)',
+    fill: true, tension: 0.4,
+    pointBackgroundColor: '#1428A0', pointRadius: 4,
+  } : {};
+  charts[id] = new Chart(ctx, {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: type === 'line' ? 'rgba(20,40,160,0.12)' : COLORS.slice(0, labels.length),
+        borderWidth: 0,
+        ...lineExtra,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: type === 'doughnut' || type === 'pie',
+          labels: { color: '#7a9cbf', font: { size: 11 }, boxWidth: 12, padding: 10 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => opts.currency ? ' $' + fmt(ctx.raw, 0) : ' ' + fmt(ctx.raw, 0)
+          }
+        }
+      },
+      scales: (type === 'bar' || type === 'line') ? {
+        x: { ticks: { color: '#4a6580', font: { size: 11 }, maxRotation: 35 }, grid: { color: '#1a2435' } },
+        y: {
+          ticks: { color: '#4a6580', font: { size: 11 }, callback: v => opts.currency ? '$' + fmt(v) : fmt(v) },
+          grid: { color: '#1a2435' }
+        }
+      } : undefined
+    }
+  });
+}
+
+function updateCharts() {
+  // Country donut
+  const cMap = {};
+  filtered.forEach(d => { cMap[d.export_country] = (cMap[d.export_country] || 0) + d.unit; });
+  const cS = Object.entries(cMap).sort((a, b) => b[1] - a[1]);
+  makeChart('chart-country', 'doughnut', cS.map(e => e[0]), cS.map(e => e[1]));
+
+  // Category bar
+  const catMap = {};
+  filtered.forEach(d => { catMap[d.category] = (catMap[d.category] || 0) + d.unit; });
+  const catS = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+  makeChart('chart-category', 'bar', catS.map(e => e[0]), catS.map(e => e[1]));
+
+  // Importer bar (top 10 by total amount)
+  const impMap = {};
+  filtered.forEach(d => { impMap[d.importer] = (impMap[d.importer] || 0) + d.total_amount; });
+  const impS = Object.entries(impMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  makeChart('chart-importer', 'bar', impS.map(e => e[0]), impS.map(e => e[1]), { currency: true });
+
+  // Monthly line
+  const mMap = {};
+  for (let m = 1; m <= 12; m++) mMap[m] = 0;
+  filtered.forEach(d => { if (d.month) mMap[d.month] = (mMap[d.month] || 0) + d.unit; });
+  const mKeys = Object.keys(mMap).sort((a, b) => a - b);
+  makeChart('chart-monthly', 'line', mKeys.map(m => m + '월'), mKeys.map(m => mMap[m]));
+}
+
+function updateTable() {
+  const tbody = document.getElementById('tbl-body');
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageData = filtered.slice(start, start + PAGE_SIZE);
+
+  document.getElementById('tbl-count').textContent = fmt(total) + '건';
+
+  tbody.innerHTML = pageData.map(d => {
+    const exp = d.exporter || '';
+    const shortExp = exp.length > 15 ? exp.substring(0, 15) + '…' : exp;
+    return `<tr>
+      <td class="col-name"><span class="badge badge-blue">${d.importer || ''}</span></td>
+      <td>${d.year}-${String(d.month).padStart(2, '0')}</td>
+      <td>${d.category || ''}</td>
+      <td><span class="badge badge-green">${d.export_country || ''}</span></td>
+      <td class="col-exporter" title="${exp.replace(/"/g, '&quot;')}">${shortExp}</td>
+      <td style="text-align:right">${fmt(d.unit)}</td>
+      <td style="text-align:right">$${fmt(d.unit_price, 2)}</td>
+      <td style="text-align:right">$${fmt(d.total_amount, 0)}</td>
+    </tr>`;
+  }).join('');
+
+  // Pagination
+  const pg = document.getElementById('pagination');
+  if (totalPages <= 1) { pg.innerHTML = ''; return; }
+
+  let html = `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&#8249;</button>`;
+  const range = [];
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) range.push(i);
+  } else {
+    range.push(1);
+    if (currentPage > 3) range.push('...');
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) range.push(i);
+    if (currentPage < totalPages - 2) range.push('...');
+    range.push(totalPages);
+  }
+  range.forEach(p => {
+    if (p === '...') html += `<span class="page-info">...</span>`;
+    else html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goPage(${p})">${p}</button>`;
+  });
+  html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>&#8250;</button>`;
+  html += `<span class="page-info">${fmt(total)}건 중 ${start + 1}~${Math.min(start + PAGE_SIZE, total)}</span>`;
+  pg.innerHTML = html;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  updateTable();
+}
+
+// Boot: fetch data then initialize
+fetch('./data/samsung.json')
+  .then(res => {
+    if (!res.ok) throw new Error('Failed to load data: ' + res.status);
+    return res.json();
+  })
+  .then(data => {
+    RAW = data;
+    filtered = [...RAW];
+    populateSelects();
+    applyFilters();
+    document.getElementById('loading').style.display = 'none';
+  })
+  .catch(err => {
+    document.getElementById('loading').innerHTML =
+      '<p style="color:#ef4444">데이터 로드 실패: ' + err.message + '</p>';
+  });
+</script>
+</body>
+</html>
