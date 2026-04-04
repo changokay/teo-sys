@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samsung Electronics — 제품 카탈로그</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --blue:#1428A0; --blue2:#2253d4; --blue-pale:#e8edf9;
+  --bg:#f4f5f8; --white:#fff; --text:#1a1a1a;
+  --text2:#555; --text3:#999; --border:#e5e7eb;
+  --sh:0 8px 30px rgba(20,40,160,.14); --r:14px;
+}
+body { font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif; background:var(--bg); color:var(--text); }
+
+/* HEADER */
+.hdr { background:var(--blue); padding:0 36px; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(20,40,160,.35); }
+.hdr-in { max-width:1360px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:60px; }
+.logo { font-size:20px; font-weight:800; letter-spacing:.5px; color:#fff; text-decoration:none; display:flex; align-items:center; gap:10px; }
+.logo-sub { font-size:12px; font-weight:400; opacity:.7; border-left:1px solid rgba(255,255,255,.3); padding-left:10px; }
+.srch { display:flex; align-items:center; gap:8px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.3); border-radius:22px; padding:7px 18px; min-width:260px; transition:.2s; }
+.srch:focus-within { background:rgba(255,255,255,.25); }
+.srch input { background:none; border:none; outline:none; color:#fff; font-size:13px; width:100%; }
+.srch input::placeholder { color:rgba(255,255,255,.55); }
+
+/* TABS */
+.tabs { background:#fff; border-bottom:1px solid var(--border); }
+.tabs-in { max-width:1360px; margin:0 auto; padding:0 36px; display:flex; }
+.tab { padding:15px 28px; font-size:14px; font-weight:600; border:none; background:none; cursor:pointer; color:var(--text3); border-bottom:3px solid transparent; transition:.2s; }
+.tab:hover { color:var(--blue); }
+.tab.on { color:var(--blue); border-bottom-color:var(--blue); }
+.tab .cnt { display:inline-block; background:var(--blue-pale); color:var(--blue); font-size:10px; font-weight:700; padding:1px 6px; border-radius:9px; margin-left:5px; }
+.tab.on .cnt { background:var(--blue); color:#fff; }
+
+/* LAYOUT */
+.main { max-width:1360px; margin:0 auto; padding:28px 36px; display:flex; gap:24px; align-items:flex-start; }
+
+/* SIDEBAR */
+.sidebar { width:200px; flex-shrink:0; position:sticky; top:80px; }
+.sb-title { font-size:10px; font-weight:700; color:var(--text3); letter-spacing:1.2px; text-transform:uppercase; margin-bottom:10px; padding-left:4px; }
+.sb-btn { display:flex; align-items:center; gap:8px; width:100%; padding:9px 12px; border:none; background:none; cursor:pointer; border-radius:9px; font-size:13px; color:var(--text2); transition:.15s; text-align:left; margin-bottom:2px; }
+.sb-btn:hover { background:var(--blue-pale); color:var(--blue); }
+.sb-btn.on { background:var(--blue); color:#fff; font-weight:700; }
+.sb-btn .ico { font-size:16px; width:22px; text-align:center; flex-shrink:0; }
+.sb-btn .n { margin-left:auto; font-size:10px; opacity:.65; background:rgba(0,0,0,.07); padding:1px 6px; border-radius:7px; }
+.sb-btn.on .n { background:rgba(255,255,255,.25); opacity:1; }
+
+/* PRODUCT AREA */
+.prod-area { flex:1; min-width:0; }
+.area-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+.area-title { font-size:18px; font-weight:700; }
+.area-title em { color:var(--blue); font-style:normal; }
+.area-count { font-size:12px; color:var(--text3); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px; }
+
+/* CARD */
+.card { background:var(--white); border-radius:var(--r); border:1px solid var(--border); overflow:hidden; cursor:pointer; transition:.22s; }
+.card:hover { transform:translateY(-4px); box-shadow:var(--sh); border-color:#c5d0f0; }
+
+/* CARD THUMB */
+.ct { background:linear-gradient(135deg,#f5f7ff,#eaedff); height:175px; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.ct img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:14px; opacity:0; transition:opacity .3s; }
+.ct img.ok { opacity:1; }
+.ct .fi { font-size:60px; position:relative; z-index:0; transition:opacity .3s; }
+.ct.img-ok .fi { opacity:0; }
+
+.bdg { position:absolute; top:10px; left:10px; font-size:9px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; padding:2px 8px; border-radius:20px; z-index:2; }
+.b-new{background:#e63;color:#fff} .b-best{background:var(--blue);color:#fff}
+.b-ai{background:#7c3aed;color:#fff} .b-bespoke{background:#0a9669;color:#fff} .b-pro{background:#d97706;color:#fff}
+
+.cb { padding:14px 16px; }
+.cc { font-size:10px; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:.7px; margin-bottom:4px; }
+.cn { font-size:14px; font-weight:700; margin-bottom:5px; line-height:1.35; }
+.cp { font-size:16px; font-weight:800; color:var(--blue); margin-bottom:5px; }
+.cp .pn { font-size:10px; font-weight:400; color:var(--text3); margin-left:4px; }
+.cd { font-size:11px; color:var(--text3); line-height:1.5; margin-bottom:10px; }
+.ctg { display:flex; flex-wrap:wrap; gap:4px; }
+.tg { font-size:9px; font-weight:600; padding:2px 7px; border-radius:5px; background:var(--blue-pale); color:var(--blue); }
+
+/* EMPTY */
+.empty { grid-column:1/-1; text-align:center; padding:80px 0; color:var(--text3); }
+.empty .eico { font-size:40px; margin-bottom:12px; }
+
+/* MODAL */
+.ov { position:fixed; inset:0; background:rgba(0,0,0,.48); z-index:200; display:flex; align-items:center; justify-content:center; padding:16px; opacity:0; pointer-events:none; transition:.18s; }
+.ov.on { opacity:1; pointer-events:all; }
+.modal { background:#fff; border-radius:20px; max-width:500px; width:100%; max-height:88vh; overflow-y:auto; transform:translateY(18px); transition:.18s; }
+.ov.on .modal { transform:none; }
+.mt { height:220px; position:relative; background:linear-gradient(135deg,#f0f2ff,#e0e6ff); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.mt img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; padding:20px; opacity:0; transition:opacity .3s; z-index:1; }
+.mt img.ok { opacity:1; }
+.mt .mi { font-size:88px; }
+.mt.img-ok .mi { opacity:0; }
+.mc { position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:50%; background:rgba(0,0,0,.15); border:none; cursor:pointer; font-size:16px; color:#fff; display:flex; align-items:center; justify-content:center; z-index:3; }
+.mc:hover { background:rgba(0,0,0,.3); }
+.mb { padding:24px; }
+.mcat { font-size:11px; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:.8px; margin-bottom:6px; }
+.mname { font-size:20px; font-weight:800; margin-bottom:6px; }
+.mprice { font-size:22px; font-weight:800; color:var(--blue); margin-bottom:4px; }
+.mpnote { font-size:11px; color:var(--text3); margin-bottom:14px; }
+.mdesc { font-size:13px; color:var(--text2); line-height:1.7; margin-bottom:18px; }
+.mst { font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.8px; margin-bottom:8px; }
+.sr { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.sr:last-child { border:none; }
+.sk { color:var(--text3); }
+.sv { font-weight:700; color:var(--text); text-align:right; max-width:60%; }
+.mtg { display:flex; flex-wrap:wrap; gap:5px; margin:16px 0 20px; }
+.mt2 { font-size:11px; font-weight:600; padding:4px 10px; border-radius:6px; background:var(--blue-pale); color:var(--blue); }
+.mbtn { display:block; width:100%; padding:13px; background:var(--blue); color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:700; cursor:pointer; }
+.mbtn:hover { background:var(--blue2); }
+
+@media(max-width:900px){ .sidebar{display:none;} .main{padding:20px 16px;} .hdr{padding:0 16px;} .tabs-in{padding:0 16px;} }
+@media(max-width:480px){ .grid{grid-template-columns:repeat(2,1fr); gap:12px;} }
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-in">
+    <a class="logo" href="#">SAMSUNG <span class="logo-sub">제품 카탈로그</span></a>
+    <div class="srch"><span>🔍</span><input id="q" type="text" placeholder="제품명·카테고리 검색..." autocomplete="off"></div>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tabs-in">
+    <button class="tab on" data-seg="b2c" onclick="setSeg('b2c')">B2C — 소비자 제품 <span class="cnt" id="cnt-b2c">0</span></button>
+    <button class="tab" data-seg="b2b" onclick="setSeg('b2b')">B2B — 기업 솔루션 <span class="cnt" id="cnt-b2b">0</span></button>
+  </div>
+</div>
+
+<div class="main">
+  <aside class="sidebar"><div class="sb-title">카테고리</div><div id="sb"></div></aside>
+  <section class="prod-area">
+    <div class="area-hdr"><h2 class="area-title" id="atitle"></h2><span class="area-count" id="acount"></span></div>
+    <div class="grid" id="grid"></div>
+  </section>
+</div>
+
+<div class="ov" id="ov" onclick="closeOv(event)">
+  <div class="modal">
+    <div class="mt" id="mthumb"></div>
+    <div class="mb">
+      <div class="mcat" id="mcat"></div>
+      <div class="mname" id="mname"></div>
+      <div class="mprice" id="mprice"></div>
+      <div class="mpnote" id="mpnote"></div>
+      <div class="mdesc" id="mdesc"></div>
+      <div class="mst">주요 사양</div>
+      <div id="mspecs"></div>
+      <div class="mtg" id="mtags"></div>
+      <button class="mbtn" onclick="closeModal()">확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 삼성 공식 CDN (실제 확인된 URL) ──
+const I = {
+  // 스마트폰 / 폴더블
+  s26u:  'https://images.samsung.com/is/image/samsung/p6pim/us/s2602/gallery/us-galaxy-s26-ultra-s948-sm-s948uzvaxaa-550993934?$PD_GALLERY_PNG$',
+  zfold7:'https://images.samsung.com/is/image/samsung/p6pim/us/f2507/gallery/us-galaxy-z-fold7-f966-sm-f966ulgaxaa-547827981?$PD_GALLERY_PNG$',
+  zflip7:'https://images.samsung.com/is/image/samsung/p6pim/us/f2507/gallery/us-galaxy-zflip7-f766-sm-f766ulgaxaa-547891061?$PD_GALLERY_PNG$',
+  // TV
+  nqled8k:'https://images.samsung.com/is/image/samsung/p6pim/us/qn85qn990ffxza/gallery/us-qled-qn990f-qn85qn990ffxza-545961372?$PD_GALLERY_PNG$',
+  nqled4k:'https://images.samsung.com/is/image/samsung/p6pim/us/qn85qn90fafxza/gallery/us-qled-qn90f-qn85qn90fafxza-550561148?$PD_GALLERY_PNG$',
+  nqled80:'https://images.samsung.com/is/image/samsung/p6pim/us/qn55qn80hafxza/gallery/us-qled-qn80h-qn55qn80hafxza-551344356?$PD_GALLERY_PNG$',
+  oled95: 'https://images.samsung.com/is/image/samsung/p6pim/us/qn77s95fafxza/gallery/us-oled-s95f-qn77s95fafxza-545388111?$PD_GALLERY_PNG$',
+  oled90: 'https://images.samsung.com/is/image/samsung/p6pim/us/qn65s90fafxza/gallery/us-oled-tv-qn65s90fafxza-front-black-545670802?$PD_GALLERY_PNG$',
+  frame:  'https://images.samsung.com/is/image/samsung/p6pim/us/qn65ls03fafxza/gallery/us-the-frame-ls03f-qn65ls03fafxza-546242585?$PD_GALLERY_PNG$',
+  // 냉장고 / 세탁기 / 건조기
+  fridge4:'https://images.samsung.com/is/image/samsung/p6pim/us/rf29db9900qdaa/gallery/us-french-door-rf29db9900qdaa-bespoke-ai---door-flex--stainless-steel-551068510?$PD_GALLERY_PNG$',
+  fridge2:'https://images.samsung.com/is/image/samsung/p6pim/us/rf90f29aecraa/gallery/us-french-door-rf90f29aecraa-bespoke-ai---door-french-door-charcoal-glass-stainless-steel-551059747?$PD_GALLERY_PNG$',
+  washer: 'https://images.samsung.com/is/image/samsung/p6pim/us/wf90f53adsa5/gallery/us-wf90f27-567782-wf90f53adsa5-549516613?$PD_GALLERY_PNG$',
+  dryer:  'https://images.samsung.com/is/image/samsung/p6pim/us/wd53dba900hza1/gallery/us-wd8000dk-wd53dba900hza1-550099545?$PD_GALLERY_PNG$',
+  // PC / 태블릿
+  book6u: 'https://images.samsung.com/is/image/samsung/p6pim/us/np960ujh-xg2us/gallery/us-galaxy-book6-ultra-16-inch-np960ujhe-np960ujh-xg2us-551616194?$PD_GALLERY_PNG$',
+  book6p16:'https://images.samsung.com/is/image/samsung/p6pim/us/np960xjg-ka1us/gallery/us-galaxy-book6-pro-16-inch-np960xjge-np960xjg-ka1us-551616548?$PD_GALLERY_PNG$',
+  book6p14:'https://images.samsung.com/is/image/samsung/p6pim/us/np940xjg-kg1us/gallery/us-galaxy-book6-pro-16-inch-np960xjge-np940xjg-kg1us-551616801?$PD_GALLERY_PNG$',
+  book5360:'https://images.samsung.com/is/image/samsung/p6pim/us/np960qha-kg1us/gallery/us-galaxy-book5-pro-360-16-inch-np960-np960qha-kg1us-551307462?$PD_GALLERY_PNG$',
+  book5p: 'https://stg-images.samsung.com/is/content/samsung/p6pim/us/np960xha-kg3us/gallery/us-galaxy-book5-pro-14-inch-np940-578328-np960xha-kg3us-551312395.webp',
+  book5:  'https://stg-images.samsung.com/is/image/samsung/p6pim/us/np750xhd-kb1us/gallery/us-galaxy-book5-15-inch-np750-np750xhd-kb1us-550736219?$PD_GALLERY_PNG$',
+  tab11u: 'https://images.samsung.com/is/image/samsung/p6pim/us/sm-x930nzaaxar/gallery/us-galaxy-tab-s11-ultra-sm-x930-sm-x930nzaaxar-550969762?$PD_GALLERY_PNG$',
+  tab11:  'https://images.samsung.com/is/image/samsung/p6pim/us/sm-x730nzsaxar/gallery/us-galaxy-tab-s11-sm-x730-sm-x730nzsaxar-550969747?$PD_GALLERY_PNG$',
+  tab10fe:'https://images.samsung.com/is/image/samsung/p6pim/us/sm-x520nzsexar/gallery/us-galaxy-tab-s10-fe-sm-x526-sm-x520nzsexar-550966782?$PD_GALLERY_PNG$',
+  // B2B 모니터
+  m8:    'https://images.samsung.com/is/image/samsung/p6pim/us/ls32fm803unxza/gallery/us-smart-m8-32m80f-ls32fm803unxza-550443173?$PD_GALLERY_PNG$',
+  m9:    'https://images.samsung.com/is/image/samsung/p6pim/us/ls32fm902snxza/gallery/us-smart-m9-32m90sf-ls32fm902snxza-547845238?$PD_GALLERY_PNG$',
+  og9:   'https://images.samsung.com/is/image/samsung/p6pim/us/ls57cg952nnxza/gallery/us-odyssey-neo-g9-g95nc-ls57cg952nnxza-550299919?$PD_GALLERY_PNG$',
+  og9f:  'https://images.samsung.com/is/image/samsung/p6pim/us/ls49fg910enxza/gallery/us-odyssey-g9-g91f-ls49fg910enxza-550443169?$PD_GALLERY_PNG$',
+  vfs6:  'https://images.samsung.com/is/image/samsung/p6pim/us/ls34c650tanxgo/gallery/us-viewfinity-s6-34s65tc-ls34c650tanxgo-551198898?$PD_GALLERY_PNG$',
+  vfs7:  'https://images.samsung.com/is/image/samsung/p6pim/us/ls37d700eanxza/gallery/us-viewfinity-s7-37s70d-ls37d700eanxza-551063396?$PD_GALLERY_PNG$',
+};
+
+const BADGE={new:{cls:'b-new',t:'NEW'},best:{cls:'b-best',t:'BEST'},ai:{cls:'b-ai',t:'AI'},bespoke:{cls:'b-bespoke',t:'BESPOKE'},pro:{cls:'b-pro',t:'PRO'}};
+const CICO={'모바일':'📱','TV/디스플레이':'📺','생활가전':'🏠','PC/태블릿':'💻','스마트 사이니지':'🖥️','비즈니스 모니터':'🖥️','프린터/복합기':'🖨️','반도체/메모리':'🔲','네트워크/통신':'📡','기업 솔루션':'🔐'};
+
+const P = {
+ b2c:[
+  /* ── 모바일 ── */
+  {id:1,cat:'모바일',ico:'📱',img:I.s26u,
+   name:'Galaxy S26 Ultra',price:'₩1,799,800',pnote:'256GB 기준 / 출고가',badge:'ai',
+   desc:'내장 S Pen과 Galaxy AI가 결합된 2026년 최상위 플래그십. Snapdragon 8 Elite for Galaxy 탑재.',
+   tags:['S Pen','200MP','Galaxy AI','Snapdragon 8 Elite','5G','Titanium'],
+   specs:{'디스플레이':'6.9" QHD+ Dynamic AMOLED 2X','AP':'Snapdragon 8 Elite for Galaxy','RAM':'12GB','저장용량':'256GB ~ 1TB','배터리':'5,000mAh','카메라':'200+50+10+12MP'}},
+
+  {id:2,cat:'모바일',ico:'📱',img:I.s26u,
+   name:'Galaxy S25 Ultra',price:'₩1,699,800',pnote:'256GB 기준',badge:'best',
+   desc:'내장 S Pen과 Galaxy AI. 200MP 카메라, Snapdragon 8 Elite, 5,000mAh 배터리.',
+   tags:['S Pen','200MP','Galaxy AI','Snapdragon 8 Elite','5G'],
+   specs:{'디스플레이':'6.9" QHD+ Dynamic AMOLED 2X','AP':'Snapdragon 8 Elite','RAM':'12GB','저장용량':'256GB ~ 1TB','배터리':'5,000mAh','카메라':'200+50+10+12MP'}},
+
+  {id:3,cat:'모바일',ico:'📱',img:null,
+   name:'Galaxy S25+',price:'₩1,254,800',pnote:'256GB 기준',badge:null,
+   desc:'강력한 성능과 대형 디스플레이의 균형. 얇은 폼팩터에 Galaxy AI 전 기능 지원.',
+   tags:['Galaxy AI','Snapdragon 8 Elite','5G','50MP'],
+   specs:{'디스플레이':'6.7" QHD+ Dynamic AMOLED 2X','AP':'Snapdragon 8 Elite','RAM':'12GB','저장용량':'256GB ~ 512GB','배터리':'4,900mAh','카메라':'50+12+10MP'}},
+
+  {id:4,cat:'모바일',ico:'📱',img:null,
+   name:'Galaxy S25',price:'₩1,049,600',pnote:'128GB 기준',badge:'new',
+   desc:'컴팩트한 사이즈에 플래그십 성능. 역대 가장 얇은 S 시리즈.',
+   tags:['Galaxy AI','Snapdragon 8 Elite','5G','50MP'],
+   specs:{'디스플레이':'6.2" FHD+ Dynamic AMOLED 2X','AP':'Snapdragon 8 Elite','RAM':'12GB','저장용량':'128GB ~ 256GB','배터리':'4,000mAh','카메라':'50+12+10MP'}},
+
+  {id:5,cat:'모바일',ico:'📱',img:I.zfold7,
+   name:'Galaxy Z Fold7',price:'₩2,399,800',pnote:'256GB 기준',badge:'best',
+   desc:'2025년형 최신 폴더블. 더 얇아진 힌지와 향상된 커버 디스플레이로 멀티태스킹 극대화.',
+   tags:['폴더블','Galaxy AI','S Pen 지원','5G','멀티태스킹'],
+   specs:{'메인 디스플레이':'7.9" Dynamic AMOLED 2X','커버 디스플레이':'6.5" Dynamic AMOLED 2X','AP':'Snapdragon 8 Elite','RAM':'12GB','저장용량':'256GB ~ 1TB','배터리':'4,400mAh'}},
+
+  {id:6,cat:'모바일',ico:'📱',img:I.zflip7,
+   name:'Galaxy Z Flip7',price:'₩1,399,800',pnote:'256GB 기준',badge:null,
+   desc:'2025년형 클램쉘 폴더블. 더 커진 커버 디스플레이와 AI 기능 강화.',
+   tags:['폴더블','클램쉘','FlexCam','5G','Galaxy AI'],
+   specs:{'메인 디스플레이':'6.7" FHD+ Dynamic AMOLED 2X','커버 디스플레이':'3.9" Super AMOLED','AP':'Snapdragon 8 Elite','RAM':'12GB','저장용량':'256GB ~ 512GB','배터리':'4,000mAh'}},
+
+  {id:7,cat:'모바일',ico:'📱',img:null,
+   name:'Galaxy A56 5G',price:'₩629,400',pnote:'128GB 기준',badge:'new',
+   desc:'AI 카메라와 스타일리시한 디자인의 2025년형 A 시리즈 최상위 모델.',
+   tags:['5G','IP67','OIS','Galaxy AI','50MP'],
+   specs:{'디스플레이':'6.7" FHD+ Super AMOLED 120Hz','AP':'Exynos 1580','RAM':'8 / 12GB','저장용량':'128 / 256GB','배터리':'5,000mAh','카메라':'50+12+5MP'}},
+
+  {id:8,cat:'모바일',ico:'📱',img:null,
+   name:'Galaxy A36 5G',price:'₩489,400',pnote:'128GB 기준',badge:null,
+   desc:'합리적인 가격에 AMOLED 디스플레이와 OIS 카메라.',
+   tags:['5G','OIS','120Hz','AMOLED'],
+   specs:{'디스플레이':'6.6" FHD+ Super AMOLED 120Hz','AP':'Snapdragon 6 Gen 3','RAM':'6 / 8GB','저장용량':'128 / 256GB','배터리':'5,000mAh'}},
+
+  {id:9,cat:'모바일',ico:'📱',img:null,
+   name:'Galaxy A16 5G',price:'₩329,400',pnote:'128GB 기준',badge:null,
+   desc:'가성비 5G 스마트폰. 50MP 카메라와 슬림한 디자인.',
+   tags:['5G','50MP','6.7"','가성비'],
+   specs:{'디스플레이':'6.7" FHD+ Super AMOLED','AP':'Exynos 1330','RAM':'4 / 6GB','저장용량':'128 / 256GB','배터리':'5,000mAh'}},
+
+  {id:10,cat:'모바일',ico:'⌚',img:null,
+   name:'Galaxy Watch8',price:'₩359,800',pnote:'40mm 기준',badge:'ai',
+   desc:'2025년형 Galaxy Watch. 향상된 혈당 트렌드 추정과 AI 건강 코칭.',
+   tags:['Galaxy AI','혈당 트렌드','수면 코칭','BioActive','5ATM+IP68'],
+   specs:{'디스플레이':'1.3 / 1.5" Super AMOLED','OS':'Wear OS 5 / One UI 7 Watch','배터리':'300 / 425mAh','방수':'5ATM + IP68 + MIL-STD-810H'}},
+
+  {id:11,cat:'모바일',ico:'⌚',img:null,
+   name:'Galaxy Watch Ultra2',price:'₩729,600',pnote:'47mm 기준',badge:'pro',
+   desc:'익스트림 스포츠를 위한 티타늄 케이스 초프리미엄 스마트워치.',
+   tags:['티타늄','10ATM','Galaxy AI','산악 모드'],
+   specs:{'디스플레이':'1.47" Super AMOLED','케이스':'티타늄','방수':'10ATM + IP68 + MIL-STD-810H','배터리':'590mAh'}},
+
+  {id:12,cat:'모바일',ico:'🎧',img:null,
+   name:'Galaxy Buds4 Pro',price:'₩289,800',pnote:'정가',badge:'best',
+   desc:'ANC와 360° 오디오를 지원하는 2025년형 프리미엄 이어버드.',
+   tags:['ANC','360° 오디오','Galaxy AI','오픈 이어'],
+   specs:{'ANC':'지원','배터리':'버드 7h + 케이스 35h','연결':'블루투스 5.4','방수':'IPX7'}},
+
+  {id:13,cat:'모바일',ico:'🎧',img:null,
+   name:'Galaxy Buds4',price:'₩189,800',pnote:'정가',badge:null,
+   desc:'스틱형 개방형 이어버드. AI 노이즈 캔슬링과 선명한 음질.',
+   tags:['개방형','AI 노이즈 캔슬링','블루투스 5.4'],
+   specs:{'배터리':'버드 7h + 케이스 28h','연결':'블루투스 5.4','방수':'IPX5'}},
+
+  /* ── TV / 디스플레이 ── */
+  {id:14,cat:'TV/디스플레이',ico:'📺',img:I.nqled8k,
+   name:'Neo QLED 8K QN990F (85")',price:'₩5,990,000',pnote:'85인치 기준 / 출고가',badge:'best',
+   desc:'2025년형 Neo QLED 8K. Vision AI로 모든 콘텐츠를 8K 수준으로 업스케일링.',
+   tags:['8K','Neo Quantum Dot','Vision AI','Dolby Atmos','OTS+'],
+   specs:{'해상도':'7680×4320 (8K)','패널':'Neo QLED (Mini LED)','HDR':'HDR10+','사운드':'Dolby Atmos / OTS+','크기':'65 / 75 / 85"'}},
+
+  {id:15,cat:'TV/디스플레이',ico:'📺',img:I.nqled4k,
+   name:'Neo QLED 4K QN90F (65")',price:'₩2,490,000',pnote:'65인치 기준',badge:'best',
+   desc:'2025년형 Neo QLED 4K. 144Hz 게이밍 최적화, Vision AI 화질 엔진.',
+   tags:['4K','Neo Quantum Dot','144Hz','게이밍','Vision AI'],
+   specs:{'해상도':'3840×2160 (4K)','패널':'Neo QLED','주사율':'144Hz','HDR':'HDR10+','크기':'50 / 55 / 65 / 75 / 85"'}},
+
+  {id:16,cat:'TV/디스플레이',ico:'📺',img:I.oled95,
+   name:'OLED S95F (65")',price:'₩3,490,000',pnote:'65인치 기준',badge:'pro',
+   desc:'2025년형 Samsung OLED. 자발광으로 완벽한 블랙과 최고 수준의 시야각.',
+   tags:['OLED','완벽한 블랙','자발광','Dolby Vision','144Hz'],
+   specs:{'해상도':'3840×2160 (4K)','패널':'OLED','주사율':'144Hz','HDR':'HDR10+ / Dolby Vision','크기':'55 / 65 / 77"'}},
+
+  {id:17,cat:'TV/디스플레이',ico:'📺',img:I.frame,
+   name:'The Frame LS03F (65")',price:'₩2,290,000',pnote:'65인치 기준',badge:'bespoke',
+   desc:'예술 작품처럼 벽에 걸리는 라이프스타일 TV. Art Mode로 꺼도 작품 전시.',
+   tags:['Art Mode','매트 디스플레이','베젤 커스텀','벽걸이','QLED'],
+   specs:{'해상도':'4K QLED','두께':'24.9mm (벽 밀착)','Art Mode':'1,800+ 작품 포함','크기':'32 ~ 85"'}},
+
+  {id:18,cat:'TV/디스플레이',ico:'📺',img:I.oled90,
+   name:'OLED S90F (65")',price:'₩2,890,000',pnote:'65인치 기준',badge:null,
+   desc:'합리적인 가격의 OLED TV. 완벽한 블랙과 선명한 색상 재현.',
+   tags:['OLED','4K','144Hz','HDR10+','Dolby Vision'],
+   specs:{'해상도':'3840×2160 (4K)','패널':'OLED','주사율':'144Hz','크기':'55 / 65"'}},
+
+  {id:19,cat:'TV/디스플레이',ico:'📺',img:I.nqled80,
+   name:'Neo QLED 4K QN80H (55")',price:'₩1,590,000',pnote:'55인치 기준',badge:null,
+   desc:'미니 LED 백라이트 합리형 Neo QLED. 120Hz, HDR10+, Vision AI.',
+   tags:['4K','Neo Quantum Dot','120Hz','HDR10+','Vision AI'],
+   specs:{'해상도':'3840×2160 (4K)','패널':'Neo QLED','주사율':'120Hz','크기':'43 / 50 / 55 / 65"'}},
+
+  /* ── 생활가전 ── */
+  {id:20,cat:'생활가전',ico:'🧊',img:I.fridge4,
+   name:'비스포크 AI 냉장고 4도어',price:'₩3,690,000',pnote:'용량별 상이 / 패널 별도',badge:'bespoke',
+   desc:'패널 교체 가능한 맞춤형 냉장고. AI 에너지 절약과 최첨단 신선 보관 기술.',
+   tags:['비스포크','AI 에너지','패널 교체','SpaceMax','맞춤형'],
+   specs:{'용량':'최대 846L','냉각 방식':'쿨링 스트립','AI 기능':'AI 에너지 절감','에너지 등급':'1등급'}},
+
+  {id:21,cat:'생활가전',ico:'🧊',img:I.fridge2,
+   name:'비스포크 AI 냉장고 2도어',price:'₩2,490,000',pnote:'605L 기준',badge:'bespoke',
+   desc:'프렌치 도어 스타일의 넓은 내부 공간. 패밀리허브 연동 옵션 제공.',
+   tags:['비스포크','프렌치 도어','패밀리허브','SpaceMax'],
+   specs:{'용량':'605L','특징':'프렌치 도어 / MetalCooling','패널':'20+ 색상·소재'}},
+
+  {id:22,cat:'생활가전',ico:'🫧',img:I.washer,
+   name:'비스포크 AI 세탁기 그랑데',price:'₩1,499,000',pnote:'25kg 기준',badge:'ai',
+   desc:'AI가 세탁물 무게·오염도 감지 후 최적 코스 자동 설정. EcoBubble+버블샷.',
+   tags:['AI 맞춤 세탁','버블샷','EcoBubble','비스포크','25kg'],
+   specs:{'용량':'25kg','AI':'AI 세탁 코스 추천','에너지 등급':'1등급','특징':'EcoBubble + 버블샷'}},
+
+  {id:23,cat:'생활가전',ico:'🫧',img:I.dryer,
+   name:'비스포크 AI 건조기 그랑데',price:'₩1,299,000',pnote:'25kg 기준',badge:'ai',
+   desc:'히트펌프 저온 건조로 섬유 손상 최소화. AI 건조 코스 자동 추천.',
+   tags:['히트펌프','저온 건조','AI','비스포크','25kg'],
+   specs:{'용량':'25kg','방식':'히트펌프','AI':'AI 건조 추천','에너지 등급':'1등급'}},
+
+  {id:24,cat:'생활가전',ico:'❄️',img:null,
+   name:'비스포크 무풍에어컨 갤러리',price:'₩2,290,000',pnote:'스탠드 1way 기준',badge:'bespoke',
+   desc:'바람 없이 냉방하는 무풍 기술. 360° 냉기 확산, PM0.3 청정 필터.',
+   tags:['무풍','비스포크','갤러리형','AI 절전','PM0.3 청정'],
+   specs:{'냉방':'AI 무풍냉방','청정':'PM0.3 99.97% 필터','에너지 등급':'1등급','설치':'벽걸이 / 스탠드'}},
+
+  {id:25,cat:'생활가전',ico:'🌀',img:null,
+   name:'비스포크 제트 청소기',price:'₩799,000',pnote:'정가',badge:'bespoke',
+   desc:'200W 강력 흡입력과 AI 모션 센서로 자동 흡입력 조절.',
+   tags:['무선','AI 모션 센서','200W','비스포크','1.45kg'],
+   specs:{'흡입력':'최대 200W','배터리':'최대 60분','무게':'1.45kg','AI':'오토 클리닝 모드'}},
+
+  {id:26,cat:'생활가전',ico:'🍽️',img:null,
+   name:'비스포크 식기세척기',price:'₩1,290,000',pnote:'14인용 기준',badge:'bespoke',
+   desc:'파워스팀 세척과 스파클링 워터로 찌든 때 집중 제거.',
+   tags:['비스포크','파워스팀','14인용','에너지 1등급'],
+   specs:{'용량':'14인용','기능':'파워스팀 / 스파클링 워터','에너지 등급':'1등급'}},
+
+  {id:27,cat:'생활가전',ico:'🌡️',img:null,
+   name:'비스포크 큐커 (복합조리기)',price:'₩499,000',pnote:'정가',badge:'ai',
+   desc:'에어프라이어·전자레인지·오븐·그릴을 하나로. AI 자동 요리 추천.',
+   tags:['4-in-1','AI 요리','에어프라이어','비스포크','25L'],
+   specs:{'기능':'에어프라이어 / 전자레인지 / 오븐 / 그릴','AI':'AI 자동 요리','용량':'25L'}},
+
+  /* ── PC / 태블릿 ── */
+  {id:28,cat:'PC/태블릿',ico:'💻',img:I.book6u,
+   name:'Galaxy Book6 Ultra',price:'₩2,799,000',pnote:'16" 32GB/1TB 기준',badge:'ai',
+   desc:'Galaxy AI PC 최상위 모델. Intel Core Ultra X7, AMOLED 디스플레이.',
+   tags:['Intel Core Ultra X7','AMOLED','Galaxy AI','AI PC','Copilot+'],
+   specs:{'디스플레이':'16" Dynamic AMOLED 2X','CPU':'Intel Core Ultra X7','RAM':'32GB','저장용량':'1TB SSD','배터리':'최대 22h'}},
+
+  {id:29,cat:'PC/태블릿',ico:'💻',img:I.book6p16,
+   name:'Galaxy Book6 Pro (16")',price:'₩1,999,000',pnote:'16GB/512GB 기준',badge:'best',
+   desc:'Galaxy AI와 AMOLED 디스플레이로 생산성 극대화. 초경량 설계.',
+   tags:['Intel Core Ultra 7','AMOLED','Galaxy AI','AI PC','경량'],
+   specs:{'디스플레이':'14 / 16" Dynamic AMOLED 2X','CPU':'Intel Core Ultra 7','RAM':'16 / 32GB','무게':'1.55kg (14")'}},
+
+  {id:30,cat:'PC/태블릿',ico:'💻',img:I.book5360,
+   name:'Galaxy Book5 Pro 360',price:'₩2,499,000',pnote:'16" 16GB/512GB 기준',badge:null,
+   desc:'S Pen 내장 2-in-1 노트북. AMOLED + 360° 회전 힌지, AI PC.',
+   tags:['Intel Core Ultra 7','S Pen','AMOLED','2-in-1','Galaxy AI'],
+   specs:{'디스플레이':'14 / 16" Dynamic AMOLED 2X','CPU':'Intel Core Ultra 7','RAM':'16 / 32GB','저장용량':'512GB ~ 1TB SSD','배터리':'최대 25h'}},
+
+  {id:31,cat:'PC/태블릿',ico:'💻',img:I.book5,
+   name:'Galaxy Book5',price:'₩1,299,000',pnote:'15.6" 16GB/256GB 기준',badge:null,
+   desc:'일상 업무 최적화 경량 노트북. 긴 배터리와 갤럭시 생태계 연동.',
+   tags:['Intel Core 5','경량','Galaxy 연동','18h 배터리'],
+   specs:{'디스플레이':'15.6" FHD IPS','CPU':'Intel Core 5','RAM':'16GB','배터리':'최대 18h'}},
+
+  {id:32,cat:'PC/태블릿',ico:'📟',img:I.tab11u,
+   name:'Galaxy Tab S11 Ultra',price:'₩1,699,800',pnote:'256GB Wi-Fi 기준',badge:'best',
+   desc:'14.6" 대형 AMOLED 태블릿. S Pen 기본 포함, Galaxy AI, DeX 지원.',
+   tags:['S Pen 포함','Galaxy AI','14.6"','Snapdragon 8 Elite','DeX'],
+   specs:{'디스플레이':'14.6" Dynamic AMOLED 2X','AP':'Snapdragon 8 Elite','RAM':'12 / 16GB','저장용량':'256GB ~ 1TB','배터리':'11,200mAh'}},
+
+  {id:33,cat:'PC/태블릿',ico:'📟',img:I.tab11,
+   name:'Galaxy Tab S11',price:'₩1,099,800',pnote:'128GB Wi-Fi 기준',badge:'new',
+   desc:'11" AMOLED에 S Pen 포함. 강력한 멀티태스킹과 창작 작업.',
+   tags:['S Pen 포함','Galaxy AI','11"','DeX'],
+   specs:{'디스플레이':'11" Dynamic AMOLED 2X','AP':'Snapdragon 8 Elite','RAM':'12GB','저장용량':'128 / 256GB'}},
+
+  {id:34,cat:'PC/태블릿',ico:'📟',img:I.tab10fe,
+   name:'Galaxy Tab S10 FE',price:'₩649,800',pnote:'128GB Wi-Fi 기준',badge:null,
+   desc:'합리적인 가격에 S Pen 포함. Tab S10 핵심 기능을 폭넓게 제공.',
+   tags:['S Pen 포함','10.9"','Galaxy AI','가성비'],
+   specs:{'디스플레이':'10.9" LCD','AP':'Exynos 1580','RAM':'6 / 8GB','배터리':'10,090mAh'}}
+ ],
+
+ b2b:[
+  /* ── 스마트 사이니지 ── */
+  {id:101,cat:'스마트 사이니지',ico:'🖥️',img:null,
+   name:'QMR 시리즈 (상업용 4K)',price:'₩800,000~',pnote:'43인치 기준 / 견적 문의',badge:'best',
+   desc:'4K UHD 상업용 디스플레이. 24/7 연속 운용과 MagicInfo 콘텐츠 관리 내장.',
+   tags:['4K','24/7 운용','MagicInfo','상업용','HDR10'],
+   specs:{'해상도':'3840×2160 (4K)','운용':'24시간 365일','소프트웨어':'MagicInfo S 내장','크기':'43 ~ 98"'}},
+
+  {id:102,cat:'스마트 사이니지',ico:'🏥',img:null,
+   name:'QHR 시리즈 (의료용)',price:'견적 문의',pnote:'IEC 60601 인증 의료용',badge:'pro',
+   desc:'의료 환경 특화 디스플레이. IEC 60601 인증, DICOM 지원, 고정밀 색상.',
+   tags:['의료용','DICOM','IEC 60601','고정밀 색상'],
+   specs:{'용도':'의료 영상 진단','인증':'IEC 60601-1','색상':'DICOM PART 14','크기':'27 ~ 55"'}},
+
+  {id:103,cat:'스마트 사이니지',ico:'💡',img:null,
+   name:'LED 사이니지 IFR',price:'견적 문의',pnote:'픽셀 피치·면적별 산출',badge:null,
+   desc:'베젤리스 LED 비디오월. 다양한 픽셀 피치로 초대형 사이니지 구현.',
+   tags:['LED','비디오월','베젤리스','1.5/1.8/2.5mm'],
+   specs:{'타입':'Direct LED','픽셀 피치':'1.5 / 1.8 / 2.5mm','밝기':'최대 1,200nit','운용':'24시간'}},
+
+  {id:104,cat:'스마트 사이니지',ico:'🖊️',img:null,
+   name:'삼성 플립 프로 WM75B',price:'₩3,500,000~',pnote:'75인치 기준 / 견적 문의',badge:'best',
+   desc:'터치 기반 디지털 플립차트. 4K 인터랙티브, 화상회의·콘텐츠 공유.',
+   tags:['인터랙티브','터치','협업','4K','화상회의'],
+   specs:{'터치':'4K 인터랙티브','크기':'55 / 65 / 75 / 85"','OS':'Tizen 내장','연결':'Wi-Fi 6 / 유선 LAN'}},
+
+  {id:105,cat:'스마트 사이니지',ico:'🔲',img:null,
+   name:'비디오월 VH/VB 시리즈',price:'견적 문의',pnote:'구성·수량별 산출',badge:null,
+   desc:'초슬림 0.44mm 베젤로 대형 멀티 스크린 구성.',
+   tags:['비디오월','0.44mm 베젤','FHD/4K','24시간'],
+   specs:{'베젤':'0.44mm 베젤 투 베젤','해상도':'FHD / 4K','설치':'가로·세로·사각 조합 가능'}},
+
+  /* ── 비즈니스 모니터 ── */
+  {id:106,cat:'비즈니스 모니터',ico:'🖥️',img:I.vfs7,
+   name:'ViewFinity S7 (37")',price:'₩1,199,000',pnote:'정가',badge:'pro',
+   desc:'37" 5K2K WQHD+ 모니터. USB-C 90W 전원 공급, 크리에이터·전문가용.',
+   tags:['5K2K','USB-C 90W','IPS','색상 정확도','크리에이터'],
+   specs:{'해상도':'5120×2160 (5K2K)','패널':'IPS','크기':'37"','연결':'USB-C 90W + DP + HDMI','밝기':'400nit'}},
+
+  {id:107,cat:'비즈니스 모니터',ico:'🖥️',img:I.vfs6,
+   name:'ViewFinity S6 (34")',price:'₩799,000',pnote:'정가',badge:'best',
+   desc:'34" WQHD 울트라와이드 IPS 모니터. 100Hz, USB-C, 높은 색상 정확도.',
+   tags:['WQHD','34"','울트라와이드','USB-C','100Hz'],
+   specs:{'해상도':'3440×1440 (WQHD)','패널':'IPS','크기':'34"','주사율':'100Hz','연결':'USB-C + DP + HDMI'}},
+
+  {id:108,cat:'비즈니스 모니터',ico:'🖥️',img:I.m8,
+   name:'Smart Monitor M8 (32")',price:'₩799,000',pnote:'정가',badge:'best',
+   desc:'PC 없이 OTT·스마트 앱 실행. Slim-Fit Camera 내장, 4K Smart Monitor.',
+   tags:['스마트 모니터','OTT','4K','Slim-Fit Camera','AirPlay'],
+   specs:{'해상도':'4K UHD','크기':'27 / 32"','OS':'Tizen 스마트 TV','연결':'Wi-Fi / HDMI / USB-C'}},
+
+  {id:109,cat:'비즈니스 모니터',ico:'🖥️',img:I.m9,
+   name:'Smart Monitor M9 (32")',price:'₩1,099,000',pnote:'정가',badge:null,
+   desc:'M8 상위 모델. 더 밝고 선명한 화질, 향상된 스마트 기능.',
+   tags:['스마트 모니터','4K','OLED','AI','Slim-Fit Camera'],
+   specs:{'해상도':'4K UHD','크기':'32"','밝기':'400nit','연결':'Wi-Fi / HDMI / USB-C / Thunderbolt'}},
+
+  {id:110,cat:'비즈니스 모니터',ico:'🖥️',img:I.og9,
+   name:'Odyssey Neo G9 (57")',price:'₩2,499,000',pnote:'정가',badge:'pro',
+   desc:'57" Dual UHD 해상도 Mini LED 커브드 게이밍 모니터. 240Hz, DisplayPort 2.1.',
+   tags:['57"','Dual UHD','240Hz','Mini LED','1000R 커브드','DisplayPort 2.1'],
+   specs:{'해상도':'7680×2160 (Dual UHD)','크기':'57"','주사율':'240Hz','백라이트':'Mini LED','HDR':'HDR2000'}},
+
+  {id:111,cat:'비즈니스 모니터',ico:'🖥️',img:I.og9f,
+   name:'Odyssey G9 G91F (49")',price:'₩1,699,000',pnote:'정가',badge:'best',
+   desc:'49" DQHD 1000R 커브드 울트라와이드. 240Hz, DisplayPort 2.1.',
+   tags:['49"','DQHD','240Hz','1000R 커브드','G-Sync Compatible'],
+   specs:{'해상도':'5120×1440 (DQHD)','크기':'49"','주사율':'240Hz','응답속도':'1ms (GtG)','HDR':'HDR1000'}},
+
+  /* ── 프린터 / 복합기 ── */
+  {id:112,cat:'프린터/복합기',ico:'🖨️',img:null,
+   name:'ProXpress SL-C4010ND',price:'₩520,000',pnote:'정가 / VAT 별도',badge:null,
+   desc:'고속 컬러 레이저 프린터. 네트워크·자동 양면·기업 보안 인쇄.',
+   tags:['컬러 레이저','네트워크','양면 인쇄','40ppm'],
+   specs:{'속도':'40ppm (흑백·컬러)','해상도':'2400×600dpi','연결':'기가비트 이더넷','용지':'A4 / A3'}},
+
+  {id:113,cat:'프린터/복합기',ico:'🖨️',img:null,
+   name:'MultiXpress X7600LX',price:'견적 문의',pnote:'엔터프라이즈 A3 복합기',badge:'pro',
+   desc:'엔터프라이즈 A3 컬러 복합기. 60ppm, 클라우드 연동, 보안 출력.',
+   tags:['A3','60ppm','클라우드','기업용','보안 인쇄'],
+   specs:{'속도':'60ppm','기능':'인쇄 / 복사 / 스캔 / 팩스','연결':'클라우드 / NFC / 이더넷'}},
+
+  /* ── 반도체 / 메모리 ── */
+  {id:114,cat:'반도체/메모리',ico:'🔲',img:null,
+   name:'HBM3E (Shinebolt)',price:'기업 문의',pnote:'AI 가속기 탑재용',badge:'ai',
+   desc:'AI·HPC 가속기용 고대역폭 메모리. 엔비디아 H200·B200 공식 탑재.',
+   tags:['HBM3E','AI 가속기','1.2TB/s','HPC','12단 스택'],
+   specs:{'세대':'HBM3E','대역폭':'최대 1.2TB/s','용량':'24 / 36GB','적용':'AI 가속기 / HPC'}},
+
+  {id:115,cat:'반도체/메모리',ico:'🔲',img:null,
+   name:'DDR5 서버 모듈 (RDIMM)',price:'기업 문의',pnote:'서버·데이터센터용',badge:null,
+   desc:'DDR5 서버 메모리. 6400Mbps 고속 전송, ECC 지원.',
+   tags:['DDR5','6400Mbps','서버용','ECC','RDIMM'],
+   specs:{'속도':'6400Mbps','용량':'16 ~ 128GB','타입':'RDIMM / LRDIMM','ECC':'지원'}},
+
+  {id:116,cat:'반도체/메모리',ico:'💾',img:null,
+   name:'PM9A3 엔터프라이즈 SSD',price:'기업 문의',pnote:'용량별 상이',badge:null,
+   desc:'데이터센터 전용 NVMe SSD. 최대 6.9GB/s 읽기 속도.',
+   tags:['NVMe','PCIe 4.0','데이터센터','6.9GB/s','V-NAND'],
+   specs:{'인터페이스':'PCIe 4.0 x4 NVMe','읽기':'최대 6,900MB/s','용량':'960GB ~ 30.72TB','폼팩터':'U.2 / E1.S / E3.S'}},
+
+  {id:117,cat:'반도체/메모리',ico:'📦',img:null,
+   name:'UFS 4.0 (모바일 스토리지)',price:'기업 문의',pnote:'스마트폰 제조사 공급용',badge:'new',
+   desc:'스마트폰·태블릿용 초고속 내장 스토리지. 읽기 4,200MB/s.',
+   tags:['UFS 4.0','4200MB/s','모바일','AI 가속'],
+   specs:{'세대':'UFS 4.0','읽기':'4,200MB/s','쓰기':'2,800MB/s','용량':'64GB ~ 1TB'}},
+
+  /* ── 네트워크 / 통신 ── */
+  {id:118,cat:'네트워크/통신',ico:'📡',img:null,
+   name:'Samsung 5G vRAN',price:'프로젝트 견적',pnote:'통신사·기업 네트워크용',badge:'best',
+   desc:'가상화 기반 5G 무선 접속 네트워크. OpenRAN 아키텍처로 유연한 구성.',
+   tags:['5G','vRAN','OpenRAN','Sub-6GHz','mmWave'],
+   specs:{'기술':'5G NR','아키텍처':'O-RAN / vRAN','주파수':'Sub-6GHz / mmWave','솔루션':'매크로 / 스몰셀 / 이종망'}},
+
+  {id:119,cat:'네트워크/통신',ico:'📡',img:null,
+   name:'Private 5G (이음 5G)',price:'프로젝트 견적',pnote:'기업 전용 사설망',badge:'pro',
+   desc:'기업 전용 사설 5G 네트워크. 스마트 공장·물류·병원 등 산업 IoT 최적화.',
+   tags:['Private 5G','사설망','초저지연','스마트 공장','산업 IoT'],
+   specs:{'대상':'기업 전용망','지연':'초저지연 (1ms 이하 목표)','보안':'독립망 운영','적용':'제조 / 물류 / 의료 / 공공'}},
+
+  /* ── 기업 솔루션 ── */
+  {id:120,cat:'기업 솔루션',ico:'🔐',img:null,
+   name:'Samsung Knox',price:'라이선스 문의',pnote:'디바이스 수·플랜별 상이',badge:'best',
+   desc:'군사급 보안 기업 모바일 관리 플랫폼. MDM/EMM, 컨테이너 격리.',
+   tags:['MDM','EMM','컨테이너','군사급 보안','FIPS 140-3','CC인증'],
+   specs:{'인증':'FIPS 140-3 / Common Criteria','기능':'MDM / Knox Workspace / Knox E-FOTA','지원 OS':'Android (Galaxy)'}},
+
+  {id:121,cat:'기업 솔루션',ico:'🏭',img:null,
+   name:'삼성 스마트 팩토리',price:'프로젝트 견적',pnote:'규모·기능별 산출',badge:'ai',
+   desc:'AI 기반 제조 라인 자동화. 불량 감지, 예지 정비, 에너지 관리.',
+   tags:['AI','스마트 제조','예지 정비','불량 감지','에너지 관리'],
+   specs:{'기술':'AI Vision / Digital Twin','적용':'제조 라인 / 품질 관리','연동':'MES / ERP / IoT'}},
+
+  {id:122,cat:'기업 솔루션',ico:'🤝',img:null,
+   name:'Samsung DeX (기업용)',price:'단말기 포함',pnote:'Galaxy 기기 구매 시 기본 제공',badge:null,
+   desc:'스마트폰을 PC처럼 사용. Knox 보안과 결합한 엔터프라이즈 워크플로우.',
+   tags:['DeX','모바일 워크','Knox','멀티태스킹'],
+   specs:{'연결':'USB-C / 무선 DeX','디스플레이':'외부 모니터 4K 출력','보안':'Knox 통합'}},
+
+  {id:123,cat:'기업 솔루션',ico:'🌐',img:null,
+   name:'Samsung SDS 클라우드',price:'종량제',pnote:'사용량·플랜별 상이',badge:null,
+   desc:'삼성 SDS 엔터프라이즈 클라우드. 하이브리드 클라우드, AI·빅데이터 플랫폼.',
+   tags:['하이브리드 클라우드','AI 플랫폼','빅데이터','기업용'],
+   specs:{'타입':'하이브리드 / 프라이빗 / 멀티 클라우드','서비스':'IaaS / PaaS / SaaS','AI':'Brightics AI 플랫폼'}}
+ ]
+};
+
+// ── state ──
+let seg='b2c', cat='all', q='';
+
+// ── 이미지 로드 핸들러 ──
+function imgOk(el){
+  el.classList.add('ok');
+  el.closest('.ct, .mt').classList.add('img-ok');
+}
+function imgErr(el){ el.remove(); }
+
+// ── 카드 렌더링 ──
+function cardHtml(p){
+  const b = p.badge && BADGE[p.badge] ? `<span class="bdg ${BADGE[p.badge].cls}">${BADGE[p.badge].t}</span>` : '';
+  const imgTag = p.img ? `<img src="${p.img}" alt="${p.name}" loading="lazy" onload="imgOk(this)" onerror="imgErr(this)">` : '';
+  const tags = (p.tags||[]).slice(0,3).map(t=>`<span class="tg">${t}</span>`).join('');
+  return `<div class="card" onclick="openModal(${p.id})">
+    <div class="ct">${b}${imgTag}<span class="fi">${p.ico}</span></div>
+    <div class="cb">
+      <div class="cc">${p.cat}</div>
+      <div class="cn">${p.name}</div>
+      <div class="cp">${p.price}<span class="pn">${p.pnote}</span></div>
+      <div class="cd">${p.desc.slice(0,55)}${p.desc.length>55?'…':''}</div>
+      <div class="ctg">${tags}</div>
+    </div>
+  </div>`;
+}
+
+// ── 사이드바 ── (onclick에 단일따옴표 사용 → HTML 속성 충돌 방지)
+function renderSb(){
+  const counts={};
+  P[seg].forEach(p=>{ counts[p.cat]=(counts[p.cat]||0)+1; });
+  const all=P[seg].length;
+  document.getElementById('sb').innerHTML=
+    `<button class="sb-btn${cat==='all'?' on':''}" onclick="setCat('all')">
+       <span class="ico">📦</span>전체 보기<span class="n">${all}</span>
+     </button>`+
+    Object.entries(counts).map(([c,n])=>{
+      const safe=c.replace(/'/g,"\\'");
+      return `<button class="sb-btn${cat===c?' on':''}" onclick="setCat('${safe}')">
+        <span class="ico">${CICO[c]||'▪️'}</span>${c}<span class="n">${n}</span>
+      </button>`;
+    }).join('');
+}
+
+// ── 메인 렌더 ──
+function render(){
+  let items=P[seg];
+  if(cat!=='all') items=items.filter(p=>p.cat===cat);
+  if(q) items=items.filter(p=>
+    p.name.toLowerCase().includes(q)||p.desc.toLowerCase().includes(q)||
+    p.cat.toLowerCase().includes(q)||(p.tags||[]).some(t=>t.toLowerCase().includes(q))||
+    p.price.includes(q)
+  );
+  renderSb();
+  document.getElementById('atitle').innerHTML=(cat==='all'?'전체':cat)+' <em>'+(seg==='b2c'?'B2C':'B2B')+'</em>';
+  document.getElementById('acount').textContent=items.length+'개 제품';
+  const g=document.getElementById('grid');
+  if(!items.length){
+    g.innerHTML='<div class="empty"><div class="eico">🔍</div><p>검색 결과가 없습니다.</p></div>';
+    return;
+  }
+  g.innerHTML=items.map(cardHtml).join('');
+}
+
+// ── 탭 전환 ──
+function setSeg(s){
+  seg=s; cat='all';
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.seg===s));
+  render();
+}
+
+// ── 카테고리 전환 ──
+function setCat(c){ cat=c; render(); }
+
+// ── 모달 ──
+function openModal(id){
+  const p=[...P.b2c,...P.b2b].find(x=>x.id===id);
+  if(!p) return;
+  const imgTag=p.img?`<img src="${p.img}" alt="${p.name}" onload="imgOk(this)" onerror="imgErr(this)">`:'';
+  const b=p.badge&&BADGE[p.badge]?`<span class="bdg ${BADGE[p.badge].cls}" style="position:static;display:inline-block;margin-bottom:8px">${BADGE[p.badge].t}</span>`:'';
+  document.getElementById('mthumb').innerHTML=`${imgTag}<span class="mi">${p.ico}</span><button class="mc" onclick="closeModal()">✕</button>`;
+  document.getElementById('mcat').textContent=p.cat;
+  document.getElementById('mname').innerHTML=b+p.name;
+  document.getElementById('mprice').textContent=p.price;
+  document.getElementById('mpnote').textContent=p.pnote;
+  document.getElementById('mdesc').textContent=p.desc;
+  document.getElementById('mspecs').innerHTML=Object.entries(p.specs||{}).map(([k,v])=>`<div class="sr"><span class="sk">${k}</span><span class="sv">${v}</span></div>`).join('');
+  document.getElementById('mtags').innerHTML=(p.tags||[]).map(t=>`<span class="mt2">${t}</span>`).join('');
+  document.getElementById('ov').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function closeOv(e){ if(e.target===document.getElementById('ov')) closeModal(); }
+function closeModal(){ document.getElementById('ov').classList.remove('on'); document.body.style.overflow=''; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+// ── 초기화 ──
+document.getElementById('cnt-b2c').textContent=P.b2c.length;
+document.getElementById('cnt-b2b').textContent=P.b2b.length;
+document.getElementById('q').addEventListener('input',e=>{ q=e.target.value.toLowerCase().trim(); render(); });
+render();
+</script>
+</body>
+</html>

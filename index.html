@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Teo Hub</title>
+<title>Teo Sys</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -283,7 +283,7 @@ body {
 <nav class="sidebar">
   <div class="sidebar-header">
     <div class="sidebar-logo">T</div>
-    <span class="sidebar-title">Teo Hub</span>
+    <span class="sidebar-title">Teo Sys</span>
   </div>
 
   <div class="sidebar-section">
@@ -315,6 +315,14 @@ body {
   </div>
 
   <div class="sidebar-section">
+    <div class="sidebar-section-label">삼성전자</div>
+    <a class="nav-item" onclick="loadPage(this, 'samsung-catalog.html', '삼성전자 제품 카탈로그')">
+      <span class="nav-icon">📱</span>
+      <span class="nav-label">삼성전자 B2C·B2B 카탈로그</span>
+    </a>
+  </div>
+
+  <div class="sidebar-section">
     <div class="sidebar-section-label">식품 카탈로그</div>
     <a class="nav-item" onclick="loadPage(this, 'shinsegaefood.html', '신세계푸드 제품 카탈로그')">
       <span class="nav-icon">🌿</span>
@@ -339,13 +347,13 @@ body {
   <div id="home-page">
     <div class="page">
       <span class="page-icon">🇲🇳</span>
-      <h1 class="page-title">Teo Hub</h1>
+      <h1 class="page-title">Teo Sys</h1>
       <p class="page-desc">몽골 시장 데이터를 한 곳에서 — 영업 기초 정보, 수입 통계, 리테일 점포 현황, 가전제품 가격 분석을 대시보드로 제공합니다.</p>
 
       <div class="info-grid">
         <div class="info-cell">
           <div class="info-cell-label">대시보드</div>
-          <div class="info-cell-value">6개</div>
+          <div class="info-cell-value">7개</div>
         </div>
         <div class="info-cell">
           <div class="info-cell-label">지역</div>
@@ -417,6 +425,23 @@ body {
           <div class="service-row-tags">
             <span class="stag stag-red">점포 지도</span>
             <span class="stag stag-green">리테일</span>
+          </div>
+          <span class="row-arrow">›</span>
+        </div>
+      </div>
+
+      <div class="block-label">삼성전자</div>
+      <div class="service-list">
+        <div class="service-row" onclick="loadPage(null, 'samsung-catalog.html', '삼성전자 제품 카탈로그')">
+          <div class="service-row-icon" style="background:#e8edf9;">📱</div>
+          <div class="service-row-body">
+            <div class="service-row-title">삼성전자 제품 카탈로그</div>
+            <div class="service-row-url">B2C · B2B 전 제품 · 57개 · 한국 소매가</div>
+          </div>
+          <div class="service-row-tags">
+            <span class="stag stag-blue">B2C</span>
+            <span class="stag stag-purple">B2B</span>
+            <span class="stag stag-green">가격 정보</span>
           </div>
           <span class="row-arrow">›</span>
         </div>
