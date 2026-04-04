@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>신세계푸드 제품 카탈로그 | 리테일 평균 판매가</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f4f6f9; color: #1a1a2e; }
+
+/* ── 헤더 ── */
+.header { background: linear-gradient(135deg, #1b6b3a 0%, #2e9e5a 100%); color: white; padding: 22px 20px 18px; }
+.header-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.logo-wrap { display: flex; align-items: center; gap: 14px; }
+.logo-badge { background: white; color: #1b6b3a; font-weight: 900; font-size: 15px; padding: 6px 14px; border-radius: 8px; letter-spacing: -0.5px; }
+.header-title h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+.header-title p { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+.header-meta { font-size: 12px; opacity: 0.75; text-align: right; line-height: 1.7; }
+
+/* ── 통계바 ── */
+.stats-bar { background: white; border-bottom: 1px solid #e4e8ef; padding: 10px 20px; }
+.stats-inner { max-width: 1280px; margin: 0 auto; display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; align-items: center; }
+.stat-item { text-align: center; }
+.stat-val { font-size: 20px; font-weight: 800; color: #1b6b3a; }
+.stat-label { font-size: 11px; color: #888; margin-top: 1px; }
+
+/* ── 컨트롤 영역 ── */
+.controls { background: white; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid #e4e8ef; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+.controls-inner { max-width: 1280px; margin: 0 auto; padding: 10px 16px; }
+
+.search-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.search-box { flex: 1; position: relative; }
+.search-box input { width: 100%; padding: 9px 14px 9px 36px; border: 2px solid #e4e8ef; border-radius: 22px; font-size: 14px; outline: none; transition: border 0.2s; }
+.search-box input:focus { border-color: #1b6b3a; }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 15px; }
+.view-toggle { display: flex; border: 2px solid #e4e8ef; border-radius: 8px; overflow: hidden; }
+.view-btn { padding: 8px 14px; background: white; border: none; cursor: pointer; font-size: 16px; transition: background 0.2s; }
+.view-btn.active { background: #1b6b3a; color: white; }
+
+.filter-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.seg-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; margin-right: 2px; }
+.filter-btn { padding: 5px 14px; border: 2px solid #ddd; background: white; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; color: #555; white-space: nowrap; }
+.filter-btn:hover { border-color: #1b6b3a; color: #1b6b3a; }
+.filter-btn.active { background: #1b6b3a; border-color: #1b6b3a; color: white; }
+.filter-btn.b2c.active { background: #2563eb; border-color: #2563eb; }
+.filter-btn.b2b.active { background: #ea580c; border-color: #ea580c; }
+.divider { width: 1px; height: 20px; background: #ddd; margin: 0 4px; }
+
+/* ── 결과 카운트 ── */
+.result-row { max-width: 1280px; margin: 0 auto; padding: 8px 16px 0; display: flex; justify-content: space-between; align-items: center; }
+.result-count { font-size: 13px; color: #777; }
+.sort-select { font-size: 12px; padding: 5px 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; cursor: pointer; }
+
+/* ── 카드 그리드 ── */
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; padding: 14px 20px 50px; max-width: 1280px; margin: 0 auto; }
+
+.product-card { background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+.product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+
+.card-top { position: relative; background: #f5f8f5; padding: 0; text-align: center; height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+.card-img { width: 100%; height: 180px; object-fit: contain; padding: 12px; background: #f5f8f5; display: block; }
+.card-emoji { font-size: 52px; line-height: 1; }
+.card-channel { position: absolute; top: 10px; left: 10px; }
+.channel-tag { font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 12px; letter-spacing: 0.3px; }
+.channel-tag.b2c { background: #dbeafe; color: #1d4ed8; }
+.channel-tag.b2b { background: #ffedd5; color: #c2410c; }
+.card-brand { position: absolute; top: 10px; right: 10px; font-size: 10px; font-weight: 700; background: rgba(27,107,58,0.12); color: #1b6b3a; padding: 3px 9px; border-radius: 12px; }
+
+.card-body { padding: 13px 14px 15px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.product-name { font-size: 13px; font-weight: 700; color: #1a1a2e; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 38px; }
+.product-spec { font-size: 11px; color: #888; }
+.product-category { font-size: 11px; color: #1b6b3a; font-weight: 600; background: #f0f9f3; padding: 2px 8px; border-radius: 6px; display: inline-block; }
+
+.price-section { margin-top: auto; padding-top: 10px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-end; }
+.price-main { }
+.price-label { font-size: 10px; color: #aaa; margin-bottom: 2px; }
+.price-value { font-size: 19px; font-weight: 900; color: #1a1a2e; }
+.price-value span { font-size: 12px; font-weight: 600; color: #777; margin-left: 1px; }
+.price-range { text-align: right; }
+.price-range-label { font-size: 10px; color: #aaa; margin-bottom: 2px; }
+.price-range-val { font-size: 11px; color: #888; }
+
+/* ── 테이블 뷰 ── */
+.product-table-wrap { padding: 14px 20px 50px; max-width: 1280px; margin: 0 auto; overflow-x: auto; }
+.product-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.06); font-size: 13px; }
+.product-table thead { background: #1b6b3a; color: white; }
+.product-table th { padding: 12px 14px; text-align: left; font-weight: 700; font-size: 12px; white-space: nowrap; }
+.product-table td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+.product-table tr:last-child td { border-bottom: none; }
+.product-table tr:hover td { background: #f8fdf9; }
+.td-name { font-weight: 600; color: #1a1a2e; }
+.td-spec { color: #888; font-size: 11px; }
+.td-price { font-weight: 800; color: #1a1a2e; white-space: nowrap; }
+.td-range { color: #888; font-size: 11px; white-space: nowrap; }
+.td-channel .channel-tag { display: inline-block; }
+.td-category .product-category { display: inline-block; }
+.table-emoji { font-size: 22px; }
+.price-up { color: #e53e3e; font-size: 10px; margin-left: 4px; }
+.price-dn { color: #2563eb; font-size: 10px; margin-left: 4px; }
+
+/* ── 브랜드 범례 ── */
+.brand-legend { background: white; border-radius: 12px; padding: 14px 18px; margin: 14px 20px 0; max-width: 1280px; margin-left: auto; margin-right: auto; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.brand-legend-title { font-size: 12px; font-weight: 700; color: #555; margin-right: 6px; }
+.brand-chip { font-size: 11px; background: #f0f9f3; color: #1b6b3a; border: 1px solid #c6e8d0; padding: 4px 12px; border-radius: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.brand-chip:hover, .brand-chip.active { background: #1b6b3a; color: white; border-color: #1b6b3a; }
+
+/* ── 숨김 ── */
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <div class="logo-badge">신세계푸드</div>
+      <div class="header-title">
+        <h1>제품 카탈로그 &amp; 리테일 가격</h1>
+        <p>B2C · B2B 통합 제품 판매가 현황</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      기준일: 2026년 4월<br>
+      단위: 원 (VAT 포함, 소비자가 기준)
+    </div>
+  </div>
+</div>
+
+<!-- 통계 -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-val" id="stat-total">0</div><div class="stat-label">전체 제품</div></div>
+    <div class="stat-item"><div class="stat-val" id="stat-b2c">0</div><div class="stat-label">B2C</div></div>
+    <div class="stat-item"><div class="stat-val" id="stat-b2b">0</div><div class="stat-label">B2B</div></div>
+    <div class="stat-item"><div class="stat-val" id="stat-brands">0</div><div class="stat-label">브랜드</div></div>
+    <div class="stat-item"><div class="stat-val" id="stat-cats">0</div><div class="stat-label">카테고리</div></div>
+  </div>
+</div>
+
+<!-- 브랜드 필터 -->
+<div class="brand-legend" id="brand-legend-wrap">
+  <span class="brand-legend-title">브랜드</span>
+  <!-- JS 생성 -->
+</div>
+
+<!-- 컨트롤 -->
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search-row">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="제품명, 브랜드, 카테고리 검색...">
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="btn-grid" onclick="setView('grid')" title="카드뷰">▦</button>
+        <button class="view-btn" id="btn-table" onclick="setView('table')" title="테이블뷰">☰</button>
+      </div>
+    </div>
+    <div class="filter-row">
+      <span class="seg-label">채널</span>
+      <button class="filter-btn active" data-filter="channel" data-val="all">전체</button>
+      <button class="filter-btn b2c" data-filter="channel" data-val="B2C">B2C</button>
+      <button class="filter-btn b2b" data-filter="channel" data-val="B2B">B2B</button>
+      <div class="divider"></div>
+      <span class="seg-label">카테고리</span>
+      <button class="filter-btn active" data-filter="category" data-val="all">전체</button>
+      <!-- JS 생성 -->
+    </div>
+  </div>
+</div>
+
+<!-- 결과 카운트 & 정렬 -->
+<div class="result-row">
+  <div class="result-count" id="result-count"></div>
+  <select class="sort-select" id="sort-select" onchange="renderAll()">
+    <option value="default">기본 순</option>
+    <option value="price-asc">가격 낮은 순</option>
+    <option value="price-desc">가격 높은 순</option>
+    <option value="name">이름 순</option>
+  </select>
+</div>
+
+<!-- 카드 그리드 -->
+<div class="product-grid" id="product-grid"></div>
+
+<!-- 테이블 뷰 -->
+<div class="product-table-wrap hidden" id="product-table-wrap">
+  <table class="product-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>채널</th>
+        <th>브랜드</th>
+        <th>제품명</th>
+        <th>규격/용량</th>
+        <th>카테고리</th>
+        <th>리테일 평균가</th>
+        <th>판매 범위</th>
+      </tr>
+    </thead>
+    <tbody id="product-tbody"></tbody>
+  </table>
+</div>
+
+<script>
+// ── 제품 데이터 ──────────────────────────────────────────
+const CDN = "https://sitem.ssgcdn.com";
+const PRODUCTS = [
+  // ── B2C : 피코크(Peacock) ──
+  { channel:"B2C", brand:"피코크", name:"피코크 양반김 9봉", spec:"4g×9봉", category:"스낵·김", emoji:"🌿", img:`${CDN}/30/00/98/item/1000050980030_i1_232.jpg`, avgPrice:3980, priceRange:"3,580~4,200" },
+  { channel:"B2C", brand:"피코크", name:"피코크 냉동 떡갈비", spec:"500g", category:"냉동·즉석식품", emoji:"🍖", img:`${CDN}/07/38/66/item/1000013663807_i1_232.jpg`, avgPrice:9900, priceRange:"9,500~10,900" },
+  { channel:"B2C", brand:"피코크", name:"피코크 사골곰탕", spec:"500g×2", category:"국·찌개", emoji:"🍲", img:`${CDN}/47/17/70/item/1000357701747_i1_232.jpg`, avgPrice:7900, priceRange:"7,400~8,500" },
+  { channel:"B2C", brand:"피코크", name:"피코크 순살 닭갈비", spec:"600g", category:"냉동·즉석식품", emoji:"🍗", img:`${CDN}/15/22/43/item/1000791432215_i1_232.jpg`, avgPrice:12900, priceRange:"11,900~13,500" },
+  { channel:"B2C", brand:"피코크", name:"피코크 육개장", spec:"500g", category:"국·찌개", emoji:"🍲", img:`${CDN}/93/07/02/item/1000005020793_i1_232.jpg`, avgPrice:6500, priceRange:"5,900~7,000" },
+  { channel:"B2C", brand:"피코크", name:"피코크 닭볶음탕", spec:"800g", category:"국·찌개", emoji:"🍗", img:`${CDN}/74/74/44/item/1000751447474_i1_232.jpg`, avgPrice:9900, priceRange:"9,200~10,500" },
+  { channel:"B2C", brand:"피코크", name:"피코크 궁중떡볶이", spec:"400g", category:"냉동·즉석식품", emoji:"🍢", img:`${CDN}/17/95/68/item/1000032689517_i1_232.jpg`, avgPrice:5900, priceRange:"5,500~6,500" },
+  { channel:"B2C", brand:"피코크", name:"피코크 부대찌개", spec:"600g", category:"국·찌개", emoji:"🍲", img:`${CDN}/03/69/43/item/1000599436903_i1_232.jpg`, avgPrice:8900, priceRange:"8,200~9,600" },
+  { channel:"B2C", brand:"피코크", name:"피코크 냉동 칼국수", spec:"570g(2인)", category:"면류", emoji:"🍜", img:`${CDN}/82/89/44/item/1000795448982_i1_232.jpg`, avgPrice:6900, priceRange:"6,200~7,400" },
+  { channel:"B2C", brand:"피코크", name:"피코크 설렁탕", spec:"500g×2", category:"국·찌개", emoji:"🍲", img:`${CDN}/89/29/75/item/1000400752989_i1_232.jpg`, avgPrice:8500, priceRange:"7,900~9,200" },
+  { channel:"B2C", brand:"피코크", name:"피코크 스팸 선물세트 L호", spec:"200g×6캔", category:"선물세트", emoji:"🎁", img:`${CDN}/62/85/09/item/1000575098562_i1_232.jpg`, avgPrice:38000, priceRange:"34,000~42,000" },
+  { channel:"B2C", brand:"피코크", name:"피코크 모둠전 (명절)", spec:"600g", category:"명절·간편식", emoji:"🥘", img:`${CDN}/11/51/23/item/1000056235111_i1_232.jpg`, avgPrice:14900, priceRange:"13,500~16,000" },
+
+  // ── B2C : 올가(Olga) ──
+  { channel:"B2C", brand:"올가", name:"올가 유기농 검은콩두유", spec:"190ml×16입", category:"음료·두유", emoji:"🫘", img:`${CDN}/30/77/00/item/1000634007730_i1_232.jpg`, avgPrice:13900, priceRange:"12,900~15,000" },
+  { channel:"B2C", brand:"올가", name:"올가 유기농 쌀국수", spec:"320g", category:"면류", emoji:"🍜", img:`${CDN}/57/70/55/item/1000568557057_i1_232.jpg`, avgPrice:5900, priceRange:"5,200~6,500" },
+  { channel:"B2C", brand:"올가", name:"올가 유기농 콩나물국밥", spec:"450g", category:"국·찌개", emoji:"🌱", img:`${CDN}/94/94/27/item/1000034279494_i1_232.jpg`, avgPrice:7200, priceRange:"6,800~7,800" },
+  { channel:"B2C", brand:"올가", name:"올가 유기농 잡곡밥", spec:"210g×3입", category:"즉석밥", emoji:"🍚", img:`${CDN}/04/47/20/item/1000688204704_i1_232.jpg`, avgPrice:6500, priceRange:"5,900~7,200" },
+  { channel:"B2C", brand:"올가", name:"올가 유기농 고추장", spec:"500g", category:"양념·소스", emoji:"🌶️", img:`${CDN}/34/41/30/item/1000627304134_i1_232.jpg`, avgPrice:12800, priceRange:"11,500~13,500" },
+  { channel:"B2C", brand:"올가", name:"올가 유기농 된장", spec:"450g", category:"양념·소스", emoji:"🫙", img:`${CDN}/50/74/36/item/1000581367450_i1_232.jpg`, avgPrice:11500, priceRange:"10,500~12,500" },
+  { channel:"B2C", brand:"올가", name:"올가 유기농 두부 (찌개용)", spec:"400g", category:"두부·콩제품", emoji:"🟡", img:`${CDN}/98/61/90/item/1000033906198_i1_232.jpg`, avgPrice:3500, priceRange:"3,200~3,900" },
+  { channel:"B2C", brand:"올가", name:"올가 유기농 현미 (10kg)", spec:"10kg", category:"쌀·잡곡", emoji:"🌾", img:`${CDN}/17/11/24/item/1000688241117_i1_232.jpg`, avgPrice:42000, priceRange:"38,000~46,000" },
+
+  // ── B2C : 노브랜드버거 소매 HMR ──
+  { channel:"B2C", brand:"노브랜드버거", name:"냉동 노브랜드버거 패티 세트", spec:"120g×4장", category:"냉동·즉석식품", emoji:"🍔", img:`${CDN}/84/51/13/item/1000543135184_i1_232.jpg`, avgPrice:9900, priceRange:"8,900~11,000" },
+  { channel:"B2C", brand:"노브랜드버거", name:"버거소스 3종 세트", spec:"300ml×3", category:"양념·소스", emoji:"🧴", img:`${CDN}/85/56/86/item/1000742865685_i1_232.jpg`, avgPrice:8500, priceRange:"7,900~9,500" },
+
+  // ── B2C : 신세계푸드 자체 HMR ──
+  { channel:"B2C", brand:"신세계푸드", name:"보노보노 떡만두국", spec:"650g", category:"국·찌개", emoji:"🍲", img:`${CDN}/23/22/43/item/1000791432223_i1_232.jpg`, avgPrice:7900, priceRange:"7,200~8,500" },
+  { channel:"B2C", brand:"신세계푸드", name:"보노보노 왕만두 (찐만두)", spec:"540g(18개)", category:"냉동·즉석식품", emoji:"🥟", img:`${CDN}/22/84/58/item/1000036588422_i1_232.jpg`, avgPrice:8500, priceRange:"7,900~9,200" },
+  { channel:"B2C", brand:"신세계푸드", name:"보노보노 고기만두 (군만두)", spec:"420g(14개)", category:"냉동·즉석식품", emoji:"🥟", img:`${CDN}/04/45/39/item/1000037394504_i1_232.jpg`, avgPrice:7200, priceRange:"6,500~7,900" },
+  { channel:"B2C", brand:"신세계푸드", name:"SSG 도시락 (불고기 덮밥)", spec:"1인분", category:"도시락·샌드위치", emoji:"🍱", img:`${CDN}/33/20/60/item/1000768602033_i1_232.jpg`, avgPrice:5900, priceRange:"5,500~6,500" },
+  { channel:"B2C", brand:"신세계푸드", name:"SSG 삼각김밥 (참치마요)", spec:"105g", category:"도시락·샌드위치", emoji:"🍙", img:`${CDN}/83/63/80/item/1000633806383_i1_232.jpg`, avgPrice:1500, priceRange:"1,400~1,700" },
+  { channel:"B2C", brand:"신세계푸드", name:"SSG 샌드위치 (BLT)", spec:"160g", category:"도시락·샌드위치", emoji:"🥪", img:`${CDN}/94/63/80/item/1000633806394_i1_232.jpg`, avgPrice:3200, priceRange:"2,900~3,500" },
+
+  // ── B2C : 베이커리 ──
+  { channel:"B2C", brand:"신세계푸드", name:"베이크하우스 우유식빵", spec:"400g", category:"베이커리", emoji:"🍞", img:`${CDN}/76/71/26/item/1000522267176_i1_232.jpg`, avgPrice:4500, priceRange:"4,000~5,000" },
+  { channel:"B2C", brand:"신세계푸드", name:"베이크하우스 소금빵 (4입)", spec:"200g", category:"베이커리", emoji:"🥐", img:`${CDN}/73/16/77/item/1000739771673_i1_232.jpg`, avgPrice:6500, priceRange:"5,900~7,200" },
+  { channel:"B2C", brand:"신세계푸드", name:"베이크하우스 버터크림 롤케익", spec:"350g", category:"베이커리", emoji:"🎂", img:`${CDN}/88/68/92/item/1000719926888_i1_232.jpg`, avgPrice:13800, priceRange:"12,500~15,000" },
+
+  // ── B2C : 음료 ──
+  { channel:"B2C", brand:"신세계푸드", name:"제주 감귤 착즙주스", spec:"500ml", category:"음료·두유", emoji:"🍊", img:`${CDN}/03/52/36/item/1000718365203_i1_232.jpg`, avgPrice:4200, priceRange:"3,800~4,800" },
+  { channel:"B2C", brand:"신세계푸드", name:"냉압착 녹즙 (케일·사과)", spec:"100ml×10입", category:"음료·두유", emoji:"🥬", img:`${CDN}/49/59/36/item/1000718365949_i1_232.jpg`, avgPrice:18900, priceRange:"17,500~20,000" },
+
+  // ── B2B : 소스류 ──
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 데미글라스소스", spec:"2kg", category:"소스·시즈닝", emoji:"🍯", avgPrice:18500, priceRange:"17,000~20,000" },
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 갈비양념 소스", spec:"5kg", category:"소스·시즈닝", emoji:"🥣", avgPrice:29000, priceRange:"26,000~32,000" },
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 마리나라 파스타소스", spec:"3kg", category:"소스·시즈닝", emoji:"🍝", avgPrice:22000, priceRange:"19,500~24,500" },
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 카레소스 (중간맛)", spec:"3kg", category:"소스·시즈닝", emoji:"🍛", avgPrice:19500, priceRange:"17,500~21,500" },
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 냉면육수 베이스", spec:"5L", category:"소스·시즈닝", emoji:"🍜", avgPrice:24500, priceRange:"22,000~27,000" },
+
+  // ── B2B : 육류 가공 ──
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 냉동 닭가슴살 (IQF)", spec:"2kg", category:"육류·가공육", emoji:"🐔", avgPrice:21000, priceRange:"18,500~23,500" },
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 돈가스 (130g×20)", spec:"2.6kg", category:"육류·가공육", emoji:"🥩", avgPrice:38000, priceRange:"34,000~42,000" },
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 냉동 소불고기", spec:"2kg", category:"육류·가공육", emoji:"🥩", avgPrice:45000, priceRange:"40,000~50,000" },
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 함박스테이크 (80g×20)", spec:"1.6kg", category:"육류·가공육", emoji:"🍖", avgPrice:34000, priceRange:"30,000~38,000" },
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 닭튀김 (순살 30개)", spec:"1.5kg", category:"육류·가공육", emoji:"🍗", avgPrice:28500, priceRange:"25,000~32,000" },
+
+  // ── B2B : 면·밥류 ──
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 냉동 쌀밥 (200g×20)", spec:"4kg", category:"면·밥류", emoji:"🍚", avgPrice:16500, priceRange:"14,500~18,500" },
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 생면 우동 (200g×10)", spec:"2kg", category:"면·밥류", emoji:"🍜", avgPrice:12000, priceRange:"10,500~13,500" },
+  { channel:"B2B", brand:"신세계푸드 F&B", name:"업소용 냉동 짜장 소스", spec:"2.5kg", category:"소스·시즈닝", emoji:"🫙", avgPrice:17500, priceRange:"15,500~19,500" },
+
+  // ── B2B : 급식 식재료 ──
+  { channel:"B2B", brand:"신세계푸드 케이터링", name:"급식용 단호박죽 (1인분)", spec:"250g×20", category:"급식·케이터링", emoji:"🎃", avgPrice:35000, priceRange:"31,000~39,000" },
+  { channel:"B2B", brand:"신세계푸드 케이터링", name:"급식용 잡채 (냉동)", spec:"2kg", category:"급식·케이터링", emoji:"🍝", avgPrice:26000, priceRange:"23,000~29,000" },
+  { channel:"B2B", brand:"신세계푸드 케이터링", name:"급식용 떡갈비 (80g×20)", spec:"1.6kg", category:"급식·케이터링", emoji:"🍖", avgPrice:32000, priceRange:"28,500~35,500" },
+  { channel:"B2B", brand:"신세계푸드 케이터링", name:"급식용 계란찜 파우더", spec:"500g", category:"급식·케이터링", emoji:"🥚", avgPrice:8900, priceRange:"7,900~10,000" },
+  { channel:"B2B", brand:"신세계푸드 케이터링", name:"급식용 미역국 베이스", spec:"2kg", category:"급식·케이터링", emoji:"🌿", avgPrice:15500, priceRange:"13,500~17,500" },
+
+  // ── B2B : 베이커리 원자재 ──
+  { channel:"B2B", brand:"신세계푸드 베이커리", name:"업소용 생크림 (동물성)", spec:"1L×6팩", category:"베이커리 원료", emoji:"🥛", avgPrice:42000, priceRange:"38,000~46,000" },
+  { channel:"B2B", brand:"신세계푸드 베이커리", name:"업소용 버터크림 필링", spec:"5kg", category:"베이커리 원료", emoji:"🧈", avgPrice:38500, priceRange:"34,500~42,500" },
+  { channel:"B2B", brand:"신세계푸드 베이커리", name:"업소용 팥앙금 (가당)", spec:"5kg", category:"베이커리 원료", emoji:"🫘", avgPrice:25000, priceRange:"22,000~28,000" },
+];
+
+// ── 상태 ────────────────────────────────────────────────
+let filterChannel = "all";
+let filterCategory = "all";
+let filterBrand = "all";
+let viewMode = "grid";
+
+// ── 초기화 ───────────────────────────────────────────────
+function init() {
+  // 카테고리 버튼 생성
+  const cats = [...new Set(PRODUCTS.map(p => p.category))].sort();
+  const brands = [...new Set(PRODUCTS.map(p => p.brand))].sort();
+  const filterRow = document.querySelector('.filter-row');
+
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.dataset.filter = 'category';
+    btn.dataset.val = cat;
+    btn.textContent = cat;
+    filterRow.appendChild(btn);
+  });
+
+  // 브랜드 칩 생성
+  const legendWrap = document.getElementById('brand-legend-wrap');
+  brands.forEach(brand => {
+    const chip = document.createElement('div');
+    chip.className = 'brand-chip';
+    chip.textContent = brand;
+    chip.dataset.brand = brand;
+    chip.onclick = () => toggleBrand(brand, chip);
+    legendWrap.appendChild(chip);
+  });
+
+  // 통계
+  document.getElementById('stat-total').textContent = PRODUCTS.length;
+  document.getElementById('stat-b2c').textContent = PRODUCTS.filter(p=>p.channel==='B2C').length;
+  document.getElementById('stat-b2b').textContent = PRODUCTS.filter(p=>p.channel==='B2B').length;
+  document.getElementById('stat-brands').textContent = brands.length;
+  document.getElementById('stat-cats').textContent = cats.length;
+
+  // 이벤트
+  document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const f = btn.dataset.filter;
+      const v = btn.dataset.val;
+      document.querySelectorAll(`.filter-btn[data-filter="${f}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (f === 'channel') filterChannel = v;
+      if (f === 'category') filterCategory = v;
+      renderAll();
+    });
+  });
+
+  document.getElementById('search-input').addEventListener('input', renderAll);
+  renderAll();
+}
+
+function toggleBrand(brand, chip) {
+  if (filterBrand === brand) {
+    filterBrand = 'all';
+    document.querySelectorAll('.brand-chip').forEach(c => c.classList.remove('active'));
+  } else {
+    filterBrand = brand;
+    document.querySelectorAll('.brand-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  }
+  renderAll();
+}
+
+function setView(mode) {
+  viewMode = mode;
+  document.getElementById('btn-grid').classList.toggle('active', mode==='grid');
+  document.getElementById('btn-table').classList.toggle('active', mode==='table');
+  document.getElementById('product-grid').classList.toggle('hidden', mode!=='grid');
+  document.getElementById('product-table-wrap').classList.toggle('hidden', mode!=='table');
+  renderAll();
+}
+
+function getFiltered() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const sort = document.getElementById('sort-select').value;
+
+  let list = PRODUCTS.filter(p => {
+    if (filterChannel !== 'all' && p.channel !== filterChannel) return false;
+    if (filterCategory !== 'all' && p.category !== filterCategory) return false;
+    if (filterBrand !== 'all' && p.brand !== filterBrand) return false;
+    if (q && !( p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q) || p.category.toLowerCase().includes(q) || p.channel.toLowerCase().includes(q) )) return false;
+    return true;
+  });
+
+  if (sort === 'price-asc') list.sort((a,b) => a.avgPrice - b.avgPrice);
+  else if (sort === 'price-desc') list.sort((a,b) => b.avgPrice - a.avgPrice);
+  else if (sort === 'name') list.sort((a,b) => a.name.localeCompare(b.name, 'ko'));
+
+  return list;
+}
+
+function fmt(n) { return n.toLocaleString('ko-KR'); }
+
+function renderAll() {
+  const list = getFiltered();
+  document.getElementById('result-count').textContent = `총 ${list.length}개 제품`;
+
+  if (viewMode === 'grid') renderGrid(list);
+  else renderTable(list);
+}
+
+function imgOrEmoji(p) {
+  if (p.img) {
+    return `<img class="card-img" src="${p.img}" alt="${p.name}" loading="lazy"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="card-emoji" style="display:none">${p.emoji}</div>`;
+  }
+  return `<div class="card-emoji">${p.emoji}</div>`;
+}
+
+function renderGrid(list) {
+  const grid = document.getElementById('product-grid');
+  if (!list.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;color:#aaa;font-size:15px;">검색 결과가 없습니다.</div>'; return; }
+  grid.innerHTML = list.map(p => `
+    <div class="product-card">
+      <div class="card-top">
+        ${imgOrEmoji(p)}
+        <div class="card-channel"><span class="channel-tag ${p.channel.toLowerCase()}">${p.channel}</span></div>
+        <div class="card-brand">${p.brand}</div>
+      </div>
+      <div class="card-body">
+        <div class="product-name">${p.name}</div>
+        <div class="product-spec">${p.spec}</div>
+        <div><span class="product-category">${p.category}</span></div>
+        <div class="price-section">
+          <div class="price-main">
+            <div class="price-label">리테일 평균가</div>
+            <div class="price-value">${fmt(p.avgPrice)}<span>원</span></div>
+          </div>
+          <div class="price-range">
+            <div class="price-range-label">판매 범위</div>
+            <div class="price-range-val">${p.priceRange}원</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderTable(list) {
+  const tbody = document.getElementById('product-tbody');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:#aaa;">검색 결과가 없습니다.</td></tr>'; return; }
+  tbody.innerHTML = list.map(p => `
+    <tr>
+      <td style="width:52px;padding:6px 10px;">
+        ${p.img
+          ? `<img src="${p.img}" alt="${p.name}" loading="lazy" style="width:44px;height:44px;object-fit:contain;border-radius:6px;background:#f5f8f5;"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+             <span class="table-emoji" style="display:none">${p.emoji}</span>`
+          : `<span class="table-emoji">${p.emoji}</span>`
+        }
+      </td>
+      <td class="td-channel"><span class="channel-tag ${p.channel.toLowerCase()}">${p.channel}</span></td>
+      <td style="font-size:12px;color:#555;white-space:nowrap;">${p.brand}</td>
+      <td class="td-name">${p.name}</td>
+      <td class="td-spec">${p.spec}</td>
+      <td class="td-category"><span class="product-category">${p.category}</span></td>
+      <td class="td-price">${fmt(p.avgPrice)}원</td>
+      <td class="td-range">${p.priceRange}원</td>
+    </tr>
+  `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
