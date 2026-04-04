@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CJ씨푸드 제품 카탈로그 | 리테일 평균 판매가</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: #f4f6f9; color: #1a1a2e; }
+
+/* ── 헤더 ── */
+.header { background: linear-gradient(135deg, #003087 0%, #0052cc 100%); color: white; padding: 22px 20px 18px; }
+.header-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.logo-wrap { display: flex; align-items: center; gap: 14px; }
+.logo-badge { background: white; color: #003087; font-weight: 900; font-size: 15px; padding: 6px 14px; border-radius: 8px; letter-spacing: -0.5px; }
+.header-title h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+.header-title p { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+.header-meta { font-size: 12px; opacity: 0.75; text-align: right; line-height: 1.7; }
+
+/* ── 통계바 ── */
+.stats-bar { background: white; border-bottom: 1px solid #e4e8ef; padding: 10px 20px; }
+.stats-inner { max-width: 1280px; margin: 0 auto; display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; align-items: center; }
+.stat-item { text-align: center; }
+.stat-val { font-size: 20px; font-weight: 800; color: #003087; }
+.stat-label { font-size: 11px; color: #888; margin-top: 1px; }
+
+/* ── 컨트롤 ── */
+.controls { background: white; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid #e4e8ef; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+.controls-inner { max-width: 1280px; margin: 0 auto; padding: 10px 16px; }
+.search-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.search-box { flex: 1; position: relative; }
+.search-box input { width: 100%; padding: 9px 14px 9px 36px; border: 2px solid #e4e8ef; border-radius: 22px; font-size: 14px; outline: none; transition: border 0.2s; }
+.search-box input:focus { border-color: #003087; }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 15px; }
+.view-toggle { display: flex; border: 2px solid #e4e8ef; border-radius: 8px; overflow: hidden; }
+.view-btn { padding: 8px 14px; background: white; border: none; cursor: pointer; font-size: 16px; transition: background 0.2s; }
+.view-btn.active { background: #003087; color: white; }
+
+.filter-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.seg-label { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; margin-right: 2px; }
+.filter-btn { padding: 5px 14px; border: 2px solid #ddd; background: white; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; color: #555; white-space: nowrap; }
+.filter-btn:hover { border-color: #003087; color: #003087; }
+.filter-btn.active { background: #003087; border-color: #003087; color: white; }
+.filter-btn.b2c.active { background: #2563eb; border-color: #2563eb; }
+.filter-btn.b2b.active { background: #ea580c; border-color: #ea580c; }
+.divider { width: 1px; height: 20px; background: #ddd; margin: 0 4px; }
+
+/* ── 결과 카운트 ── */
+.result-row { max-width: 1280px; margin: 0 auto; padding: 8px 16px 0; display: flex; justify-content: space-between; align-items: center; }
+.result-count { font-size: 13px; color: #777; }
+.sort-select { font-size: 12px; padding: 5px 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; cursor: pointer; }
+
+/* ── 브랜드 범례 ── */
+.brand-legend { background: white; border-radius: 12px; padding: 14px 18px; margin: 14px 20px 0; max-width: 1280px; margin-left: auto; margin-right: auto; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.brand-legend-title { font-size: 12px; font-weight: 700; color: #555; margin-right: 6px; }
+.brand-chip { font-size: 11px; background: #eff6ff; color: #003087; border: 1px solid #bfdbfe; padding: 4px 12px; border-radius: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.brand-chip:hover, .brand-chip.active { background: #003087; color: white; border-color: #003087; }
+
+/* ── 카드 ── */
+.product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; padding: 14px 20px 50px; max-width: 1280px; margin: 0 auto; }
+.product-card { background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+.product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.card-top { position: relative; background: #f0f4ff; padding: 0; height: 180px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.card-img { width: 100%; height: 180px; object-fit: contain; padding: 12px; background: #f0f4ff; display: block; }
+.card-emoji { font-size: 52px; line-height: 1; }
+.card-channel { position: absolute; top: 10px; left: 10px; }
+.channel-tag { font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 12px; letter-spacing: 0.3px; }
+.channel-tag.b2c { background: #dbeafe; color: #1d4ed8; }
+.channel-tag.b2b { background: #ffedd5; color: #c2410c; }
+.card-brand { position: absolute; top: 10px; right: 10px; font-size: 10px; font-weight: 700; background: rgba(0,48,135,0.10); color: #003087; padding: 3px 9px; border-radius: 12px; }
+
+.card-body { padding: 13px 14px 15px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.product-name { font-size: 13px; font-weight: 700; color: #1a1a2e; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 38px; }
+.product-spec { font-size: 11px; color: #888; }
+.product-category { font-size: 11px; color: #003087; font-weight: 600; background: #eff6ff; padding: 2px 8px; border-radius: 6px; display: inline-block; }
+.price-section { margin-top: auto; padding-top: 10px; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-end; }
+.price-label { font-size: 10px; color: #aaa; margin-bottom: 2px; }
+.price-value { font-size: 19px; font-weight: 900; color: #1a1a2e; }
+.price-value span { font-size: 12px; font-weight: 600; color: #777; margin-left: 1px; }
+.price-range-label { font-size: 10px; color: #aaa; margin-bottom: 2px; text-align: right; }
+.price-range-val { font-size: 11px; color: #888; }
+
+/* ── 테이블 ── */
+.product-table-wrap { padding: 14px 20px 50px; max-width: 1280px; margin: 0 auto; overflow-x: auto; }
+.product-table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.06); font-size: 13px; }
+.product-table thead { background: #003087; color: white; }
+.product-table th { padding: 12px 14px; text-align: left; font-weight: 700; font-size: 12px; white-space: nowrap; }
+.product-table td { padding: 11px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+.product-table tr:last-child td { border-bottom: none; }
+.product-table tr:hover td { background: #f0f4ff; }
+.td-name { font-weight: 600; color: #1a1a2e; }
+.td-price { font-weight: 800; color: #1a1a2e; white-space: nowrap; }
+.td-range { color: #888; font-size: 11px; white-space: nowrap; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <div class="logo-badge">CJ씨푸드</div>
+      <div class="header-title">
+        <h1>제품 카탈로그 &amp; 리테일 가격</h1>
+        <p>B2C · B2B 통합 제품 판매가 현황 | 삼호 · 비비고 · CJ명가 · 주부유부왕</p>
+      </div>
+    </div>
+    <div class="header-meta">기준일: 2026년 4월<br>단위: 원 (VAT 포함, 소비자가 기준)</div>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-val" id="stat-total">0</div><div class="stat-label">전체 제품</div></div>
+    <div class="stat-item"><div class="stat-val" id="stat-b2c">0</div><div class="stat-label">B2C</div></div>
+    <div class="stat-item"><div class="stat-val" id="stat-b2b">0</div><div class="stat-label">B2B</div></div>
+    <div class="stat-item"><div class="stat-val" id="stat-brands">0</div><div class="stat-label">브랜드</div></div>
+    <div class="stat-item"><div class="stat-val" id="stat-cats">0</div><div class="stat-label">카테고리</div></div>
+  </div>
+</div>
+
+<div class="brand-legend" id="brand-legend-wrap">
+  <span class="brand-legend-title">브랜드</span>
+</div>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="search-row">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="제품명, 브랜드, 카테고리 검색...">
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="btn-grid" onclick="setView('grid')" title="카드뷰">▦</button>
+        <button class="view-btn" id="btn-table" onclick="setView('table')" title="테이블뷰">☰</button>
+      </div>
+    </div>
+    <div class="filter-row">
+      <span class="seg-label">채널</span>
+      <button class="filter-btn active" data-filter="channel" data-val="all">전체</button>
+      <button class="filter-btn b2c" data-filter="channel" data-val="B2C">B2C</button>
+      <button class="filter-btn b2b" data-filter="channel" data-val="B2B">B2B</button>
+      <div class="divider"></div>
+      <span class="seg-label">카테고리</span>
+      <button class="filter-btn active" data-filter="category" data-val="all">전체</button>
+    </div>
+  </div>
+</div>
+
+<div class="result-row">
+  <div class="result-count" id="result-count"></div>
+  <select class="sort-select" id="sort-select" onchange="renderAll()">
+    <option value="default">기본 순</option>
+    <option value="price-asc">가격 낮은 순</option>
+    <option value="price-desc">가격 높은 순</option>
+    <option value="name">이름 순</option>
+  </select>
+</div>
+
+<div class="product-grid" id="product-grid"></div>
+
+<div class="product-table-wrap hidden" id="product-table-wrap">
+  <table class="product-table">
+    <thead>
+      <tr>
+        <th></th><th>채널</th><th>브랜드</th><th>제품명</th>
+        <th>규격/용량</th><th>카테고리</th><th>리테일 평균가</th><th>판매 범위</th>
+      </tr>
+    </thead>
+    <tbody id="product-tbody"></tbody>
+  </table>
+</div>
+
+<script>
+const CDN = "https://sitem.ssgcdn.com";
+const PRODUCTS = [
+  // ── B2C : 삼호 어묵 ──
+  { channel:"B2C", brand:"삼호", name:"삼호 시원한 오뎅한그릇", spec:"360g", category:"어묵·즉석", emoji:"🍢",
+    img:`${CDN}/18/87/70/item/1000569708718_i1_232.jpg`, avgPrice:2980, priceRange:"2,700~3,200" },
+  { channel:"B2C", brand:"삼호", name:"삼호 얼큰한 오뎅한그릇", spec:"360g", category:"어묵·즉석", emoji:"🍢",
+    img:`${CDN}/03/00/71/item/1000569710003_i1_232.jpg`, avgPrice:2980, priceRange:"2,700~3,200" },
+  { channel:"B2C", brand:"삼호", name:"삼호 오뎅한그릇 2종 혼합 6입", spec:"360g×6", category:"어묵·즉석", emoji:"🍢",
+    img:`${CDN}/66/27/05/item/1000570052766_i1_232.jpg`, avgPrice:15900, priceRange:"14,500~17,500" },
+  { channel:"B2C", brand:"삼호", name:"삼호 매운어묵꼬치", spec:"360g", category:"어묵·즉석", emoji:"🌶️",
+    img:`${CDN}/05/12/10/item/1000616101205_i1_232.jpg`, avgPrice:3500, priceRange:"3,200~3,900" },
+  { channel:"B2C", brand:"삼호", name:"삼호 부산어묵 모둠세트", spec:"500g", category:"어묵·즉석", emoji:"🍢",
+    img:`${CDN}/36/56/41/item/1000531415636_i1_232.jpg`, avgPrice:7900, priceRange:"7,200~8,500" },
+  { channel:"B2C", brand:"삼호", name:"삼호 프리미엄 어묵탕 세트", spec:"600g", category:"어묵·즉석", emoji:"🍲",
+    img:`${CDN}/97/76/59/item/1000569597697_i1_232.jpg`, avgPrice:9800, priceRange:"8,900~10,800" },
+  { channel:"B2C", brand:"삼호", name:"삼호 고래바 6종 어묵 세트", spec:"300g", category:"어묵·즉석", emoji:"🐋",
+    img:`${CDN}/10/02/09/item/1000671090210_i1_232.jpg`, avgPrice:8500, priceRange:"7,800~9,300" },
+
+  // ── B2C : 비비고 생선구이 ──
+  { channel:"B2C", brand:"비비고", name:"비비고 순살 고등어구이", spec:"60g×1팩", category:"생선구이", emoji:"🐟",
+    img:`${CDN}/73/83/95/item/1000197958373_i1_232.jpg`, avgPrice:2980, priceRange:"2,700~3,300" },
+  { channel:"B2C", brand:"비비고", name:"비비고 순살 삼치구이", spec:"60g×1팩", category:"생선구이", emoji:"🐠",
+    img:`${CDN}/03/84/95/item/1000197958403_i1_232.jpg`, avgPrice:2980, priceRange:"2,700~3,300" },
+  { channel:"B2C", brand:"비비고", name:"비비고 갈치구이", spec:"70g×1팩", category:"생선구이", emoji:"🐡",
+    img:`${CDN}/89/83/95/item/1000197958389_i1_232.jpg`, avgPrice:3200, priceRange:"2,900~3,500" },
+  { channel:"B2C", brand:"비비고", name:"비비고 순살 임연수구이", spec:"60g×1팩", category:"생선구이", emoji:"🐟",
+    img:`${CDN}/66/75/62/item/1000579627566_i1_232.jpg`, avgPrice:2980, priceRange:"2,700~3,300" },
+  { channel:"B2C", brand:"비비고", name:"비비고 순살 가자미구이", spec:"60g×1팩", category:"생선구이", emoji:"🐠",
+    img:`${CDN}/22/84/93/item/1000632938422_i1_232.jpg`, avgPrice:2980, priceRange:"2,700~3,300" },
+  { channel:"B2C", brand:"비비고", name:"비비고 순살 고등어구이 4입", spec:"60g×4팩", category:"생선구이", emoji:"🐟",
+    img:`${CDN}/79/22/00/item/1000443002279_i1_232.jpg`, avgPrice:10900, priceRange:"9,900~11,900" },
+  { channel:"B2C", brand:"비비고", name:"비비고 연어스테이크", spec:"60g×1팩", category:"생선구이", emoji:"🍣",
+    img:`${CDN}/19/50/58/item/1000773585019_i1_232.jpg`, avgPrice:3500, priceRange:"3,200~3,900" },
+  { channel:"B2C", brand:"비비고", name:"비비고 틸라피아스테이크", spec:"70g×1팩", category:"생선구이", emoji:"🐟",
+    img:`${CDN}/07/27/42/item/1000803422707_i1_232.jpg`, avgPrice:2800, priceRange:"2,500~3,100" },
+
+  // ── B2C : CJ명가 · 비비고 김 ──
+  { channel:"B2C", brand:"CJ명가", name:"CJ명가 토종김 참기름 12번들", spec:"5g×12번들", category:"김·스낵", emoji:"🌿",
+    img:`${CDN}/99/13/40/item/1000548401399_i1_232.jpg`, avgPrice:4980, priceRange:"4,500~5,500" },
+  { channel:"B2C", brand:"CJ명가", name:"CJ명가 토종김 들기름 12번들", spec:"4g×12번들", category:"김·스낵", emoji:"🌿",
+    img:`${CDN}/83/14/40/item/1000548401483_i1_232.jpg`, avgPrice:4980, priceRange:"4,500~5,500" },
+  { channel:"B2C", brand:"비비고", name:"비비고 직화 들기름김 (도시락)", spec:"4g×8봉", category:"김·스낵", emoji:"🌿",
+    img:`${CDN}/80/86/01/item/1000688018680_i1_232.jpg`, avgPrice:3500, priceRange:"3,200~3,900" },
+  { channel:"B2C", brand:"비비고", name:"비비고 직화 들기름김 선물세트", spec:"4g×24봉", category:"김·스낵", emoji:"🎁",
+    img:`${CDN}/83/86/01/item/1000688018683_i1_232.jpg`, avgPrice:12900, priceRange:"11,500~14,000" },
+  { channel:"B2C", brand:"비비고", name:"비비고 햇바삭 재래김 멀티팩", spec:"5g×3번들×4", category:"김·스낵", emoji:"🌿",
+    img:`${CDN}/49/21/00/item/1000587002149_i1_232.jpg`, avgPrice:5900, priceRange:"5,200~6,500" },
+  { channel:"B2C", brand:"비비고", name:"비비고 김스낵 (오리지널)", spec:"40g", category:"김·스낵", emoji:"🍘",
+    img:`${CDN}/93/21/00/item/1000587002193_i1_232.jpg`, avgPrice:1800, priceRange:"1,600~2,000" },
+
+  // ── B2C : 주부유부왕 ──
+  { channel:"B2C", brand:"주부유부왕", name:"주부유부왕 한입사각 유부초밥", spec:"400g", category:"유부초밥", emoji:"🍱",
+    img:`${CDN}/06/19/57/item/1000037571906_i1_232.jpg`, avgPrice:4500, priceRange:"4,000~5,000" },
+  { channel:"B2C", brand:"주부유부왕", name:"새콤달콤 유부초밥 패밀리세트", spec:"320g", category:"유부초밥", emoji:"🍱",
+    img:`${CDN}/73/96/24/item/0000008249673_i1_232.jpg`, avgPrice:4980, priceRange:"4,500~5,500" },
+  { channel:"B2C", brand:"주부유부왕", name:"새콤달콤 롤유부초밥", spec:"229g", category:"유부초밥", emoji:"🍣",
+    img:`${CDN}/73/07/43/item/1000616430773_i1_232.jpg`, avgPrice:3800, priceRange:"3,400~4,200" },
+  { channel:"B2C", brand:"주부유부왕", name:"주부유부왕 한입사각 유부초밥 2입", spec:"400g×2", category:"유부초밥", emoji:"🍱",
+    img:`${CDN}/45/17/40/item/1000548401745_i1_232.jpg`, avgPrice:8500, priceRange:"7,800~9,200" },
+  { channel:"B2C", brand:"주부유부왕", name:"국산콩두부 유부초밥", spec:"328g", category:"유부초밥", emoji:"🍱",
+    img:`${CDN}/45/60/93/item/0000007936045_i1_232.jpg`, avgPrice:4200, priceRange:"3,800~4,600" },
+
+  // ── B2B : 업소용 어묵 ──
+  { channel:"B2B", brand:"삼호 F&B", name:"업소용 삼호 사각어묵 (대용량)", spec:"1kg", category:"업소용 어묵", emoji:"🍢",
+    avgPrice:8500, priceRange:"7,500~9,500" },
+  { channel:"B2B", brand:"삼호 F&B", name:"업소용 삼호 어묵 꼬치", spec:"1kg(30개)", category:"업소용 어묵", emoji:"🍢",
+    avgPrice:12000, priceRange:"10,500~13,500" },
+  { channel:"B2B", brand:"삼호 F&B", name:"업소용 냉동 모둠어묵", spec:"2kg", category:"업소용 어묵", emoji:"🍢",
+    avgPrice:19500, priceRange:"17,500~21,500" },
+  { channel:"B2B", brand:"삼호 F&B", name:"업소용 어묵탕 베이스 소스", spec:"3kg", category:"업소용 어묵", emoji:"🍲",
+    avgPrice:16000, priceRange:"14,000~18,000" },
+  { channel:"B2B", brand:"삼호 F&B", name:"업소용 부산어묵 납작어묵", spec:"1.5kg", category:"업소용 어묵", emoji:"🍢",
+    avgPrice:13500, priceRange:"11,500~15,500" },
+
+  // ── B2B : 업소용 생선구이 ──
+  { channel:"B2B", brand:"비비고 F&B", name:"업소용 고등어구이 IQF (20팩)", spec:"60g×20", category:"업소용 생선구이", emoji:"🐟",
+    avgPrice:38000, priceRange:"34,000~42,000" },
+  { channel:"B2B", brand:"비비고 F&B", name:"업소용 갈치구이 IQF (20팩)", spec:"70g×20", category:"업소용 생선구이", emoji:"🐡",
+    avgPrice:42000, priceRange:"38,000~46,000" },
+  { channel:"B2B", brand:"비비고 F&B", name:"업소용 삼치구이 IQF (20팩)", spec:"60g×20", category:"업소용 생선구이", emoji:"🐠",
+    avgPrice:38000, priceRange:"34,000~42,000" },
+  { channel:"B2B", brand:"비비고 F&B", name:"업소용 생선구이 5종 혼합 (30팩)", spec:"60g×30", category:"업소용 생선구이", emoji:"🐟",
+    avgPrice:55000, priceRange:"49,000~61,000" },
+
+  // ── B2B : 업소용 김·유부 ──
+  { channel:"B2B", brand:"CJ명가 F&B", name:"급식용 조미김 대용량 (50봉)", spec:"5g×50봉", category:"업소용 김", emoji:"🌿",
+    avgPrice:18000, priceRange:"16,000~20,000" },
+  { channel:"B2B", brand:"CJ명가 F&B", name:"업소용 김밥김 전장 (100장)", spec:"20g×100장", category:"업소용 김", emoji:"🌿",
+    avgPrice:35000, priceRange:"31,000~39,000" },
+  { channel:"B2B", brand:"주부유부왕 F&B", name:"업소용 유부초밥 세트 (대용량)", spec:"2kg", category:"업소용 유부", emoji:"🍱",
+    avgPrice:24000, priceRange:"21,000~27,000" },
+  { channel:"B2B", brand:"주부유부왕 F&B", name:"업소용 사각유부 (튀김용)", spec:"1kg", category:"업소용 유부", emoji:"🟡",
+    avgPrice:9500, priceRange:"8,500~10,500" },
+
+  // ── B2B : 급식·케이터링 ──
+  { channel:"B2B", brand:"CJ씨푸드 케이터링", name:"급식용 생선구이 세트 (5종×4팩)", spec:"1.2kg", category:"급식·케이터링", emoji:"🐟",
+    avgPrice:44000, priceRange:"39,000~49,000" },
+  { channel:"B2B", brand:"CJ씨푸드 케이터링", name:"급식용 어묵탕 (1인분×20)", spec:"300g×20", category:"급식·케이터링", emoji:"🍲",
+    avgPrice:32000, priceRange:"28,000~36,000" },
+  { channel:"B2B", brand:"CJ씨푸드 케이터링", name:"급식용 고등어 조림 (1인분×20)", spec:"80g×20", category:"급식·케이터링", emoji:"🐟",
+    avgPrice:38000, priceRange:"34,000~42,000" },
+];
+
+// ── 상태 ──
+let filterChannel = "all", filterCategory = "all", filterBrand = "all", viewMode = "grid";
+
+function init() {
+  const cats   = [...new Set(PRODUCTS.map(p => p.category))].sort();
+  const brands = [...new Set(PRODUCTS.map(p => p.brand))].sort();
+
+  const filterRow = document.querySelector('.filter-row');
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn';
+    btn.dataset.filter = 'category';
+    btn.dataset.val = cat;
+    btn.textContent = cat;
+    filterRow.appendChild(btn);
+  });
+
+  const legendWrap = document.getElementById('brand-legend-wrap');
+  brands.forEach(brand => {
+    const chip = document.createElement('div');
+    chip.className = 'brand-chip';
+    chip.textContent = brand;
+    chip.dataset.brand = brand;
+    chip.onclick = () => toggleBrand(brand, chip);
+    legendWrap.appendChild(chip);
+  });
+
+  document.getElementById('stat-total').textContent  = PRODUCTS.length;
+  document.getElementById('stat-b2c').textContent    = PRODUCTS.filter(p=>p.channel==='B2C').length;
+  document.getElementById('stat-b2b').textContent    = PRODUCTS.filter(p=>p.channel==='B2B').length;
+  document.getElementById('stat-brands').textContent = brands.length;
+  document.getElementById('stat-cats').textContent   = cats.length;
+
+  document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const f = btn.dataset.filter, v = btn.dataset.val;
+      document.querySelectorAll(`.filter-btn[data-filter="${f}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      if (f === 'channel')  filterChannel  = v;
+      if (f === 'category') filterCategory = v;
+      renderAll();
+    });
+  });
+  document.getElementById('search-input').addEventListener('input', renderAll);
+  renderAll();
+}
+
+function toggleBrand(brand, chip) {
+  filterBrand = filterBrand === brand ? 'all' : brand;
+  document.querySelectorAll('.brand-chip').forEach(c => c.classList.remove('active'));
+  if (filterBrand !== 'all') chip.classList.add('active');
+  renderAll();
+}
+
+function setView(mode) {
+  viewMode = mode;
+  document.getElementById('btn-grid').classList.toggle('active', mode==='grid');
+  document.getElementById('btn-table').classList.toggle('active', mode==='table');
+  document.getElementById('product-grid').classList.toggle('hidden', mode!=='grid');
+  document.getElementById('product-table-wrap').classList.toggle('hidden', mode!=='table');
+  renderAll();
+}
+
+function getFiltered() {
+  const q    = document.getElementById('search-input').value.trim().toLowerCase();
+  const sort = document.getElementById('sort-select').value;
+  let list = PRODUCTS.filter(p => {
+    if (filterChannel  !== 'all' && p.channel  !== filterChannel)  return false;
+    if (filterCategory !== 'all' && p.category !== filterCategory) return false;
+    if (filterBrand    !== 'all' && p.brand    !== filterBrand)    return false;
+    if (q && ![p.name,p.brand,p.category,p.channel].some(s=>s.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  if (sort==='price-asc')  list.sort((a,b)=>a.avgPrice-b.avgPrice);
+  if (sort==='price-desc') list.sort((a,b)=>b.avgPrice-a.avgPrice);
+  if (sort==='name')       list.sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+  return list;
+}
+
+const fmt = n => n.toLocaleString('ko-KR');
+
+function imgTag(p, tableMode=false) {
+  const size = tableMode ? 'width:44px;height:44px;object-fit:contain;border-radius:6px;background:#f0f4ff;' : '';
+  const cls  = tableMode ? '' : 'class="card-img"';
+  if (p.img) return `<img ${cls} src="${p.img}" alt="${p.name}" loading="lazy" style="${size}"
+      onerror="this.style.display='none';this.nextElementSibling.style.display='${tableMode?'inline':'block'}'">
+    <${tableMode?'span':'div'} class="${tableMode?'':'card-emoji'}" style="display:none;${tableMode?'font-size:22px':'font-size:52px'}">${p.emoji}</${tableMode?'span':'div'}>`;
+  return tableMode ? `<span style="font-size:22px">${p.emoji}</span>` : `<div class="card-emoji">${p.emoji}</div>`;
+}
+
+function renderAll() {
+  const list = getFiltered();
+  document.getElementById('result-count').textContent = `총 ${list.length}개 제품`;
+  if (viewMode==='grid') {
+    const grid = document.getElementById('product-grid');
+    if (!list.length) { grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:60px;color:#aaa">검색 결과가 없습니다.</div>'; return; }
+    grid.innerHTML = list.map(p=>`
+      <div class="product-card">
+        <div class="card-top">
+          ${imgTag(p)}
+          <div class="card-channel"><span class="channel-tag ${p.channel.toLowerCase()}">${p.channel}</span></div>
+          <div class="card-brand">${p.brand}</div>
+        </div>
+        <div class="card-body">
+          <div class="product-name">${p.name}</div>
+          <div class="product-spec">${p.spec}</div>
+          <div><span class="product-category">${p.category}</span></div>
+          <div class="price-section">
+            <div><div class="price-label">리테일 평균가</div><div class="price-value">${fmt(p.avgPrice)}<span>원</span></div></div>
+            <div><div class="price-range-label">판매 범위</div><div class="price-range-val">${p.priceRange}원</div></div>
+          </div>
+        </div>
+      </div>`).join('');
+  } else {
+    const tbody = document.getElementById('product-tbody');
+    if (!list.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:#aaa">검색 결과가 없습니다.</td></tr>'; return; }
+    tbody.innerHTML = list.map(p=>`
+      <tr>
+        <td style="width:52px;padding:6px 10px">${imgTag(p,true)}</td>
+        <td><span class="channel-tag ${p.channel.toLowerCase()}">${p.channel}</span></td>
+        <td style="font-size:12px;color:#555;white-space:nowrap">${p.brand}</td>
+        <td class="td-name">${p.name}</td>
+        <td style="font-size:11px;color:#888">${p.spec}</td>
+        <td><span class="product-category">${p.category}</span></td>
+        <td class="td-price">${fmt(p.avgPrice)}원</td>
+        <td class="td-range">${p.priceRange}원</td>
+      </tr>`).join('');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
