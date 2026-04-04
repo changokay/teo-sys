@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>몽골 영업 기초 정보</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      background: #f0f4f8;
+      color: #1a2332;
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, #c7323a 0%, #8b0000 60%, #1a1a2e 100%);
+      color: white;
+      padding: 40px 24px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    header .flag-stripe {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    header .stripe {
+      width: 32px;
+      height: 8px;
+      border-radius: 2px;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+      position: relative;
+    }
+    header p {
+      font-size: 0.95rem;
+      opacity: 0.8;
+      position: relative;
+    }
+    header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.8rem;
+      margin-top: 10px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+
+    /* KPI 카드 행 */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .kpi-card {
+      background: white;
+      border-radius: 14px;
+      padding: 22px 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      border-top: 4px solid var(--accent, #c7323a);
+      transition: transform 0.15s;
+    }
+    .kpi-card:hover { transform: translateY(-2px); }
+    .kpi-card .label {
+      font-size: 0.78rem;
+      color: #6b7280;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .kpi-card .value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #111827;
+      line-height: 1.1;
+    }
+    .kpi-card .unit {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+    .kpi-card .sub {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 6px;
+    }
+
+    /* 섹션 */
+    .section {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .section h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #f3f4f6;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section h2 .icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      background: #fef2f2;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    /* 2열 그리드 */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* 바 차트 */
+    .bar-item {
+      margin-bottom: 14px;
+    }
+    .bar-item .bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #374151;
+    }
+    .bar-track {
+      background: #f3f4f6;
+      border-radius: 6px;
+      height: 10px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #c7323a, #e05a5a);
+      transition: width 0.8s ease;
+    }
+    .bar-fill.blue { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+    .bar-fill.green { background: linear-gradient(90deg, #059669, #34d399); }
+    .bar-fill.orange { background: linear-gradient(90deg, #d97706, #fbbf24); }
+    .bar-fill.purple { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+
+    /* 표 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    th {
+      background: #f9fafb;
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 700;
+      color: #374151;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f3f4f6;
+      color: #4b5563;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+    .td-bold { font-weight: 700; color: #111827; }
+    .td-red { color: #c7323a; font-weight: 700; }
+    .td-blue { color: #2563eb; font-weight: 600; }
+
+    /* 하이라이트 박스 */
+    .highlight-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 4px solid #c7323a;
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+    .highlight-box h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #991b1b;
+      margin-bottom: 6px;
+    }
+    .highlight-box p {
+      font-size: 0.86rem;
+      color: #7f1d1d;
+    }
+
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid #2563eb;
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+    .info-box h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 6px;
+    }
+    .info-box p {
+      font-size: 0.86rem;
+      color: #1e3a8a;
+    }
+
+    .green-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #059669;
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+    .green-box h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #065f46;
+      margin-bottom: 6px;
+    }
+    .green-box p {
+      font-size: 0.86rem;
+      color: #064e3b;
+    }
+
+    /* 도시 목록 */
+    .city-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 12px;
+    }
+    .city-card {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 14px 16px;
+      border: 1px solid #e5e7eb;
+    }
+    .city-card .city-name {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #111827;
+      margin-bottom: 2px;
+    }
+    .city-card .city-mn {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+    .city-card .city-pop {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #c7323a;
+    }
+    .city-card .city-note {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 2px;
+    }
+
+    /* 태그 */
+    .tag {
+      display: inline-block;
+      background: #fef2f2;
+      color: #c7323a;
+      border: 1px solid #fecaca;
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin: 2px;
+    }
+    .tag.blue { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+    .tag.green { background: #f0fdf4; color: #059669; border-color: #bbf7d0; }
+
+    /* 주의사항 */
+    .note {
+      font-size: 0.78rem;
+      color: #9ca3af;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px dashed #e5e7eb;
+      text-align: right;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    @media (max-width: 480px) {
+      .kpi-row { grid-template-columns: 1fr 1fr; }
+      header h1 { font-size: 1.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="flag-stripe">
+    <div class="stripe" style="background:#c7323a;"></div>
+    <div class="stripe" style="background:#2563eb;"></div>
+    <div class="stripe" style="background:#c7323a;"></div>
+  </div>
+  <h1>🇲🇳 몽골 영업 기초 정보</h1>
+  <p>인구 · 가구 · 경제 · 디지털 환경 핵심 데이터</p>
+  <div class="badge">기준: 2025년 최신 데이터</div>
+</header>
+
+<div class="container">
+
+  <!-- KPI 핵심 지표 -->
+  <div class="kpi-row">
+    <div class="kpi-card" style="--accent:#c7323a">
+      <div class="label">총 인구</div>
+      <div class="value">352만</div>
+      <div class="unit">명 (2025년 기준)</div>
+      <div class="sub">연간 성장률 약 +1.5%</div>
+    </div>
+    <div class="kpi-card" style="--accent:#2563eb">
+      <div class="label">울란바토르 인구</div>
+      <div class="value">173만</div>
+      <div class="unit">명 (전국 약 49%)</div>
+      <div class="sub">수도 집중도 세계 최고 수준</div>
+    </div>
+    <div class="kpi-card" style="--accent:#059669">
+      <div class="label">추정 가구 수</div>
+      <div class="value">약 96만</div>
+      <div class="unit">가구 (전국)</div>
+      <div class="sub">평균 가구원 수 3.5명</div>
+    </div>
+    <div class="kpi-card" style="--accent:#d97706">
+      <div class="label">1인당 GDP</div>
+      <div class="value">$7,005</div>
+      <div class="unit">USD (2025년)</div>
+      <div class="sub">총 GDP 약 251억 달러</div>
+    </div>
+    <div class="kpi-card" style="--accent:#7c3aed">
+      <div class="label">중위 연령</div>
+      <div class="value">26.9세</div>
+      <div class="unit">매우 젊은 소비층</div>
+      <div class="sub">30세 미만 인구 약 66%</div>
+    </div>
+    <div class="kpi-card" style="--accent:#0891b2">
+      <div class="label">도시화율</div>
+      <div class="value">69%</div>
+      <div class="unit">도시 거주 인구</div>
+      <div class="sub">연 1.4% 도시화 진행 중</div>
+    </div>
+  </div>
+
+  <!-- 인구 분포 -->
+  <div class="section">
+    <h2><span class="icon">👥</span> 인구 구조 분석</h2>
+    <div class="two-col">
+      <div>
+        <h3 style="font-size:0.9rem;color:#374151;margin-bottom:14px;font-weight:700;">연령대별 인구 비중</h3>
+        <div class="bar-item">
+          <div class="bar-label"><span>0–14세 (유소년)</span><span>28.5%</span></div>
+          <div class="bar-track"><div class="bar-fill orange" style="width:28.5%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>15–19세 (청소년)</span><span>9.1%</span></div>
+          <div class="bar-track"><div class="bar-fill orange" style="width:9.1%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>20–39세 (젊은층)</span><span>30.2%</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:30.2%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>40–64세 (중장년)</span><span>26.7%</span></div>
+          <div class="bar-track"><div class="bar-fill blue" style="width:26.7%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>65세 이상 (노인)</span><span>5.4%</span></div>
+          <div class="bar-track"><div class="bar-fill green" style="width:5.4%"></div></div>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:0.9rem;color:#374151;margin-bottom:14px;font-weight:700;">도시 / 농촌 인구 비중</h3>
+        <div class="bar-item">
+          <div class="bar-label"><span>울란바토르</span><span>~49%</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:49%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>기타 도시 (아이막 중심지)</span><span>~20%</span></div>
+          <div class="bar-track"><div class="bar-fill blue" style="width:20%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>농촌 / 유목민</span><span>~31%</span></div>
+          <div class="bar-track"><div class="bar-fill green" style="width:31%"></div></div>
+        </div>
+
+        <div style="margin-top:20px;">
+          <h3 style="font-size:0.9rem;color:#374151;margin-bottom:10px;font-weight:700;">영업 인사이트</h3>
+          <div class="highlight-box">
+            <h3>수도 집중 시장</h3>
+            <p>전체 소비의 60~70%가 울란바토르에 집중. 첫 진입은 UB 단독 공략이 효율적.</p>
+          </div>
+          <div class="info-box">
+            <h3>젊은 소비층 강점</h3>
+            <p>중위연령 26.9세, 디지털/SNS 마케팅에 높은 반응. 20~30대 타겟 제품에 유리.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 주요 도시 -->
+  <div class="section">
+    <h2><span class="icon">🏙️</span> 주요 도시별 인구</h2>
+    <div class="city-list">
+      <div class="city-card">
+        <div class="city-name">울란바토르</div>
+        <div class="city-mn">Улаанбаатар · 수도</div>
+        <div class="city-pop">1,733,000명</div>
+        <div class="city-note">전국 인구의 약 49%</div>
+      </div>
+      <div class="city-card">
+        <div class="city-name">에르데네트</div>
+        <div class="city-mn">Эрдэнэт · 오르홍 아이막</div>
+        <div class="city-pop">107,856명</div>
+        <div class="city-note">제2의 도시 · 구리 광산 도시</div>
+      </div>
+      <div class="city-card">
+        <div class="city-name">다르항</div>
+        <div class="city-mn">Дархан · 다르항-올 아이막</div>
+        <div class="city-pop">약 89,000명</div>
+        <div class="city-note">제3의 도시 · 산업 중심지</div>
+      </div>
+      <div class="city-card">
+        <div class="city-name">초이발산</div>
+        <div class="city-mn">Чойбалсан · 동부 중심</div>
+        <div class="city-pop">약 44,000명</div>
+        <div class="city-note">동부 도르노드 아이막 중심</div>
+      </div>
+      <div class="city-card">
+        <div class="city-name">무룽</div>
+        <div class="city-mn">Мөрөн · 북부 중심</div>
+        <div class="city-pop">약 38,000명</div>
+        <div class="city-note">홉스골 아이막 중심</div>
+      </div>
+      <div class="city-card">
+        <div class="city-name">만달고비</div>
+        <div class="city-mn">Мандалговь · 중부</div>
+        <div class="city-pop">약 20,000명</div>
+        <div class="city-note">두르군비 아이막 중심</div>
+      </div>
+    </div>
+    <p class="note">※ UB 이외 도시 규모가 매우 작아 전국 유통망 구축 시 물류 효율 고려 필수</p>
+  </div>
+
+  <!-- 가구 정보 -->
+  <div class="section">
+    <h2><span class="icon">🏠</span> 가구 구조 & 주거 형태</h2>
+    <div class="two-col">
+      <div>
+        <table>
+          <thead>
+            <tr><th>구분</th><th>수치</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>전국 총 가구 수</td><td class="td-bold">약 96만 가구</td></tr>
+            <tr><td>울란바토르 가구 수</td><td class="td-bold">약 50만 가구</td></tr>
+            <tr><td>평균 가구원 수</td><td class="td-bold">3.5명</td></tr>
+            <tr><td>1인 가구 비율</td><td class="td-bold">약 13%</td></tr>
+            <tr><td>UB 내 아파트 거주</td><td class="td-bold">약 60%</td></tr>
+            <tr><td>UB 내 게르 거주</td><td class="td-bold">약 40%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div class="highlight-box">
+          <h3>게르 지구 (Ger District) 주목</h3>
+          <p>울란바토르 인구 40%가 게르 지구 거주. 난방·생활용품 수요 높고, 별도 유통 채널 필요. 급속히 아파트로 전환 중.</p>
+        </div>
+        <div class="green-box">
+          <h3>아파트 시장 성장</h3>
+          <p>신규 아파트 단지 급증 → 가전, 인테리어, 가구, 생활용품 수요 증가. B2B 건설사 채널 주목.</p>
+        </div>
+        <div class="info-box">
+          <h3>가구당 평균 소비 능력</h3>
+          <p>월 평균 가계 소득 약 150~250만 투그릭(약 45~75만원). 가처분 소득의 식품·필수소비재 비중 높음.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 경제 지표 -->
+  <div class="section">
+    <h2><span class="icon">📊</span> 경제 핵심 지표</h2>
+    <div class="two-col">
+      <div>
+        <table>
+          <thead>
+            <tr><th>지표</th><th>수치</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>GDP (명목)</td><td class="td-bold">251억 달러 (2025)</td></tr>
+            <tr><td>1인당 GDP</td><td class="td-bold">$7,005 USD</td></tr>
+            <tr><td>경제성장률</td><td class="td-red">+5.5% (2025)</td></tr>
+            <tr><td>통화</td><td class="td-bold">투그릭 (MNT)</td></tr>
+            <tr><td>환율 (1USD)</td><td class="td-bold">약 3,400 MNT</td></tr>
+            <tr><td>물가상승률</td><td class="td-bold">약 8~10%</td></tr>
+            <tr><td>실업률</td><td class="td-bold">약 5.5%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3 style="font-size:0.88rem;font-weight:700;color:#374151;margin-bottom:12px;">주요 산업 비중</h3>
+        <div class="bar-item">
+          <div class="bar-label"><span>광업 (석탄·구리·금)</span><span>~25%</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:25%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>도소매 · 유통</span><span>~16%</span></div>
+          <div class="bar-track"><div class="bar-fill blue" style="width:16%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>건설</span><span>~12%</span></div>
+          <div class="bar-track"><div class="bar-fill orange" style="width:12%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>농업 · 축산</span><span>~11%</span></div>
+          <div class="bar-track"><div class="bar-fill green" style="width:11%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>금융 · 서비스</span><span>~10%</span></div>
+          <div class="bar-track"><div class="bar-fill purple" style="width:10%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 디지털 & 모바일 -->
+  <div class="section">
+    <h2><span class="icon">📱</span> 디지털 · 모바일 환경</h2>
+    <div class="two-col">
+      <div>
+        <table>
+          <thead>
+            <tr><th>지표</th><th>수치</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>인터넷 보급률</td><td class="td-red">82%</td></tr>
+            <tr><td>스마트폰 보급률</td><td class="td-red">90%+</td></tr>
+            <tr><td>소셜미디어 이용률</td><td class="td-bold">78%</td></tr>
+            <tr><td>주요 SNS</td><td class="td-bold">Facebook · Instagram · TikTok</td></tr>
+            <tr><td>모바일 결제</td><td class="td-bold">QPay · MonPay · SocialPay</td></tr>
+            <tr><td>4G LTE 커버리지</td><td class="td-bold">도시 99%, 농촌 확장 중</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3 style="font-size:0.88rem;font-weight:700;color:#374151;margin-bottom:12px;">영업 채널별 추천 우선순위</h3>
+        <div class="bar-item">
+          <div class="bar-label"><span>SNS 광고 (Facebook/Instagram)</span><span>★★★★★</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:95%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>오프라인 대형마트 입점</span><span>★★★★☆</span></div>
+          <div class="bar-track"><div class="bar-fill blue" style="width:80%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>인플루언서 마케팅</span><span>★★★★☆</span></div>
+          <div class="bar-track"><div class="bar-fill orange" style="width:78%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>이커머스 플랫폼</span><span>★★★☆☆</span></div>
+          <div class="bar-track"><div class="bar-fill green" style="width:62%"></div></div>
+        </div>
+        <div class="bar-item">
+          <div class="bar-label"><span>TV 광고</span><span>★★★☆☆</span></div>
+          <div class="bar-track"><div class="bar-fill purple" style="width:55%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 행정 구역 -->
+  <div class="section">
+    <h2><span class="icon">🗺️</span> 행정 구역 & 지역 영업 권역</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>권역</th>
+          <th>주요 아이막 (도)</th>
+          <th>추정 인구</th>
+          <th>영업 특성</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-bold">수도권</td>
+          <td>울란바토르</td>
+          <td class="td-red">173만명 (49%)</td>
+          <td>소비 집중, 프리미엄 제품 가능, 모든 채널 존재</td>
+        </tr>
+        <tr>
+          <td class="td-bold">중부권</td>
+          <td>에르데네트, 다르항, 다르항-올</td>
+          <td class="td-blue">약 25만명</td>
+          <td>광산·산업 도시, 중산층 비교적 두터움</td>
+        </tr>
+        <tr>
+          <td class="td-bold">북부권</td>
+          <td>홉스골, 셀렝게, 불간</td>
+          <td class="td-blue">약 18만명</td>
+          <td>농업·관광 지역, 계절 수요 강함</td>
+        </tr>
+        <tr>
+          <td class="td-bold">동부권</td>
+          <td>도르노드, 헨티, 수흐바타르</td>
+          <td class="td-blue">약 12만명</td>
+          <td>유목·농업 중심, 저밀도, 물류 어려움</td>
+        </tr>
+        <tr>
+          <td class="td-bold">서부권</td>
+          <td>홉드, 고비-알타이, 자브항</td>
+          <td class="td-blue">약 11만명</td>
+          <td>소수민족 혼재, 원격지, 전통 소비 패턴</td>
+        </tr>
+        <tr>
+          <td class="td-bold">남부/고비권</td>
+          <td>옴노고비, 동고비, 중간고비</td>
+          <td class="td-blue">약 9만명</td>
+          <td>광산 개발 지역, 이동인구 많음</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note">※ 전국 21개 아이막 + 수도 울란바토르 총 22개 행정 구역</p>
+  </div>
+
+  <!-- 영업 주의사항 -->
+  <div class="section">
+    <h2><span class="icon">⚠️</span> 영업 시 주요 고려 사항</h2>
+    <div class="two-col">
+      <div>
+        <div class="highlight-box">
+          <h3>수입 관세 & 인증</h3>
+          <p>식품·화장품·의약품 등은 몽골 국가표준국(MNS) 인증 필요. 수입관세 평균 5~15%, 통관 절차 시간 소요.</p>
+        </div>
+        <div class="highlight-box">
+          <h3>통화 환율 리스크</h3>
+          <p>투그릭(MNT) 환율 변동성 큼. 달러 기준 계약 권장, 현지 결제 조건 명확히 설정 필요.</p>
+        </div>
+        <div class="highlight-box">
+          <h3>물류 인프라</h3>
+          <p>UB 외 지역 배송 인프라 취약. 내륙국으로 중국 또는 러시아 경유 수입. 콜드체인 미비.</p>
+        </div>
+      </div>
+      <div>
+        <div class="green-box">
+          <h3>파트너십 현지화</h3>
+          <p>로컬 디스트리뷰터·에이전트 확보가 핵심. 인맥 기반 영업 문화 강함. 장기 신뢰 관계 구축 필요.</p>
+        </div>
+        <div class="green-box">
+          <h3>계절 영업 전략</h3>
+          <p>겨울(11~3월): 난방·방한 제품 피크. 여름(6~8월): 관광·야외 제품. 명절(차강사르 1~2월): 소비 급증 시즌.</p>
+        </div>
+        <div class="info-box">
+          <h3>결제 문화</h3>
+          <p>현금·QR결제 병용. QPay, SocialPay 등 모바일 결제 급성장. B2B는 은행 송금 주류. 신용카드 수용 증가 중.</p>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:16px 18px;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;">
+      <h3 style="font-size:0.88rem;font-weight:700;color:#374151;margin-bottom:10px;">한국 기업 진출 시 유리한 카테고리</h3>
+      <span class="tag">식품·라면·스낵</span>
+      <span class="tag">K-뷰티 화장품</span>
+      <span class="tag">생활가전</span>
+      <span class="tag blue">건강기능식품</span>
+      <span class="tag blue">유아용품</span>
+      <span class="tag blue">패션·의류</span>
+      <span class="tag green">방한·캠핑용품</span>
+      <span class="tag green">건자재·인테리어</span>
+      <span class="tag green">의료·헬스케어</span>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  데이터 출처: Worldometer, UN Population Fund, World Bank, IMF (2025) · 몽골 통계청 (NSO Mongolia)<br>
+  일부 수치는 추정치이며 실제 영업 시 현지 최신 데이터 확인을 권장합니다.
+</footer>
+
+</body>
+</html>
