@@ -76,9 +76,47 @@ body {
 
 <script>
 const RSS_URL = 'https://news.google.com/rss/search?q=%EB%AA%BD%EA%B3%A8&hl=ko&gl=KR&ceid=KR:ko';
-const PROXY   = 'https://api.allorigins.win/raw?url=';
+const PROXIES = [
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+];
 
 let countdownTimer, countdownSec = 300, isLoading = false;
+
+async function fetchWithTimeout(url, ms = 8000) {
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), ms);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res;
+  } finally {
+    clearTimeout(tid);
+  }
+}
+
+async function fetchRSS() {
+  let lastErr;
+  for (const proxy of PROXIES) {
+    try {
+      const res  = await fetchWithTimeout(proxy(RSS_URL));
+      const text = await res.text();
+      const xml  = new DOMParser().parseFromString(text, 'application/xml');
+      const items = xml.querySelectorAll('item');
+      if (!items.length) throw new Error('빈 응답');
+      return [...items].slice(0, 20).map(item => ({
+        title:   cleanTitle(item.querySelector('title')?.textContent || ''),
+        link:    item.querySelector('link')?.textContent || '',
+        pubDate: item.querySelector('pubDate')?.textContent || '',
+        source:  extractSource(item.querySelector('title')?.textContent || ''),
+      })).filter(i => i.title);
+    } catch(e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr;
+}
 
 function formatDate(str) {
   if (!str) return '';
@@ -111,16 +149,7 @@ async function load() {
   showSkeleton();
 
   try {
-    const res  = await fetch(PROXY + encodeURIComponent(RSS_URL));
-    const text = await res.text();
-    const xml  = new DOMParser().parseFromString(text, 'application/xml');
-    const items = [...xml.querySelectorAll('item')].slice(0, 20).map(item => ({
-      title:   cleanTitle(item.querySelector('title')?.textContent || ''),
-      link:    item.querySelector('link')?.textContent || '',
-      pubDate: item.querySelector('pubDate')?.textContent || '',
-      source:  extractSource(item.querySelector('title')?.textContent || ''),
-    })).filter(i => i.title);
-
+    const items = await fetchRSS();
     if (!items.length) throw new Error('검색 결과가 없습니다.');
 
     document.getElementById('news-list').innerHTML = items.map((item, i) => `
