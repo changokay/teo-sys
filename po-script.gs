@@ -12,7 +12,7 @@
 
 // ── 설정 ──────────────────────────────────────────────────
 // Gmail 검색 쿼리: 필요에 따라 조정
-const PO_SEARCH_QUERY = 'subject:(PO OR "purchase order" OR "발주서" OR "발주") newer_than:60d';
+const PO_SEARCH_QUERY = '(subject:(PO OR "purchase order" OR "발주서" OR "발주" OR "order" OR "주문") OR (PO OR "purchase order" OR "발주")) newer_than:60d';
 const SHEET_NAME = 'POs';
 // ────────────────────────────────────────────────────────────
 
@@ -24,8 +24,12 @@ function doGet(e) {
   const props = PropertiesService.getScriptProperties();
   if (!props.getProperty('trigger_set')) {
     setupTrigger();
-    fetchNewPOs();
     props.setProperty('trigger_set', 'true');
+  }
+
+  // ?refresh=1 파라미터로 수동 수집 가능
+  if (e && e.parameter && e.parameter.refresh === '1') {
+    fetchNewPOs();
   }
 
   const data = getAllPOs();
