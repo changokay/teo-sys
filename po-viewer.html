@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수출 PO 관리 — 태오시스템</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #ffffff;
+  --card-bg: #f7f7f5;
+  --border: rgba(0,0,0,0.08);
+  --text: rgba(0,0,0,0.87);
+  --text-sub: rgba(0,0,0,0.45);
+  --text-ter: rgba(0,0,0,0.28);
+  --hover: rgba(0,0,0,0.04);
+  --accent: #2563eb;
+  --panel-bg: #ffffff;
+}
+html.dark {
+  --bg: #111318;
+  --card-bg: #1a1d24;
+  --border: rgba(255,255,255,0.08);
+  --text: rgba(255,255,255,0.87);
+  --text-sub: rgba(255,255,255,0.45);
+  --text-ter: rgba(255,255,255,0.28);
+  --hover: rgba(255,255,255,0.05);
+  --accent: #4f8eff;
+  --panel-bg: #1e2230;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; font-size: 14px;
+}
+
+/* 상단 바 */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.topbar-title { font-size: 16px; font-weight: 700; flex: 1; }
+.topbar-sub { font-size: 12px; color: var(--text-ter); }
+.btn {
+  padding: 6px 14px; border-radius: 7px; font-size: 13px;
+  border: 1px solid var(--border); background: var(--card-bg);
+  color: var(--text-sub); cursor: pointer; transition: background 0.15s;
+}
+.btn:hover { background: var(--hover); }
+.btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn-primary:hover { opacity: 0.88; background: var(--accent); }
+
+/* 설정 안내 배너 */
+.setup-banner {
+  margin: 24px; padding: 20px 24px;
+  background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+}
+html.dark .setup-banner { background: #2a2010; border-color: #78500a; }
+.setup-banner h3 { font-size: 14px; font-weight: 600; color: #92400e; margin-bottom: 6px; }
+html.dark .setup-banner h3 { color: #fbbf24; }
+.setup-banner p { font-size: 13px; color: #78350f; line-height: 1.6; }
+html.dark .setup-banner p { color: #d97706; }
+.setup-banner code {
+  font-family: monospace; background: rgba(0,0,0,0.07);
+  padding: 1px 6px; border-radius: 4px; font-size: 12px;
+}
+
+/* KPI */
+.kpi-row {
+  display: flex; gap: 12px; padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.kpi { flex: 1; }
+.kpi-num { font-size: 24px; font-weight: 700; }
+.kpi-label { font-size: 11px; color: var(--text-ter); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+.kpi-num.blue { color: #2563eb; }
+.kpi-num.green { color: #16a34a; }
+.kpi-num.yellow { color: #d97706; }
+.kpi-num.gray { color: var(--text-sub); }
+
+/* 필터 탭 */
+.filter-bar {
+  display: flex; gap: 4px; padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.tab {
+  padding: 5px 14px; border-radius: 6px; font-size: 13px;
+  border: none; background: none; color: var(--text-sub);
+  cursor: pointer; transition: background 0.12s;
+}
+.tab:hover { background: var(--hover); }
+.tab.active { background: var(--card-bg); color: var(--text); font-weight: 600; }
+
+/* PO 리스트 */
+.po-list { padding: 8px 24px 80px; }
+.po-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer; transition: background 0.12s, border-color 0.12s;
+  margin-bottom: 4px;
+}
+.po-row:hover { background: var(--hover); border-color: var(--border); }
+.po-row.selected { background: var(--hover); border-color: var(--accent); }
+.po-icon {
+  width: 38px; height: 38px; border-radius: 9px;
+  background: #eff6ff; display: flex; align-items: center;
+  justify-content: center; font-size: 18px; flex-shrink: 0;
+}
+html.dark .po-icon { background: #1e2d4a; }
+.po-body { flex: 1; min-width: 0; }
+.po-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.po-meta { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+.po-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+.po-amount { font-size: 14px; font-weight: 700; }
+.badge {
+  font-size: 11px; font-weight: 600; padding: 2px 9px;
+  border-radius: 4px; white-space: nowrap;
+}
+.badge-new    { background: #eff6ff; color: #2563eb; }
+.badge-review { background: #fffbeb; color: #d97706; }
+.badge-done   { background: #f0fdf4; color: #16a34a; }
+.badge-cancel { background: #fff1f2; color: #e11d48; }
+html.dark .badge-new    { background: #1e2d4a; color: #60a5fa; }
+html.dark .badge-review { background: #2a2010; color: #fbbf24; }
+html.dark .badge-done   { background: #0f2e1a; color: #4ade80; }
+html.dark .badge-cancel { background: #2e0f14; color: #fb7185; }
+
+/* 상태 없음 */
+.empty {
+  text-align: center; padding: 80px 20px; color: var(--text-ter);
+}
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty p { font-size: 14px; }
+
+/* 로딩 */
+.loading {
+  display: flex; align-items: center; justify-content: center;
+  padding: 80px; color: var(--text-ter); font-size: 13px; gap: 10px;
+}
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 상세 패널 */
+.detail-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3); z-index: 100;
+}
+.detail-overlay.open { display: block; }
+.detail-panel {
+  position: fixed; right: 0; top: 0; bottom: 0;
+  width: 420px; max-width: 95vw;
+  background: var(--panel-bg);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  z-index: 101;
+}
+.detail-panel.open { transform: translateX(0); }
+.detail-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.detail-head h2 { flex: 1; font-size: 15px; font-weight: 700; }
+.close-btn {
+  width: 30px; height: 30px; border-radius: 6px;
+  border: none; background: var(--hover); color: var(--text-sub);
+  cursor: pointer; font-size: 16px; display: flex;
+  align-items: center; justify-content: center;
+}
+.detail-body { flex: 1; overflow-y: auto; padding: 20px; }
+.detail-field { margin-bottom: 16px; }
+.detail-label { font-size: 11px; color: var(--text-ter); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.detail-value { font-size: 14px; color: var(--text); line-height: 1.5; }
+.detail-body-text {
+  font-size: 12px; color: var(--text-sub); line-height: 1.7;
+  background: var(--card-bg); padding: 12px 14px; border-radius: 8px;
+  white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto;
+  font-family: monospace;
+}
+.status-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 20px; }
+.status-btn {
+  padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--border); background: var(--card-bg);
+  color: var(--text-sub); cursor: pointer; transition: background 0.12s;
+}
+.status-btn:hover { background: var(--hover); }
+.status-btn.active-status { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">📦 수출 PO 관리</div>
+  </div>
+  <span class="topbar-sub" id="updated-time"></span>
+  <button class="btn" onclick="loadData()">↻ 새로고침</button>
+</div>
+
+<div id="setup-banner" class="setup-banner" style="display:none">
+  <h3>⚙️ Google Apps Script 연동이 필요합니다</h3>
+  <p>
+    1. <strong>Google 스프레드시트</strong>를 새로 만들고 → <strong>확장 프로그램 &gt; Apps Script</strong> 열기<br>
+    2. <code>po-script.gs</code> 내용을 붙여넣고 저장<br>
+    3. <strong>배포 &gt; 새 배포 &gt; 웹 앱</strong> → 액세스: <em>모든 사용자</em> → 배포<br>
+    4. 발급된 <strong>웹 앱 URL</strong>을 아래 <code>APPS_SCRIPT_URL</code>에 입력 후 저장<br>
+    5. Apps Script에서 <code>setupTrigger()</code> 한 번 실행 (1시간마다 자동 수집)
+  </p>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-num gray" id="k-total">—</div><div class="kpi-label">전체</div></div>
+  <div class="kpi"><div class="kpi-num blue" id="k-new">—</div><div class="kpi-label">신규</div></div>
+  <div class="kpi"><div class="kpi-num yellow" id="k-review">—</div><div class="kpi-label">검토중</div></div>
+  <div class="kpi"><div class="kpi-num green" id="k-done">—</div><div class="kpi-label">완료</div></div>
+</div>
+
+<div class="filter-bar">
+  <button class="tab active" onclick="setFilter('all', this)">전체</button>
+  <button class="tab" onclick="setFilter('new', this)">신규</button>
+  <button class="tab" onclick="setFilter('review', this)">검토중</button>
+  <button class="tab" onclick="setFilter('done', this)">완료</button>
+  <button class="tab" onclick="setFilter('cancel', this)">취소</button>
+</div>
+
+<div class="po-list" id="po-list">
+  <div class="loading"><div class="spinner"></div> 데이터 불러오는 중...</div>
+</div>
+
+<!-- 상세 패널 -->
+<div class="detail-overlay" id="overlay" onclick="closeDetail()"></div>
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-head">
+    <h2 id="d-title">PO 상세</h2>
+    <button class="close-btn" onclick="closeDetail()">✕</button>
+  </div>
+  <div class="detail-body" id="d-body"></div>
+</div>
+
+<script>
+// ⬇️ 여기에 Apps Script 웹 앱 URL을 입력하세요
+const APPS_SCRIPT_URL = '';
+
+const STATUS_LABEL = { new: '신규', review: '검토중', done: '완료', cancel: '취소' };
+const STATUS_BADGE  = { new: 'badge-new', review: 'badge-review', done: 'badge-done', cancel: 'badge-cancel' };
+
+let ALL_POS = [];
+let currentFilter = 'all';
+let selectedId = null;
+
+// 저장된 상태 (로컬)
+function getLocalStatuses() {
+  try { return JSON.parse(localStorage.getItem('po_statuses') || '{}'); } catch { return {}; }
+}
+function saveStatus(id, status) {
+  const s = getLocalStatuses(); s[id] = status;
+  localStorage.setItem('po_statuses', JSON.stringify(s));
+}
+
+function loadData() {
+  if (!APPS_SCRIPT_URL) {
+    document.getElementById('setup-banner').style.display = 'block';
+    renderEmpty('Apps Script URL을 설정해 주세요');
+    return;
+  }
+  document.getElementById('po-list').innerHTML = '<div class="loading"><div class="spinner"></div> 데이터 불러오는 중...</div>';
+
+  const cbName = 'po_cb_' + Date.now();
+  window[cbName] = (res) => {
+    delete window[cbName];
+    const data = res.data || res;
+    ALL_POS = Array.isArray(data) ? data : [];
+    const statuses = getLocalStatuses();
+    ALL_POS.forEach(po => { if (statuses[po.id]) po.status = statuses[po.id]; });
+    document.getElementById('updated-time').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
+    renderAll();
+  };
+
+  const s = document.createElement('script');
+  s.src = APPS_SCRIPT_URL + '?callback=' + cbName;
+  s.onerror = () => { delete window[cbName]; renderEmpty('데이터 로드 실패. URL을 확인해 주세요.'); };
+  document.head.appendChild(s);
+}
+
+function filtered() {
+  if (currentFilter === 'all') return ALL_POS;
+  return ALL_POS.filter(p => (p.status || 'new') === currentFilter);
+}
+
+function renderAll() {
+  const list = filtered();
+  const statuses = getLocalStatuses();
+
+  // KPI
+  document.getElementById('k-total').textContent  = ALL_POS.length;
+  document.getElementById('k-new').textContent    = ALL_POS.filter(p => (p.status||'new') === 'new').length;
+  document.getElementById('k-review').textContent = ALL_POS.filter(p => p.status === 'review').length;
+  document.getElementById('k-done').textContent   = ALL_POS.filter(p => p.status === 'done').length;
+
+  if (!list.length) { renderEmpty('해당하는 PO가 없습니다'); return; }
+
+  document.getElementById('po-list').innerHTML = list.map(po => {
+    const status = po.status || 'new';
+    const date = po.date ? new Date(po.date).toLocaleDateString('ko-KR') : '';
+    const amount = po.amount ? po.currency + ' ' + Number(po.amount).toLocaleString() : '';
+    return `<div class="po-row${selectedId === po.id ? ' selected' : ''}" onclick="openDetail('${po.id}')">
+      <div class="po-icon">📦</div>
+      <div class="po-body">
+        <div class="po-title">${escHtml(po.poNumber || po.subject || '(번호 없음)')}</div>
+        <div class="po-meta">${escHtml(po.company || po.sender || '')} ${date ? '· ' + date : ''}</div>
+      </div>
+      <div class="po-right">
+        ${amount ? `<span class="po-amount">${escHtml(amount)}</span>` : ''}
+        <span class="badge ${STATUS_BADGE[status]||'badge-new'}">${STATUS_LABEL[status]||status}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderEmpty(msg) {
+  document.getElementById('po-list').innerHTML = `<div class="empty"><div class="empty-icon">📭</div><p>${msg}</p></div>`;
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderAll();
+}
+
+function openDetail(id) {
+  selectedId = id;
+  const po = ALL_POS.find(p => p.id === id);
+  if (!po) return;
+  const status = po.status || 'new';
+  const date = po.date ? new Date(po.date).toLocaleString('ko-KR') : '—';
+
+  document.getElementById('d-title').textContent = po.poNumber || po.subject || 'PO 상세';
+  document.getElementById('d-body').innerHTML = `
+    <div class="detail-field"><div class="detail-label">상태</div>
+      <span class="badge ${STATUS_BADGE[status]||'badge-new'}">${STATUS_LABEL[status]||status}</span>
+    </div>
+    <div class="detail-field"><div class="detail-label">PO 번호</div><div class="detail-value">${escHtml(po.poNumber||'—')}</div></div>
+    <div class="detail-field"><div class="detail-label">발신자</div><div class="detail-value">${escHtml(po.sender||'—')}</div></div>
+    <div class="detail-field"><div class="detail-label">회사</div><div class="detail-value">${escHtml(po.company||'—')}</div></div>
+    <div class="detail-field"><div class="detail-label">제목</div><div class="detail-value">${escHtml(po.subject||'—')}</div></div>
+    <div class="detail-field"><div class="detail-label">수신일</div><div class="detail-value">${date}</div></div>
+    ${po.amount ? `<div class="detail-field"><div class="detail-label">금액</div><div class="detail-value">${escHtml(po.currency||'')} ${Number(po.amount).toLocaleString()}</div></div>` : ''}
+    ${po.items ? `<div class="detail-field"><div class="detail-label">품목</div><div class="detail-value">${escHtml(po.items)}</div></div>` : ''}
+    ${po.body ? `<div class="detail-field"><div class="detail-label">이메일 본문</div><div class="detail-body-text">${escHtml(po.body)}</div></div>` : ''}
+    <div class="detail-field">
+      <div class="detail-label">상태 변경</div>
+      <div class="status-btns">
+        ${Object.entries(STATUS_LABEL).map(([k,v]) =>
+          `<button class="status-btn${status===k?' active-status':''}" onclick="changeStatus('${id}','${k}')">${v}</button>`
+        ).join('')}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('detail-panel').classList.add('open');
+  renderAll();
+}
+
+function closeDetail() {
+  selectedId = null;
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('detail-panel').classList.remove('open');
+  renderAll();
+}
+
+function changeStatus(id, status) {
+  const po = ALL_POS.find(p => p.id === id);
+  if (po) { po.status = status; saveStatus(id, status); }
+  openDetail(id);
+  renderAll();
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// 다크 모드 (부모와 동기화)
+try {
+  const dark = window.parent.document.documentElement.classList.contains('dark');
+  if (dark) document.documentElement.classList.add('dark');
+} catch(e) {}
+
+loadData();
+</script>
+</body>
+</html>

@@ -392,6 +392,14 @@ body {
   </div>
 
   <div class="sidebar-section">
+    <div class="sidebar-section-label">수출 PO</div>
+    <a class="nav-item" onclick="loadPage(this, 'po-viewer.html', '수출 PO 관리')">
+      <span class="nav-icon">📦</span>
+      <span class="nav-label">수출 PO 관리</span>
+    </a>
+  </div>
+
+  <div class="sidebar-section">
     <div class="sidebar-section-label">수입 분석</div>
     <a class="nav-item" onclick="loadPage(this, 'https://changokay.github.io/samsung-mn', '삼성 수입 대시보드')">
       <span class="nav-icon">📊</span>
@@ -480,6 +488,22 @@ body {
             <span class="stag stag-red">인구통계</span>
             <span class="stag stag-blue">경제지표</span>
             <span class="stag stag-green">시장정보</span>
+          </div>
+          <span class="row-arrow">›</span>
+        </div>
+      </div>
+
+      <div class="block-label">수출 PO</div>
+      <div class="service-list">
+        <div class="service-row" onclick="loadPage(null, 'po-viewer.html', '수출 PO 관리')">
+          <div class="service-row-icon" style="background:#f0fdf4;">📦</div>
+          <div class="service-row-body">
+            <div class="service-row-title">수출 PO 관리</div>
+            <div class="service-row-url">Gmail 자동 수집 · 상태 관리</div>
+          </div>
+          <div class="service-row-tags">
+            <span class="stag stag-green">Gmail 연동</span>
+            <span class="stag stag-blue">자동화</span>
           </div>
           <span class="row-arrow">›</span>
         </div>
