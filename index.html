@@ -62,10 +62,8 @@ body {
 }
 .sidebar-logo {
   width: 26px; height: 26px;
-  background: #4f87ff;
   border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 900; color: white;
   flex-shrink: 0;
 }
 .sidebar-title {
@@ -384,7 +382,20 @@ body {
 <!-- ── Sidebar ── -->
 <nav class="sidebar">
   <div class="sidebar-header" onclick="goHome()" style="cursor:pointer;" title="홈으로">
-    <div class="sidebar-logo">T</div>
+    <div class="sidebar-logo">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="26" height="26" rx="6" fill="#1e40af"/>
+        <rect width="26" height="26" rx="6" fill="url(#lg)"/>
+        <path d="M5.5 10h10.5m0 0-2.5-2m2.5 2-2.5 2" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M20.5 16H10m0 0 2.5-2M10 16l2.5 2" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#3b82f6"/>
+            <stop offset="1" stop-color="#1d4ed8"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
     <span class="sidebar-title">태오시스템</span>
   </div>
 
@@ -468,7 +479,19 @@ body {
   <!-- 홈 -->
   <div id="home-page">
     <div class="page">
-      <span class="page-icon">🇲🇳</span>
+      <span class="page-icon">
+        <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="52" height="52" rx="14" fill="url(#plg)"/>
+          <path d="M10 21h22m0 0-5-5m5 5-5 5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M42 31H20m0 0 5-5m-5 5 5 5" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="plg" x1="0" y1="0" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#3b82f6"/>
+              <stop offset="1" stop-color="#1d4ed8"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </span>
       <h1 class="page-title">태오시스템</h1>
       <p class="page-desc">몽골 시장 데이터를 한 곳에서 — 영업 기초 정보, 수입 통계, 리테일 점포 현황, 가전제품 가격 분석을 대시보드로 제공합니다.</p>
 
