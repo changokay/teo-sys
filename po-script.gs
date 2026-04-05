@@ -20,6 +20,14 @@ const SHEET_NAME = 'POs';
  * GET 요청 처리 — JSON 또는 JSONP 반환
  */
 function doGet(e) {
+  // 최초 실행 시 트리거 자동 등록
+  const props = PropertiesService.getScriptProperties();
+  if (!props.getProperty('trigger_set')) {
+    setupTrigger();
+    fetchNewPOs();
+    props.setProperty('trigger_set', 'true');
+  }
+
   const data = getAllPOs();
   const json = JSON.stringify({ success: true, data: data, updated: new Date().toISOString() });
 
