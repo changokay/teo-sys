@@ -708,14 +708,11 @@ body {
       if (!Array.isArray(data)) return;
       const statuses = JSON.parse(localStorage.getItem('po_statuses') || '{}');
       const newCount = data.filter(p => (statuses[p.id] || p.status || 'new') !== 'done').length;
-      [document.getElementById('po-nav-badge'), document.getElementById('po-home-badge')].forEach(badge => {
+      ['po-nav-badge', 'po-home-badge'].forEach(id => {
+        const badge = document.getElementById(id);
         if (!badge) return;
-        if (newCount > 0) {
-          badge.textContent = newCount;
-          badge.classList.add('show');
-        } else {
-          badge.classList.remove('show');
-        }
+        badge.textContent = newCount;
+        badge.style.display = newCount > 0 ? 'inline-flex' : 'none';
       });
     };
     const s = document.createElement('script');
