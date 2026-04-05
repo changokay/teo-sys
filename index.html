@@ -112,6 +112,15 @@ body {
   opacity: 0.85;
 }
 .nav-label { flex: 1; }
+.nav-badge {
+  background: #ef4444; color: #fff;
+  font-size: 10px; font-weight: 700;
+  min-width: 18px; height: 18px;
+  border-radius: 9px; padding: 0 5px;
+  display: none; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.nav-badge.show { display: flex; }
 
 .sidebar-footer {
   margin-top: auto;
@@ -396,6 +405,7 @@ body {
     <a class="nav-item" onclick="loadPage(this, 'po-viewer.html', '수출 PO 관리')">
       <span class="nav-icon">📦</span>
       <span class="nav-label">수출 PO 관리</span>
+      <span class="nav-badge" id="po-nav-badge"></span>
     </a>
   </div>
 
@@ -664,6 +674,31 @@ body {
       });
     }
   }
+
+  // 신규 PO 배지
+  const PO_URL = 'https://script.google.com/macros/s/AKfycbxBw2rW6eb5PhIW1AYytkcHHeeV2MKPzAInYlxqFq9mnXCxmk7TQ549X7-nIJGrsNzI/exec';
+  function loadPOBadge() {
+    const cbName = 'po_badge_cb_' + Date.now();
+    window[cbName] = (res) => {
+      delete window[cbName];
+      const data = res.data || res;
+      if (!Array.isArray(data)) return;
+      const statuses = JSON.parse(localStorage.getItem('po_statuses') || '{}');
+      const newCount = data.filter(p => (statuses[p.id] || p.status || 'new') === 'new').length;
+      const badge = document.getElementById('po-nav-badge');
+      if (newCount > 0) {
+        badge.textContent = newCount;
+        badge.classList.add('show');
+      } else {
+        badge.classList.remove('show');
+      }
+    };
+    const s = document.createElement('script');
+    s.src = PO_URL + '?callback=' + cbName;
+    s.onerror = () => delete window[cbName];
+    document.head.appendChild(s);
+  }
+  loadPOBadge();
 
   function goHome() {
     document.getElementById('iframe-container').style.display = 'none';
