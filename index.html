@@ -537,6 +537,7 @@ body {
           <div class="service-row-tags">
             <span class="stag stag-green">Gmail 연동</span>
             <span class="stag stag-blue">자동화</span>
+            <span class="nav-badge" id="po-home-badge" style="margin-left:2px;"></span>
           </div>
           <span class="row-arrow">›</span>
         </div>
@@ -708,13 +709,15 @@ body {
       if (!Array.isArray(data)) return;
       const statuses = JSON.parse(localStorage.getItem('po_statuses') || '{}');
       const newCount = data.filter(p => (statuses[p.id] || p.status || 'new') === 'new').length;
-      const badge = document.getElementById('po-nav-badge');
-      if (newCount > 0) {
-        badge.textContent = newCount;
-        badge.classList.add('show');
-      } else {
-        badge.classList.remove('show');
-      }
+      [document.getElementById('po-nav-badge'), document.getElementById('po-home-badge')].forEach(badge => {
+        if (!badge) return;
+        if (newCount > 0) {
+          badge.textContent = newCount;
+          badge.classList.add('show');
+        } else {
+          badge.classList.remove('show');
+        }
+      });
     };
     const s = document.createElement('script');
     s.src = PO_URL + '?callback=' + cbName;
