@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>몽골 뉴스</title>
+<title>몽골 뉴스 비즈니스 인사이트</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -20,37 +20,48 @@ body {
 .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; display: inline-block; animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 .refresh-btn {
-  background: none; border: 1px solid #d1d5db; border-radius: 6px;
-  padding: 3px 10px; font-size: 12px; cursor: pointer; color: #555;
-  transition: background .12s;
+  background: none; border: none;
+  font-size: 13px; cursor: pointer; color: #2563eb;
+  transition: color .12s;
 }
-.refresh-btn:hover { background: #f1f5f9; }
+.refresh-btn:hover { color: #1d4ed8; }
 .refresh-btn:disabled { opacity: .4; cursor: default; }
+.sub-note { font-size: 12px; color: #aaa; margin-top: 5px; }
 
-.news-list { display: flex; flex-direction: column; gap: 10px; }
+.news-list { display: flex; flex-direction: column; gap: 12px; }
 .card {
   background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 16px 20px;
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
+  border-radius: 12px;
+  padding: 18px 20px;
   transition: box-shadow .15s;
 }
-.card:hover { box-shadow: 0 3px 12px rgba(0,0,0,.07); }
-.card-body { flex: 1; min-width: 0; }
-.card-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.card:hover { box-shadow: 0 3px 14px rgba(0,0,0,.07); }
+.card-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .source-badge {
   font-size: 11px; font-weight: 600;
   background: #f1f5f9; color: #475569;
   padding: 2px 8px; border-radius: 20px; white-space: nowrap;
 }
 .pub-date { font-size: 12px; color: #9ca3af; }
-.card-title { font-size: 15px; font-weight: 500; line-height: 1.5; }
+.card-title { font-size: 15px; font-weight: 600; line-height: 1.5; margin-bottom: 8px; }
 .card-title a { color: #111; text-decoration: none; }
 .card-title a:hover { color: #2563eb; }
-.card-num { font-size: 13px; font-weight: 700; color: #cbd5e1; min-width: 22px; padding-top: 2px; }
+
+.card-summary { font-size: 13px; color: #4b5563; line-height: 1.65; margin-bottom: 8px; }
+
+.keywords { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.kw {
+  font-size: 11px; padding: 2px 9px; border-radius: 20px;
+  background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;
+}
+
+.insight-box {
+  background: #fffbeb; border-left: 4px solid #f59e0b;
+  border-radius: 0 8px 8px 0; padding: 10px 14px;
+}
+.insight-label { font-size: 11px; font-weight: 700; color: #b45309; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+.insight-text { font-size: 13px; color: #78350f; line-height: 1.65; }
 
 .skeleton { background: #e5e7eb; border-radius: 4px; animation: shimmer 1.4s infinite; }
 @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:.5} }
@@ -58,24 +69,35 @@ body {
   background: #fef2f2; border: 1px solid #fecaca;
   color: #b91c1c; border-radius: 10px; padding: 16px 20px; font-size: 14px;
 }
+.analyzing {
+  font-size: 12px; color: #9ca3af; margin-top: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.spinner {
+  width: 12px; height: 12px; border: 2px solid #e5e7eb;
+  border-top-color: #f59e0b; border-radius: 50%;
+  animation: spin .7s linear infinite; display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="header">
-    <h1>🇲🇳 몽골 뉴스</h1>
+    <h1>🇲🇳 몽골 뉴스 비즈니스 인사이트</h1>
     <div class="meta">
       <span id="updated-at"></span>
       <span><span class="dot"></span> <span id="countdown">05:00</span> 후 자동 새로고침</span>
       <button class="refresh-btn" id="refresh-btn" onclick="load()">지금 새로고침</button>
     </div>
-    <div style="font-size:12px;color:#aaa;margin-top:5px;">Google 뉴스 '몽골' 키워드 한국어 기사 실시간 수집</div>
+    <div class="sub-note">Google 뉴스 '몽골' 키워드 한국어 기사 실시간 수집 · AI 분석 포함</div>
   </div>
   <div id="news-list" class="news-list"></div>
 </div>
 
 <script>
 const RSS_URL = 'https://news.google.com/rss/search?q=%EB%AA%BD%EA%B3%A8&hl=ko&gl=KR&ceid=KR:ko';
+const GROQ_API_KEY = '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';
 const PROXIES = [
   url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
   url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
@@ -91,9 +113,7 @@ async function fetchWithTimeout(url, ms = 8000) {
     const res = await fetch(url, { signal: ctrl.signal });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res;
-  } finally {
-    clearTimeout(tid);
-  }
+  } finally { clearTimeout(tid); }
 }
 
 async function fetchRSS() {
@@ -111,11 +131,48 @@ async function fetchRSS() {
         pubDate: item.querySelector('pubDate')?.textContent || '',
         source:  extractSource(item.querySelector('title')?.textContent || ''),
       })).filter(i => i.title);
-    } catch(e) {
-      lastErr = e;
-    }
+    } catch(e) { lastErr = e; }
   }
   throw lastErr;
+}
+
+async function analyzeWithGroq(items) {
+  const listText = items.map((item, i) => `${i+1}. ${item.title}`).join('\n');
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'llama-3.1-8b-instant',
+      temperature: 0.7,
+      response_format: { type: 'json_object' },
+      messages: [
+        {
+          role: 'system',
+          content: '당신은 몽골 시장 전문 비즈니스 애널리스트입니다. 반드시 JSON 형식으로만 응답하세요.',
+        },
+        {
+          role: 'user',
+          content:
+            `아래 뉴스들을 한국 사업가 관점에서 분석해주세요.\n\n` +
+            `각 항목마다 다음 3가지를 작성하세요:\n` +
+            `- summary: 뉴스 내용을 2문장으로 요약 (핵심 사실 중심)\n` +
+            `- keywords: 핵심 키워드 3~5개 (짧은 단어/구)\n` +
+            `- insight: 한국 사업가 관점 사업적 의미 2~3문장 (시장 기회/리스크, 시사점)\n\n` +
+            `${listText}\n\n` +
+            `반드시 아래 JSON 형식만 출력하세요 (다른 텍스트 없이):\n` +
+            `{"items":[{"summary":"...","keywords":["키워드1","키워드2"],"insight":"..."},...]}`
+        },
+      ],
+    }),
+  });
+  if (!res.ok) throw new Error(`Groq API 오류 ${res.status}`);
+  const json = await res.json();
+  const text = json.choices[0]?.message?.content?.trim() ?? '{}';
+  const parsed = JSON.parse(text);
+  return Array.isArray(parsed.items) ? parsed.items : [];
 }
 
 function formatDate(str) {
@@ -124,21 +181,48 @@ function formatDate(str) {
   if (isNaN(d.getTime())) return '';
   return `${d.getMonth()+1}월 ${d.getDate()}일 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
-
 function cleanTitle(t) { return t.replace(/ - [^-]+$/, '').trim(); }
 function extractSource(t) { const m = t.match(/ - ([^-]+)$/); return m ? m[1].trim() : ''; }
 
-function showSkeleton() {
-  document.getElementById('news-list').innerHTML = Array.from({length:8}).map(() => `
-    <div class="card">
-      <div class="card-num skeleton" style="width:18px;height:18px;"></div>
-      <div class="card-body">
-        <div class="card-meta">
-          <div class="skeleton" style="width:55px;height:16px;"></div>
-          <div class="skeleton" style="width:70px;height:12px;"></div>
-        </div>
-        <div class="skeleton" style="width:85%;height:18px;"></div>
+function cardHTML(item, idx, analysis) {
+  const kws = analysis?.keywords?.map(k => `<span class="kw">#${k}</span>`).join('') || '';
+  return `
+    <div class="card" id="card-${idx}">
+      <div class="card-meta">
+        ${item.source ? `<span class="source-badge">${item.source}</span>` : ''}
+        ${item.pubDate ? `<span class="pub-date">${formatDate(item.pubDate)}</span>` : ''}
       </div>
+      <div class="card-title">
+        <a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a>
+      </div>
+      ${analysis?.summary ? `<div class="card-summary">${analysis.summary}</div>` : ''}
+      ${kws ? `<div class="keywords">${kws}</div>` : ''}
+      ${analysis?.insight ? `
+        <div class="insight-box">
+          <div class="insight-label"><span>💡</span> 사업적 의미</div>
+          <div class="insight-text">${analysis.insight}</div>
+        </div>` : `
+        <div class="analyzing"><span class="spinner"></span> AI 분석 중...</div>`
+      }
+    </div>`;
+}
+
+function showSkeleton() {
+  document.getElementById('news-list').innerHTML = Array.from({length:6}).map(() => `
+    <div class="card">
+      <div class="card-meta">
+        <div class="skeleton" style="width:55px;height:16px;"></div>
+        <div class="skeleton" style="width:70px;height:12px;margin-left:4px;"></div>
+      </div>
+      <div class="skeleton" style="width:85%;height:18px;margin-bottom:10px;"></div>
+      <div class="skeleton" style="width:100%;height:13px;margin-bottom:5px;"></div>
+      <div class="skeleton" style="width:70%;height:13px;margin-bottom:10px;"></div>
+      <div style="display:flex;gap:5px;margin-bottom:10px;">
+        <div class="skeleton" style="width:50px;height:20px;border-radius:20px;"></div>
+        <div class="skeleton" style="width:60px;height:20px;border-radius:20px;"></div>
+        <div class="skeleton" style="width:45px;height:20px;border-radius:20px;"></div>
+      </div>
+      <div class="skeleton" style="width:100%;height:60px;border-radius:8px;"></div>
     </div>`).join('');
 }
 
@@ -152,21 +236,20 @@ async function load() {
     const items = await fetchRSS();
     if (!items.length) throw new Error('검색 결과가 없습니다.');
 
-    document.getElementById('news-list').innerHTML = items.map((item, i) => `
-      <div class="card">
-        <div class="card-num">${i+1}</div>
-        <div class="card-body">
-          <div class="card-meta">
-            ${item.source ? `<span class="source-badge">${item.source}</span>` : ''}
-            ${item.pubDate ? `<span class="pub-date">${formatDate(item.pubDate)}</span>` : ''}
-          </div>
-          <div class="card-title">
-            <a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a>
-          </div>
-        </div>
-      </div>`).join('');
-
+    // 먼저 분석 없이 렌더링
+    document.getElementById('news-list').innerHTML = items.map((item, i) => cardHTML(item, i, null)).join('');
     document.getElementById('updated-at').textContent = `업데이트: ${formatDate(new Date().toISOString())}`;
+
+    // Groq 분석
+    try {
+      const analyses = await analyzeWithGroq(items);
+      items.forEach((item, i) => {
+        const el = document.getElementById(`card-${i}`);
+        if (el) el.outerHTML = cardHTML(item, i, analyses[i] || {});
+      });
+    } catch(e) {
+      console.error('Groq 분석 오류:', e);
+    }
   } catch(e) {
     document.getElementById('news-list').innerHTML = `<div class="error">오류: ${e.message}</div>`;
   }
