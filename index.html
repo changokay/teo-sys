@@ -708,7 +708,7 @@ body {
       const data = res.data || res;
       if (!Array.isArray(data)) return;
       const statuses = JSON.parse(localStorage.getItem('po_statuses') || '{}');
-      const newCount = data.filter(p => (statuses[p.id] || p.status || 'new') === 'new').length;
+      const newCount = data.filter(p => (statuses[p.id] || p.status || 'new') !== 'done').length;
       [document.getElementById('po-nav-badge'), document.getElementById('po-home-badge')].forEach(badge => {
         if (!badge) return;
         if (newCount > 0) {
