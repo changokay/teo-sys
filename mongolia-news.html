@@ -153,8 +153,8 @@ async function fetchRSS() {
   throw lastErr || new Error('모든 프록시 실패');
 }
 
-async function analyzeWithGroq(items) {
-  const listText = items.map((item, i) => `${i+1}. ${item.title}`).join('\n');
+async function analyzeOneBatch(batch) {
+  const listText = batch.map((item, i) => `${i+1}. ${item.title}`).join('\n');
   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -173,13 +173,13 @@ async function analyzeWithGroq(items) {
         {
           role: 'user',
           content:
-            `아래 뉴스들을 한국 사업가 관점에서 분석해주세요.\n\n` +
+            `아래 뉴스 ${batch.length}개를 한국 사업가 관점에서 분석해주세요.\n\n` +
             `각 항목마다 다음 3가지를 작성하세요:\n` +
             `- summary: 뉴스 내용을 2문장으로 요약 (핵심 사실 중심)\n` +
             `- keywords: 핵심 키워드 3~5개 (짧은 단어/구)\n` +
             `- insight: 한국 사업가 관점 사업적 의미 2~3문장 (시장 기회/리스크, 시사점)\n\n` +
             `${listText}\n\n` +
-            `반드시 아래 JSON 형식만 출력하세요 (다른 텍스트 없이):\n` +
+            `반드시 items 배열에 ${batch.length}개를 모두 포함한 JSON만 출력하세요:\n` +
             `{"items":[{"summary":"...","keywords":["키워드1","키워드2"],"insight":"..."},...]}`
         },
       ],
@@ -190,6 +190,25 @@ async function analyzeWithGroq(items) {
   const text = json.choices[0]?.message?.content?.trim() ?? '{}';
   const parsed = JSON.parse(text);
   return Array.isArray(parsed.items) ? parsed.items : [];
+}
+
+async function analyzeWithGroq(items) {
+  const BATCH = 5;
+  const results = [];
+  for (let i = 0; i < items.length; i += BATCH) {
+    const batch = items.slice(i, i + BATCH);
+    try {
+      const batchResults = await analyzeOneBatch(batch);
+      // 배치 결과가 부족하면 빈 객체로 채움
+      for (let j = 0; j < batch.length; j++) {
+        results.push(batchResults[j] || {});
+      }
+    } catch(e) {
+      console.error(`배치 ${i}~${i+BATCH} 분석 오류:`, e);
+      for (let j = 0; j < batch.length; j++) results.push({});
+    }
+  }
+  return results;
 }
 
 function formatDate(str) {
