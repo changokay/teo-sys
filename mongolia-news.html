@@ -117,6 +117,23 @@ async function fetchWithTimeout(url, ms = 8000) {
 }
 
 async function fetchRSS() {
+  // 방법 1: rss2json API (가장 안정적)
+  try {
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(RSS_URL)}&count=20`;
+    const res = await fetchWithTimeout(apiUrl, 10000);
+    const json = await res.json();
+    if (json.status === 'ok' && json.items?.length) {
+      return json.items.map(item => ({
+        title:   cleanTitle(item.title || ''),
+        link:    item.link || '',
+        pubDate: item.pubDate || '',
+        source:  extractSource(item.title || '') || item.author || '',
+      })).filter(i => i.title);
+    }
+    throw new Error('rss2json 빈 응답');
+  } catch(e) { /* 다음 방법으로 */ }
+
+  // 방법 2: CORS 프록시로 XML 직접 파싱
   let lastErr;
   for (const proxy of PROXIES) {
     try {
@@ -133,7 +150,7 @@ async function fetchRSS() {
       })).filter(i => i.title);
     } catch(e) { lastErr = e; }
   }
-  throw lastErr;
+  throw lastErr || new Error('모든 프록시 실패');
 }
 
 async function analyzeWithGroq(items) {
