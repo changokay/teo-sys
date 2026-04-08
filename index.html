@@ -778,7 +778,7 @@ html.dark .service-row-icon { background: rgba(255,255,255,0.07) !important; }
     document.getElementById('iframe-title').textContent = title;
 
     // 브라우저 히스토리에 상태 추가 (뒤로가기 지원)
-    history.pushState({ url, title }, title, '');
+    history.pushState({ url, title }, title, location.href);
 
     // 사이드바 active 처리
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -836,6 +836,9 @@ html.dark .service-row-icon { background: rgba(255,255,255,0.07) !important; }
     document.head.appendChild(s);
   }
   loadPOBadge();
+
+  // 페이지 최초 로드 시 홈 상태를 history에 등록 (뒤로가기로 사이트를 벗어나지 않도록)
+  history.replaceState({ home: true }, '', location.href);
 
   function goHome() {
     document.getElementById('iframe-container').style.display = 'none';
