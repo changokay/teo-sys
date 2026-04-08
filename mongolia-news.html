@@ -47,6 +47,7 @@ body {
 .card-title { font-size: 15px; font-weight: 600; line-height: 1.5; margin-bottom: 8px; }
 .card-title a { color: #111; text-decoration: none; }
 .card-title a:hover { color: #2563eb; }
+.card-orig-title { font-size: 11px; color: #b0b8c1; margin-top: -4px; margin-bottom: 8px; }
 
 .card-summary { font-size: 13px; color: #4b5563; line-height: 1.65; margin-bottom: 8px; }
 
@@ -170,13 +171,14 @@ async function analyzeOneBatch(batch) {
           role: 'user',
           content:
             `아래 뉴스 ${batch.length}개를 한국 사업가 관점에서 분석해주세요.\n\n` +
-            `각 항목마다 다음 3가지를 작성하세요:\n` +
-            `- summary: 뉴스 내용을 2문장으로 요약 (핵심 사실 중심)\n` +
-            `- keywords: 핵심 키워드 3~5개 (짧은 단어/구)\n` +
-            `- insight: 한국 사업가 관점 사업적 의미 2~3문장 (시장 기회/리스크, 시사점)\n\n` +
+            `각 항목마다 다음 4가지를 작성하세요:\n` +
+            `- titleKo: 제목을 자연스러운 한국어로 번역\n` +
+            `- summary: 뉴스 내용을 2문장으로 요약 (핵심 사실 중심, 한국어)\n` +
+            `- keywords: 핵심 키워드 3~5개 (짧은 단어/구, 한국어)\n` +
+            `- insight: 한국 사업가 관점 사업적 의미 2~3문장 (시장 기회/리스크, 시사점, 한국어)\n\n` +
             `${listText}\n\n` +
             `반드시 items 배열에 ${batch.length}개를 모두 포함한 JSON만 출력하세요:\n` +
-            `{"items":[{"summary":"...","keywords":["키워드1","키워드2"],"insight":"..."},...]}`
+            `{"items":[{"titleKo":"한국어 제목","summary":"...","keywords":["키워드1","키워드2"],"insight":"..."},...]}`
         },
       ],
     }),
@@ -225,8 +227,9 @@ function cardHTML(item, idx, analysis) {
         ${item.pubDate ? `<span class="pub-date">${formatDate(item.pubDate)}</span>` : ''}
       </div>
       <div class="card-title">
-        <a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a>
+        <a href="${item.link}" target="_blank" rel="noopener noreferrer">${analysis?.titleKo || item.title}</a>
       </div>
+      ${analysis?.titleKo ? `<div class="card-orig-title">${item.title}</div>` : ''}
       ${analysis?.summary ? `<div class="card-summary">${analysis.summary}</div>` : ''}
       ${kws ? `<div class="keywords">${kws}</div>` : ''}
       ${analysis?.insight ? `
