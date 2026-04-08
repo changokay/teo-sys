@@ -195,7 +195,16 @@ html.dark .badge-cancel { background: #2e0f14; color: #fb7185; }
 }
 .status-btn:hover { background: var(--hover); }
 .status-btn.active-status { border-color: var(--accent); color: var(--accent); }
+.btn-danger {
+  padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600;
+  border: 1px solid #fca5a5; background: #fff1f2; color: #e11d48;
+  cursor: pointer; transition: background 0.15s; width: 100%;
+}
+.btn-danger:hover { background: #ffe4e6; }
+html.dark .btn-danger { background: #2e0f14; border-color: #9f1239; color: #fb7185; }
+html.dark .btn-danger:hover { background: #3d1219; }
 </style>
+<script>(function(){if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme'){document.documentElement.classList.toggle('dark',e.data.dark);localStorage.setItem('theme',e.data.dark?'dark':'light');}});})();</script>
 </head>
 <body>
 
@@ -245,6 +254,9 @@ html.dark .badge-cancel { background: #2e0f14; color: #fb7185; }
     <button class="close-btn" onclick="closeDetail()">✕</button>
   </div>
   <div class="detail-body" id="d-body"></div>
+  <div style="padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0;background:var(--panel-bg);">
+    <button class="btn-danger" id="delete-btn" onclick="">🗑 이 항목 삭제</button>
+  </div>
 </div>
 
 <script>
@@ -368,6 +380,10 @@ function openDetail(id) {
     </div>
   `;
 
+  const deleteBtn = document.getElementById('delete-btn');
+  deleteBtn.style.display = 'block';
+  deleteBtn.onclick = () => deletePO(id);
+
   document.getElementById('overlay').classList.add('open');
   document.getElementById('detail-panel').classList.add('open');
   renderAll();
@@ -378,6 +394,24 @@ function closeDetail() {
   document.getElementById('overlay').classList.remove('open');
   document.getElementById('detail-panel').classList.remove('open');
   renderAll();
+}
+
+function deletePO(id) {
+  if (!confirm('이 항목을 삭제하시겠습니까?')) return;
+  const po = ALL_POS.find(p => p.id === id);
+  if (!po) return;
+
+  // 로컬에서 즉시 제거
+  ALL_POS = ALL_POS.filter(p => p.id !== id);
+  closeDetail();
+  renderAll();
+
+  // 서버(시트)에서도 삭제
+  const cbName = 'po_del_' + Date.now();
+  window[cbName] = () => { delete window[cbName]; };
+  const s = document.createElement('script');
+  s.src = APPS_SCRIPT_URL + '?delete=' + encodeURIComponent(po.emailId || id) + '&callback=' + cbName;
+  document.head.appendChild(s);
 }
 
 function changeStatus(id, status) {
