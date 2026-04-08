@@ -777,6 +777,9 @@ html.dark .service-row-icon { background: rgba(255,255,255,0.07) !important; }
     iframe.src = url;
     document.getElementById('iframe-title').textContent = title;
 
+    // 브라우저 히스토리에 상태 추가 (뒤로가기 지원)
+    history.pushState({ url, title }, title, '');
+
     // 사이드바 active 처리
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     if (navEl) navEl.classList.add('active');
@@ -788,6 +791,27 @@ html.dark .service-row-icon { background: rgba(255,255,255,0.07) !important; }
       });
     }
   }
+
+  // 브라우저 뒤로가기 처리
+  window.addEventListener('popstate', (e) => {
+    if (e.state && e.state.url) {
+      // 이전 페이지로 복원
+      const { url, title } = e.state;
+      document.getElementById('home-page').style.display = 'none';
+      document.getElementById('mobile-topbar').style.display = 'none';
+      document.getElementById('iframe-container').style.display = 'flex';
+      const iframe = document.getElementById('content-iframe');
+      iframe.onload = () => sendThemeToIframe();
+      iframe.src = url;
+      document.getElementById('iframe-title').textContent = title;
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.toggle('active', !!(el.getAttribute('onclick') && el.getAttribute('onclick').includes(url)));
+      });
+    } else {
+      // 히스토리 스택 없음 → 홈으로
+      goHome();
+    }
+  });
 
   // 신규 PO 배지
   const PO_URL = 'https://script.google.com/macros/s/AKfycbxBw2rW6eb5PhIW1AYytkcHHeeV2MKPzAInYlxqFq9mnXCxmk7TQ549X7-nIJGrsNzI/exec';
