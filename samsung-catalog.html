@@ -113,6 +113,8 @@ body { font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-ser
 @media(max-width:900px){ .sidebar{display:none;} .main{padding:20px 16px;} .hdr{padding:0 16px;} .tabs-in{padding:0 16px;} }
 @media(max-width:480px){ .grid{grid-template-columns:repeat(2,1fr); gap:12px;} }
 </style>
+<script>(function(){if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme'){document.documentElement.classList.toggle('dark',e.data.dark);localStorage.setItem('theme',e.data.dark?'dark':'light');}});})();</script>
+<style>html.dark{filter:invert(1) hue-rotate(180deg);}html.dark img,html.dark video,html.dark canvas{filter:invert(1) hue-rotate(180deg);}</style>
 </head>
 <body>
 

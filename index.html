@@ -737,10 +737,17 @@ html.dark .service-row-icon { background: rgba(255,255,255,0.07) !important; }
     document.getElementById('theme-toggle').textContent = '☀️';
   }
 
+  function sendThemeToIframe() {
+    const iframe = document.getElementById('content-iframe');
+    const isDark = document.documentElement.classList.contains('dark');
+    try { iframe.contentWindow.postMessage({ type: 'theme', dark: isDark }, '*'); } catch(e) {}
+  }
+
   function toggleTheme() {
     const isDark = document.documentElement.classList.toggle('dark');
     document.getElementById('theme-toggle').textContent = isDark ? '☀️' : '🌙';
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    sendThemeToIframe();
   }
 
   function toggleSidebar() {
@@ -765,7 +772,9 @@ html.dark .service-row-icon { background: rgba(255,255,255,0.07) !important; }
     container.style.display = 'flex';
 
     // iframe 로드
-    document.getElementById('content-iframe').src = url;
+    const iframe = document.getElementById('content-iframe');
+    iframe.onload = () => sendThemeToIframe();
+    iframe.src = url;
     document.getElementById('iframe-title').textContent = title;
 
     // 사이드바 active 처리

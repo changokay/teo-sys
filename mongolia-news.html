@@ -81,6 +81,8 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
+<script>(function(){if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark');window.addEventListener('message',function(e){if(e.data&&e.data.type==='theme'){document.documentElement.classList.toggle('dark',e.data.dark);localStorage.setItem('theme',e.data.dark?'dark':'light');}});})();</script>
+<style>html.dark{filter:invert(1) hue-rotate(180deg);}html.dark img,html.dark video,html.dark canvas{filter:invert(1) hue-rotate(180deg);}</style>
 </head>
 <body>
 <div class="wrap">
