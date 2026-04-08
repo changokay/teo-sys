@@ -196,7 +196,7 @@ const I = {
 };
 
 const BADGE={new:{cls:'b-new',t:'NEW'},best:{cls:'b-best',t:'BEST'},ai:{cls:'b-ai',t:'AI'},bespoke:{cls:'b-bespoke',t:'BESPOKE'},pro:{cls:'b-pro',t:'PRO'}};
-const CICO={'모바일':'📱','TV/디스플레이':'📺','생활가전':'🏠','PC/태블릿':'💻','스마트 사이니지':'🖥️','비즈니스 모니터':'🖥️','프린터/복합기':'🖨️','반도체/메모리':'🔲','네트워크/통신':'📡','기업 솔루션':'🔐'};
+const CICO={'모바일':'📱','TV/디스플레이':'📺','생활가전':'🏠','PC/태블릿':'💻','스마트 사이니지':'🖥️','비즈니스 모니터':'🖥️','프린터/복합기':'🖨️','반도체/메모리':'🔲','네트워크/통신':'📡','기업 솔루션':'🔐','영상보안/IoT':'📷'};
 
 const P = {
  b2c:[
@@ -406,7 +406,161 @@ const P = {
    name:'Galaxy Tab S10 FE',price:'₩649,800',pnote:'128GB Wi-Fi 기준',badge:null,
    desc:'합리적인 가격에 S Pen 포함. Tab S10 핵심 기능을 폭넓게 제공.',
    tags:['S Pen 포함','10.9"','Galaxy AI','가성비'],
-   specs:{'디스플레이':'10.9" LCD','AP':'Exynos 1580','RAM':'6 / 8GB','배터리':'10,090mAh'}}
+   specs:{'디스플레이':'10.9" LCD','AP':'Exynos 1580','RAM':'6 / 8GB','배터리':'10,090mAh'}},
+
+  /* ── 모바일 추가 ── */
+  {id:35,cat:'모바일',ico:'📱',img:null,
+   name:'Galaxy S25 Edge',price:'₩1,399,800',pnote:'256GB 기준',badge:'new',
+   desc:'역대 가장 얇은 S 시리즈. 6.7" 대형 화면을 5.8mm 극초슬림 바디에 담아낸 2025년 혁신작.',
+   tags:['초슬림 5.8mm','Galaxy AI','Snapdragon 8 Elite','5G','200MP'],
+   specs:{'디스플레이':'6.7" FHD+ Dynamic AMOLED 2X','AP':'Snapdragon 8 Elite','RAM':'12GB','저장용량':'256GB ~ 512GB','두께':'5.8mm','배터리':'3,900mAh'}},
+
+  {id:36,cat:'모바일',ico:'💍',img:null,
+   name:'Galaxy Ring',price:'₩459,000',pnote:'사이즈별 동일가',badge:'new',
+   desc:'24시간 건강 모니터링 스마트 링. 수면·심박·활동량 추적, 최대 9일 배터리.',
+   tags:['스마트 링','수면 추적','심박','9일 배터리','IP68'],
+   specs:{'소재':'티타늄','배터리':'최대 9일','센서':'심박 / 온도 / 가속도계','방수':'IP68','크기':'5 ~ 13호'}},
+
+  {id:37,cat:'모바일',ico:'⌚',img:null,
+   name:'Galaxy Watch8 Classic',price:'₩529,800',pnote:'47mm 기준',badge:'best',
+   desc:'클래식한 원형 디자인에 Galaxy AI 건강 기능. 회전 베젤과 고급스러운 마감.',
+   tags:['회전 베젤','Galaxy AI','혈당 트렌드','AMOLED','5ATM+IP68'],
+   specs:{'디스플레이':'1.5" Super AMOLED','케이스':'스테인리스','배터리':'425mAh','방수':'5ATM + IP68','OS':'Wear OS 5'}},
+
+  {id:38,cat:'모바일',ico:'⌚',img:null,
+   name:'Galaxy Watch FE',price:'₩219,800',pnote:'40mm 기준',badge:null,
+   desc:'합리적인 가격의 Galaxy Watch 입문 모델. 핵심 건강 기능과 세련된 디자인.',
+   tags:['Galaxy Watch','심박','수면','5ATM','IP68'],
+   specs:{'디스플레이':'1.2" Super AMOLED','배터리':'247mAh','방수':'5ATM + IP68','OS':'Wear OS'}},
+
+  {id:39,cat:'모바일',ico:'🎧',img:null,
+   name:'Galaxy Buds3',price:'₩159,800',pnote:'정가',badge:null,
+   desc:'개방형 스틱 디자인의 일상 이어버드. AI 노이즈 캔슬링과 맑은 통화 품질.',
+   tags:['개방형','ANC','AI','IPX5','블루투스 5.4'],
+   specs:{'배터리':'버드 6h + 케이스 28h','ANC':'지원 (개방형)','방수':'IPX5','연결':'블루투스 5.4'}},
+
+  {id:40,cat:'모바일',ico:'📱',img:null,
+   name:'Galaxy A55 5G',price:'₩549,400',pnote:'128GB 기준',badge:null,
+   desc:'2024년 A 시리즈 베스트셀러. 50MP OIS 카메라, AMOLED 120Hz, IP67 방수.',
+   tags:['5G','OIS','IP67','AMOLED 120Hz','50MP'],
+   specs:{'디스플레이':'6.6" FHD+ Super AMOLED 120Hz','AP':'Exynos 1480','RAM':'8GB','저장용량':'128 / 256GB','배터리':'5,000mAh','방수':'IP67'}},
+
+  {id:41,cat:'모바일',ico:'📱',img:null,
+   name:'Galaxy A25 5G',price:'₩369,400',pnote:'128GB 기준',badge:null,
+   desc:'가성비 5G 스마트폰. 50MP 트리플 카메라, Super AMOLED, 5000mAh.',
+   tags:['5G','Super AMOLED','50MP','5000mAh','가성비'],
+   specs:{'디스플레이':'6.5" FHD+ Super AMOLED','AP':'Exynos 1280','RAM':'6 / 8GB','저장용량':'128 / 256GB','배터리':'5,000mAh'}},
+
+  {id:42,cat:'모바일',ico:'📱',img:null,
+   name:'Galaxy A15',price:'₩239,400',pnote:'128GB 기준',badge:null,
+   desc:'입문 스마트폰. 6.5" Super AMOLED, 50MP 카메라, 5000mAh 배터리.',
+   tags:['Super AMOLED','50MP','5000mAh','90Hz'],
+   specs:{'디스플레이':'6.5" FHD+ Super AMOLED 90Hz','AP':'Helio G99','RAM':'4 / 6GB','저장용량':'128 / 256GB','배터리':'5,000mAh'}},
+
+  /* ── TV/디스플레이 추가 ── */
+  {id:43,cat:'TV/디스플레이',ico:'📺',img:null,
+   name:'The Serif TV (65")',price:'₩2,090,000',pnote:'65인치 기준',badge:'bespoke',
+   desc:'I자 형 스탠드의 예술 감성 라이프스타일 TV. 양면 화면과 Art Mode 지원.',
+   tags:['라이프스타일','Art Mode','QLED','양면 디스플레이','비스포크'],
+   specs:{'해상도':'4K QLED','크기':'43 / 55 / 65"','특징':'I자 스탠드 / 양면 화면','Art Mode':'내장'}},
+
+  {id:44,cat:'TV/디스플레이',ico:'📺',img:null,
+   name:'The Sero TV (43")',price:'₩1,690,000',pnote:'43인치 기준',badge:null,
+   desc:'세로 회전 가능한 모바일 라이프스타일 TV. 스마트폰 콘텐츠 최적화 세로 화면.',
+   tags:['세로 회전','라이프스타일','QLED','모바일 미러링'],
+   specs:{'해상도':'FHD (세로) / 4K QLED','크기':'43"','특징':'세로 / 가로 회전','사운드':'60W 4.1ch'}},
+
+  {id:45,cat:'TV/디스플레이',ico:'📺',img:null,
+   name:'QLED Q70D (55")',price:'₩1,290,000',pnote:'55인치 기준',badge:'best',
+   desc:'4K QLED 베스트셀러. 120Hz, Quantum HDR, 게임 모드+.',
+   tags:['4K','QLED','120Hz','Quantum HDR','게이밍'],
+   specs:{'해상도':'3840×2160 (4K)','패널':'QLED','주사율':'120Hz','HDR':'Quantum HDR','크기':'43 / 50 / 55 / 65 / 75 / 85"'}},
+
+  {id:46,cat:'TV/디스플레이',ico:'📺',img:null,
+   name:'Crystal 4K UHD (65")',price:'₩890,000',pnote:'65인치 기준',badge:null,
+   desc:'입문형 4K UHD TV. Crystal Processor 4K, AirSlim 디자인.',
+   tags:['4K UHD','Crystal Processor','AirSlim','HDR'],
+   specs:{'해상도':'3840×2160 (4K)','패널':'Crystal UHD','크기':'43 / 50 / 55 / 65 / 75"','HDR':'HDR10+'}},
+
+  {id:47,cat:'TV/디스플레이',ico:'🎞️',img:null,
+   name:'The Premiere LSP9T',price:'₩5,990,000',pnote:'정가',badge:'pro',
+   desc:'4K 초단초점 레이저 프로젝터. 130인치 화면을 벽 바로 앞에서 투사.',
+   tags:['레이저 프로젝터','4K','130"','트리플 레이저','돌비 애트모스'],
+   specs:{'해상도':'4K UHD','밝기':'2,800ANSI 루멘','광원':'트리플 레이저','사운드':'Dolby Atmos 4.2ch','최대 화면':'130"'}},
+
+  /* ── 생활가전 추가 ── */
+  {id:48,cat:'생활가전',ico:'💨',img:null,
+   name:'비스포크 큐브에어 공기청정기',price:'₩699,000',pnote:'정가',badge:'bespoke',
+   desc:'모듈형 큐브 디자인 공기청정기. AI 오토 청정, PM1.0 초미세먼지 99.97% 제거.',
+   tags:['비스포크','PM1.0','AI 오토 청정','모듈형','52m²'],
+   specs:{'적용 면적':'52m²','필터':'PM1.0 헤파 / 그린 가드','AI':'AI 오토 청정 모드','소음':'21dB (저풍량)'}},
+
+  {id:49,cat:'생활가전',ico:'👔',img:null,
+   name:'비스포크 에어드레서',price:'₩1,299,000',pnote:'정가',badge:'bespoke',
+   desc:'의류 냄새·구김·세균 제거 스타일러. AI 코스 추천, 히트펌프 방식.',
+   tags:['비스포크','의류 관리','냄새 제거','AI','스팀'],
+   specs:{'용량':'최대 의류 5벌','AI':'AI 코스 추천','방식':'히트펌프 + 스팀','에너지 등급':'1등급'}},
+
+  {id:50,cat:'생활가전',ico:'🤖',img:null,
+   name:'비스포크 AI 로봇청소기',price:'₩1,199,000',pnote:'정가',badge:'ai',
+   desc:'AI 장애물 인식 2-in-1 로봇청소기. 청소·물걸레 동시 가능, 6,000Pa 흡입력.',
+   tags:['AI 장애물 인식','물걸레','6000Pa','LiDAR','자동 비움'],
+   specs:{'흡입력':'6,000Pa','기능':'청소 + 물걸레 동시','AI':'장애물 인식 / 공간 매핑','충전':'자동 복귀 충전'}},
+
+  {id:51,cat:'생활가전',ico:'🍳',img:null,
+   name:'비스포크 인덕션 (3구)',price:'₩899,000',pnote:'정가',badge:'bespoke',
+   desc:'AI 요리 가이드와 WiFi 연동 인덕션. 스마트싱스로 원격 제어 가능.',
+   tags:['비스포크','인덕션','AI 요리','SmartThings','3구'],
+   specs:{'구성':'3구 인덕션','AI':'AI 요리 가이드','연결':'Wi-Fi / SmartThings','안전':'잔열 표시 / 안전 잠금'}},
+
+  {id:52,cat:'생활가전',ico:'♨️',img:null,
+   name:'비스포크 전기오븐 (35L)',price:'₩459,000',pnote:'정가',badge:'bespoke',
+   desc:'컨벡션 방식 35L 전기오븐. 12가지 자동 요리 코스, 비스포크 컬러 선택.',
+   tags:['비스포크','컨벡션','35L','자동 요리','에어프라이'],
+   specs:{'용량':'35L','기능':'컨벡션 / 그릴 / 에어프라이','자동 코스':'12가지','온도 범위':'40 ~ 250°C'}},
+
+  {id:53,cat:'생활가전',ico:'🏠',img:null,
+   name:'SmartThings Hub (스마트홈)',price:'₩149,000',pnote:'정가',badge:'ai',
+   desc:'삼성 스마트홈 허브. 모든 SmartThings 기기를 앱 하나로 통합 제어.',
+   tags:['SmartThings','스마트홈','AI','Zigbee','Z-Wave'],
+   specs:{'프로토콜':'Wi-Fi / Zigbee / Z-Wave / Matter','연동':'삼성 전 가전 + 타사 Matter 기기','AI':'AI 에너지 절감 리포트'}},
+
+  /* ── PC/태블릿 추가 ── */
+  {id:54,cat:'PC/태블릿',ico:'💻',img:I.book6p14,
+   name:'Galaxy Book6 Pro (14")',price:'₩1,799,000',pnote:'16GB/512GB 기준',badge:'best',
+   desc:'휴대성과 성능의 균형. 1.17kg 초경량 14" AMOLED 노트북, Galaxy AI 내장.',
+   tags:['Intel Core Ultra 7','AMOLED','Galaxy AI','1.17kg','초경량'],
+   specs:{'디스플레이':'14" Dynamic AMOLED 2X','CPU':'Intel Core Ultra 7','RAM':'16 / 32GB','무게':'1.17kg','배터리':'최대 25h'}},
+
+  {id:55,cat:'PC/태블릿',ico:'💻',img:I.book5p,
+   name:'Galaxy Book5 Pro (14")',price:'₩1,599,000',pnote:'16GB/512GB 기준',badge:null,
+   desc:'14" AMOLED 초경량 노트북. Intel Core Ultra 5, Galaxy AI 연동.',
+   tags:['Intel Core Ultra 5','AMOLED','Galaxy AI','경량','AI PC'],
+   specs:{'디스플레이':'14" Dynamic AMOLED 2X','CPU':'Intel Core Ultra 5','RAM':'16GB','무게':'1.23kg','배터리':'최대 22h'}},
+
+  {id:56,cat:'PC/태블릿',ico:'💻',img:null,
+   name:'Galaxy Book4 Edge',price:'₩1,899,000',pnote:'16GB/512GB 기준',badge:'ai',
+   desc:'Snapdragon X Elite 탑재 Copilot+ PC. ARM 네이티브 성능과 25h 초장시간 배터리.',
+   tags:['Snapdragon X Elite','Copilot+','ARM','25h 배터리','NPU 45TOPS'],
+   specs:{'디스플레이':'14" Dynamic AMOLED 2X','CPU':'Snapdragon X Elite','RAM':'16 / 32GB','무게':'1.17kg','NPU':'45 TOPS'}},
+
+  {id:57,cat:'PC/태블릿',ico:'📟',img:null,
+   name:'Galaxy Tab S10+',price:'₩1,299,800',pnote:'256GB Wi-Fi 기준',badge:'best',
+   desc:'12.4" AMOLED 대형 태블릿. S Pen 기본 포함, Galaxy AI, DeX 지원.',
+   tags:['S Pen 포함','Galaxy AI','12.4"','Snapdragon 8 Gen 3','DeX'],
+   specs:{'디스플레이':'12.4" Dynamic AMOLED 2X','AP':'Snapdragon 8 Gen 3','RAM':'12GB','저장용량':'256GB ~ 512GB','배터리':'10,090mAh'}},
+
+  {id:58,cat:'PC/태블릿',ico:'📟',img:null,
+   name:'Galaxy Tab A9+',price:'₩419,800',pnote:'64GB Wi-Fi 기준',badge:null,
+   desc:'11" LCD 가성비 태블릿. 멀티미디어와 학습에 최적화된 보급형.',
+   tags:['11"','Dolby Atmos','쿼드 스피커','가성비','OTG'],
+   specs:{'디스플레이':'11" LCD 90Hz','AP':'Snapdragon 695','RAM':'4 / 8GB','저장용량':'64 / 128GB','배터리':'7,040mAh'}},
+
+  {id:59,cat:'PC/태블릿',ico:'📟',img:null,
+   name:'Galaxy Tab A9',price:'₩279,800',pnote:'64GB Wi-Fi 기준',badge:null,
+   desc:'8.7" 소형 가성비 태블릿. 콘텐츠 소비와 학습에 최적.',
+   tags:['8.7"','가성비','OTG','Wi-Fi','학습'],
+   specs:{'디스플레이':'8.7" LCD 60Hz','AP':'Helio G99','RAM':'4GB','저장용량':'64 / 128GB','배터리':'5,100mAh'}}
  ],
 
  b2b:[
@@ -552,7 +706,158 @@ const P = {
    name:'Samsung SDS 클라우드',price:'종량제',pnote:'사용량·플랜별 상이',badge:null,
    desc:'삼성 SDS 엔터프라이즈 클라우드. 하이브리드 클라우드, AI·빅데이터 플랫폼.',
    tags:['하이브리드 클라우드','AI 플랫폼','빅데이터','기업용'],
-   specs:{'타입':'하이브리드 / 프라이빗 / 멀티 클라우드','서비스':'IaaS / PaaS / SaaS','AI':'Brightics AI 플랫폼'}}
+   specs:{'타입':'하이브리드 / 프라이빗 / 멀티 클라우드','서비스':'IaaS / PaaS / SaaS','AI':'Brightics AI 플랫폼'}},
+
+  /* ── 스마트 사이니지 추가 ── */
+  {id:124,cat:'스마트 사이니지',ico:'✨',img:null,
+   name:'The Wall (마이크로 LED)',price:'견적 문의',pnote:'모듈·크기·픽셀 피치별 산출',badge:'pro',
+   desc:'마이크로 LED 모듈형 초대형 디스플레이. 픽셀 단위 자발광으로 완벽한 블랙 재현.',
+   tags:['마이크로 LED','자발광','모듈형','HDR','110 ~ 1000"'],
+   specs:{'기술':'마이크로 LED 자발광','픽셀 피치':'0.63 / 0.84 / 1.26mm','밝기':'최대 2,000nit','크기':'모듈 조합 자유','용도':'호텔 / 방송 / 대형 전시'}},
+
+  {id:125,cat:'스마트 사이니지',ico:'☀️',img:null,
+   name:'QHH 옥외용 사이니지',price:'견적 문의',pnote:'밝기·크기별 산출',badge:null,
+   desc:'3,000nit 초고휘도 옥외 상업용 디스플레이. IP56 방진방수, -30°C 혹한 동작.',
+   tags:['옥외','3000nit','IP56','4K','24/7'],
+   specs:{'밝기':'3,000nit','방수':'IP56','운용 온도':'-30 ~ +50°C','해상도':'FHD / 4K','운용':'24시간 365일'}},
+
+  {id:126,cat:'스마트 사이니지',ico:'🏨',img:null,
+   name:'호텔 TV HT690U 시리즈',price:'견적 문의',pnote:'수량·크기별 산출',badge:null,
+   desc:'호텔 객실 전용 프로 TV. 중앙 관리 시스템 연동, 맞춤형 채널·UI 구성.',
+   tags:['호텔용','중앙 관리','LYNK REACH','IPTV','55 / 65"'],
+   specs:{'용도':'호텔 객실','관리':'LYNK REACH 중앙 관리 시스템','해상도':'4K UHD','크기':'43 ~ 75"'}},
+
+  /* ── 비즈니스 모니터 추가 ── */
+  {id:127,cat:'비즈니스 모니터',ico:'🖥️',img:null,
+   name:'ViewFinity S9 (49")',price:'₩1,799,000',pnote:'정가',badge:'pro',
+   desc:'49" 5K2K 울트라와이드 IPS 모니터. Thunderbolt 4, 내장 4K 카메라, 크리에이터 최적.',
+   tags:['5K2K','49"','Thunderbolt 4','내장 카메라','크리에이터'],
+   specs:{'해상도':'5120×2160 (5K2K)','크기':'49"','연결':'Thunderbolt 4 + DP + HDMI','카메라':'4K 내장 Slimfit Camera','밝기':'400nit'}},
+
+  {id:128,cat:'비즈니스 모니터',ico:'🖥️',img:null,
+   name:'S34A650T 울트라와이드 (34")',price:'₩649,000',pnote:'정가',badge:'best',
+   desc:'34" WQHD 울트라와이드 IPS. USB-C, 피벗·스위블 스탠드, 사무·크리에이터용.',
+   tags:['WQHD','34"','USB-C','울트라와이드','IPS'],
+   specs:{'해상도':'3440×1440 (WQHD)','크기':'34"','주사율':'100Hz','연결':'USB-C + HDMI + DP','색상':'DCI-P3 99%'}},
+
+  {id:129,cat:'비즈니스 모니터',ico:'🖥️',img:null,
+   name:'S27C432 비즈니스 (27")',price:'₩299,000',pnote:'정가',badge:null,
+   desc:'27" FHD IPS 기업용 모니터. 에르고 스탠드, 높이·각도 조절, Eye Saver 인증.',
+   tags:['27"','FHD','IPS','에르고 스탠드','Eye Saver'],
+   specs:{'해상도':'1920×1080 (FHD)','크기':'27"','패널':'IPS','연결':'HDMI + DP + USB-C','스탠드':'높이 / 틸트 / 스위블 / 피벗'}},
+
+  {id:130,cat:'비즈니스 모니터',ico:'🖥️',img:null,
+   name:'U32J590 4K 비즈니스 (32")',price:'₩499,000',pnote:'정가',badge:null,
+   desc:'32" 4K UHD IPS 사무용 모니터. 선명한 해상도와 광색역으로 전문가용 작업.',
+   tags:['4K','32"','IPS','HDR10','Picture-in-Picture'],
+   specs:{'해상도':'3840×2160 (4K)','크기':'32"','패널':'IPS','HDR':'HDR10','연결':'HDMI×2 + DP'}},
+
+  /* ── 프린터/복합기 추가 ── */
+  {id:131,cat:'프린터/복합기',ico:'🖨️',img:null,
+   name:'SL-M5370LX 흑백 복합기',price:'₩980,000',pnote:'정가 / VAT 별도',badge:'best',
+   desc:'45ppm 고속 흑백 A4 복합기. 인쇄·복사·스캔·팩스, 기가비트 이더넷, NFC 출력.',
+   tags:['흑백','45ppm','복합기','NFC','A4'],
+   specs:{'속도':'45ppm','기능':'인쇄 / 복사 / 스캔 / 팩스','연결':'기가비트 이더넷 + NFC','용지 용량':'650매'}},
+
+  {id:132,cat:'프린터/복합기',ico:'🖨️',img:null,
+   name:'SL-C4300FX 컬러 복합기',price:'₩1,290,000',pnote:'정가 / VAT 별도',badge:null,
+   desc:'35ppm 컬러 레이저 A4 복합기. 터치 UI, 클라우드 출력, 양면 자동 급지.',
+   tags:['컬러 레이저','35ppm','복합기','클라우드','터치 UI'],
+   specs:{'속도':'35ppm (컬러/흑백)','기능':'인쇄 / 복사 / 스캔 / 팩스','연결':'Wi-Fi / 이더넷 / NFC','터치 UI':'4.3" LCD'}},
+
+  {id:133,cat:'프린터/복합기',ico:'🖨️',img:null,
+   name:'SL-X7600GX A3 컬러 복합기',price:'견적 문의',pnote:'엔터프라이즈급 A3',badge:'pro',
+   desc:'60ppm A3·A4 컬러 복합기. 멀티 스테이플링, 보안 출력, 확장 가능한 용지함.',
+   tags:['A3','60ppm','복합기','보안 인쇄','60ppm'],
+   specs:{'속도':'60ppm','용지':'A3 / A4 / 기타','기능':'인쇄 / 복사 / 스캔 / 팩스 / 이메일','보안':'암호화 출력 / 사용자 인증'}},
+
+  /* ── 반도체/메모리 추가 ── */
+  {id:134,cat:'반도체/메모리',ico:'💾',img:null,
+   name:'990 Pro NVMe SSD (2TB)',price:'₩189,000',pnote:'소비자·기업 공용',badge:'best',
+   desc:'PCIe 4.0 고성능 NVMe SSD. 7,450MB/s 읽기, 게임·영상 편집·서버 범용.',
+   tags:['PCIe 4.0','NVMe','7450MB/s','2TB','V-NAND'],
+   specs:{'인터페이스':'PCIe 4.0 x4 NVMe','읽기':'7,450MB/s','쓰기':'6,900MB/s','용량':'1 / 2 / 4TB','폼팩터':'M.2 2280'}},
+
+  {id:135,cat:'반도체/메모리',ico:'🔲',img:null,
+   name:'CXL DRAM 모듈',price:'기업 문의',pnote:'데이터센터·AI 서버용',badge:'new',
+   desc:'CXL 2.0 기반 차세대 메모리 확장 모듈. CPU-GPU-메모리 풀링으로 AI 서버 효율 극대화.',
+   tags:['CXL 2.0','메모리 풀링','AI 서버','512GB','데이터센터'],
+   specs:{'표준':'CXL 2.0','용량':'128 / 256 / 512GB','대역폭':'PCIe 5.0 기반','적용':'AI 서버 / HPC / 데이터센터'}},
+
+  {id:136,cat:'반도체/메모리',ico:'🔲',img:null,
+   name:'LPDDR5X 모바일 D램',price:'기업 문의',pnote:'스마트폰·태블릿 제조사 공급',badge:'ai',
+   desc:'8,533Mbps 초고속 저전력 D램. AI 온디바이스 추론 성능 극대화.',
+   tags:['LPDDR5X','8533Mbps','AI 온디바이스','저전력','16GB'],
+   specs:{'속도':'8,533Mbps','용량':'8 / 12 / 16GB','전력 절감':'LPDDR4X 대비 20%','적용':'플래그십 스마트폰 / AI PC'}},
+
+  {id:137,cat:'반도체/메모리',ico:'📦',img:null,
+   name:'V-NAND 낸드플래시 (TLC)',price:'기업 문의',pnote:'SSD·UFS 제조사 공급용',badge:null,
+   desc:'236단 V-NAND TLC 낸드플래시. 고용량·고속·저전력 차세대 스토리지 기반.',
+   tags:['V-NAND','236단','TLC','1Tb','고용량'],
+   specs:{'세대':'9세대 V-NAND (236단)','타입':'TLC','용량':'1Tb / 셀','적용':'엔터프라이즈 SSD / UFS / eMMC'}},
+
+  /* ── 네트워크/통신 추가 ── */
+  {id:138,cat:'네트워크/통신',ico:'📶',img:null,
+   name:'Wi-Fi 6E 비즈니스 AP',price:'₩420,000~',pnote:'단위 AP 기준 / 견적 문의',badge:'best',
+   desc:'트라이밴드 Wi-Fi 6E 기업용 액세스 포인트. 6GHz 신규 대역, 최대 7.8Gbps.',
+   tags:['Wi-Fi 6E','6GHz','7.8Gbps','PoE+','기업용'],
+   specs:{'표준':'Wi-Fi 6E (802.11ax)','최대 속도':'7.8Gbps (트라이밴드)','연결':'PoE+ / 기가비트 이더넷','보안':'WPA3 / 802.1X'}},
+
+  {id:139,cat:'네트워크/통신',ico:'🏭',img:null,
+   name:'스마트 공장 5G 솔루션',price:'프로젝트 견적',pnote:'규모·구성별 산출',badge:'ai',
+   desc:'공장 내 사설 5G + 엣지 컴퓨팅 통합 솔루션. AMR·AGV 제어, 실시간 품질 검사.',
+   tags:['Private 5G','엣지 컴퓨팅','AMR','스마트 공장','초저지연'],
+   specs:{'구성':'5G 기지국 + MEC + 단말','지연':'1ms 이하','적용':'AMR / AGV / 품질 검사 AI','보안':'독립 사설망 운영'}},
+
+  /* ── 기업 솔루션 추가 ── */
+  {id:140,cat:'기업 솔루션',ico:'📱',img:null,
+   name:'Galaxy Enterprise Edition',price:'라이선스 문의',pnote:'단말+Knox+지원 패키지',badge:'best',
+   desc:'삼성 기업 전용 단말·서비스 패키지. 5년 보안 업데이트, 전담 B2B 지원, Knox 보안 내장.',
+   tags:['Knox','5년 보안','기업용','MDM','전담 지원'],
+   specs:{'보안 업데이트':'최대 7년','MDM':'Knox Suite 포함','지원':'전담 B2B CS 채널','적용':'전 Galaxy 라인업'}},
+
+  {id:141,cat:'기업 솔루션',ico:'🏧',img:null,
+   name:'Samsung Kiosk (무인 주문)',price:'₩3,200,000~',pnote:'크기·구성별 산출',badge:null,
+   desc:'결제·주문·상품 안내 올인원 무인 키오스크. 삼성 Knox 보안, 원격 관리 지원.',
+   tags:['키오스크','무인 주문','결제','Knox','터치 스크린'],
+   specs:{'크기':'21.5 / 24"','결제':'카드 / QR / 현금','보안':'Knox 통합','관리':'원격 소프트웨어 업데이트'}},
+
+  {id:142,cat:'기업 솔루션',ico:'🔧',img:null,
+   name:'Samsung Care for Business',price:'계약별 상이',pnote:'기기·플랜별 산출',badge:null,
+   desc:'기업 단말 전용 통합 케어 서비스. 파손 보상, 우선 수리, 대체 단말 제공.',
+   tags:['기업 케어','파손 보상','우선 수리','대체 단말','SLA'],
+   specs:{'보장':'물리적 파손 / 배터리 / 소프트웨어','응답':'SLA 기반 우선 대응','커버리지':'전 Galaxy 기기','기간':'1 / 2 / 3년 계약'}},
+
+  /* ── 영상보안/IoT ── */
+  {id:143,cat:'영상보안/IoT',ico:'📷',img:null,
+   name:'4K AI 반구형 IP 카메라',price:'₩380,000',pnote:'정가 / VAT 별도',badge:'ai',
+   desc:'8MP 4K AI 반구형 CCTV. 딥러닝 객체 탐지, 야간 컬러 영상, PoE 지원.',
+   tags:['4K','AI 탐지','반구형','야간 컬러','PoE'],
+   specs:{'해상도':'8MP (4K 3840×2160)','AI':'딥러닝 객체/인체 탐지','야간':'스마트 IR 30m','연결':'PoE / 기가비트'}},
+
+  {id:144,cat:'영상보안/IoT',ico:'🔭',img:null,
+   name:'PTZ 네트워크 카메라',price:'₩1,200,000',pnote:'정가 / VAT 별도',badge:'best',
+   desc:'36배 광학 줌 AI PTZ 카메라. 자동 추적, 딥러닝 분석, 실외 방진방수 IP66.',
+   tags:['PTZ','36배 줌','AI 자동 추적','IP66','야외'],
+   specs:{'광학 줌':'36배','해상도':'2MP (FHD)','AI':'자동 추적 / 행동 분석','방수':'IP66','야간':'IR 100m'}},
+
+  {id:145,cat:'영상보안/IoT',ico:'🧠',img:null,
+   name:'AI 영상분석 솔루션 (VAS)',price:'프로젝트 견적',pnote:'채널·기능별 산출',badge:'ai',
+   desc:'AI 기반 중앙 집중 영상 분석 플랫폼. 군중 밀집 감지, 이상 행동 알림, 번호판 인식.',
+   tags:['AI 영상분석','군중 감지','이상 행동','번호판 인식','VMS'],
+   specs:{'기능':'객체 탐지 / 번호판 / 군중 밀집 / 이상 행동','연동':'ONVIF VMS 연동','처리':'엣지 + 클라우드 하이브리드','보안':'암호화 영상 저장'}},
+
+  {id:146,cat:'영상보안/IoT',ico:'🌡️',img:null,
+   name:'열화상 AI 카메라',price:'₩2,500,000',pnote:'정가 / VAT 별도',badge:'pro',
+   desc:'열화상+가시광 듀얼 센서 AI 카메라. 체온 스크리닝, 설비 열화 감지, 화재 예방.',
+   tags:['열화상','듀얼 센서','체온 측정','화재 예방','IP67'],
+   specs:{'센서':'열화상(384×288) + 가시광(2MP)','정확도':'±0.5°C','AI':'발열 알림 / 화재 전조 감지','방수':'IP67','방폭':'옵션'}},
+
+  {id:147,cat:'영상보안/IoT',ico:'📦',img:null,
+   name:'NVR 32채널 영상 녹화기',price:'₩1,800,000',pnote:'HDD 별도 / VAT 별도',badge:null,
+   desc:'32채널 4K NVR 네트워크 영상 녹화기. AI 이벤트 검색, RAID, 512TB 지원.',
+   tags:['NVR','32채널','4K','RAID','512TB'],
+   specs:{'채널':'32채널 (IP 카메라)','해상도':'채널당 최대 4K 녹화','저장':'최대 512TB (HDD 8베이)','AI':'AI 이벤트 검색 / 썸네일','네트워크':'기가비트 이더넷 2포트'}}
  ]
 };
 
