@@ -99,7 +99,7 @@ body {
 </div>
 
 <script>
-const GROQ_API_KEY = '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';
+const GEMINI_API_KEY = 'AIzaSyBVYMZ44i7MYGLVrMHrBx8ZyfT3W-fre3Y';
 
 let countdownTimer, countdownSec = 300, isLoading = false;
 
@@ -131,39 +131,30 @@ async function fetchRSS() {
 
 async function analyzeOneBatch(batch) {
   const listText = batch.map((item, i) => `${i+1}. ${item.title}`).join('\n');
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${GROQ_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: 'llama-3.1-8b-instant',
-      temperature: 0.7,
-      response_format: { type: 'json_object' },
-      messages: [
-        {
-          role: 'system',
-          content: '당신은 비즈니스 애널리스트입니다. 반드시 JSON 형식으로만 응답하세요.',
-        },
-        {
-          role: 'user',
-          content:
-            `아래 뉴스 ${batch.length}개를 한국 사업가 관점에서 분석해주세요.\n\n` +
-            `각 항목마다 다음 3가지를 작성하세요:\n` +
-            `- summary: 뉴스 내용을 2문장으로 요약 (핵심 사실 중심, 한국어)\n` +
-            `- keywords: 핵심 키워드 3~5개 (짧은 단어/구, 한국어)\n` +
-            `- insight: 사업 관점 의미 2~3문장 (시장 기회/리스크, 시사점, 한국어)\n\n` +
-            `${listText}\n\n` +
-            `반드시 items 배열에 ${batch.length}개를 모두 포함한 JSON만 출력하세요:\n` +
-            `{"items":[{"summary":"...","keywords":["키워드1","키워드2"],"insight":"..."},...]}`
-        },
-      ],
-    }),
-  });
-  if (!res.ok) throw new Error(`Groq API 오류 ${res.status}`);
+  const prompt =
+    `아래 뉴스 ${batch.length}개를 한국 사업가 관점에서 분석해주세요.\n\n` +
+    `각 항목마다 다음 3가지를 작성하세요:\n` +
+    `- summary: 뉴스 내용을 2문장으로 요약 (핵심 사실 중심, 한국어)\n` +
+    `- keywords: 핵심 키워드 3~5개 (짧은 단어/구, 한국어)\n` +
+    `- insight: 사업 관점 의미 2~3문장 (시장 기회/리스크, 시사점, 한국어)\n\n` +
+    `${listText}\n\n` +
+    `반드시 items 배열에 ${batch.length}개를 모두 포함한 JSON만 출력하세요:\n` +
+    `{"items":[{"summary":"...","keywords":["키워드1","키워드2"],"insight":"..."},...]}`;
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: 'application/json' },
+      }),
+    }
+  );
+  if (!res.ok) throw new Error(`Gemini API 오류 ${res.status}`);
   const json = await res.json();
-  const text = json.choices[0]?.message?.content?.trim() ?? '{}';
+  const text = json.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
   const parsed = JSON.parse(text);
   return Array.isArray(parsed.items) ? parsed.items : [];
 }
